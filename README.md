@@ -1,24 +1,28 @@
-# Númina — acceso rediseñado v2
+# Númina — Activación con clave temporal v3
 
-## Rutas
+## Flujo
 
-- Portada pública: `https://elberlord.github.io/Numina/`
-- Portal instalado / solicitud de dispositivo: `https://elberlord.github.io/Numina/portal.html`
-- Panel administrativo: `https://elberlord.github.io/Numina/panel-privado-8f27c4.html`
+1. El usuario instala o abre Númina.
+2. Solicita una clave y envía el mensaje por WhatsApp.
+3. El administrador abre el panel privado, localiza la solicitud y pulsa **Generar clave**.
+4. Envía la clave por WhatsApp.
+5. El usuario pulsa **Ingresar clave temporal**, activa el equipo y crea su PIN.
+6. El equipo entra normalmente con ese PIN hasta ser revocado o vencer su permiso offline.
 
-La portada pública no contiene enlaces al panel administrativo. El nombre del archivo administrativo no es una medida de seguridad por sí sola porque el repositorio de GitHub es público. La protección real sigue siendo Firebase Authentication, el UID administrativo y las reglas de Firestore.
+## Recuperación
 
-## Flujo público
+En un dispositivo activo, el administrador puede pulsar **Nueva clave**. Esa clave permite borrar el PIN local y crear uno nuevo, sin duplicar el dispositivo. Si el navegador fue borrado o reinstalado y cambió el UID anónimo, debe enviarse una solicitud nueva y revocarse la instalación anterior.
 
-1. La portada detecta si se abre desde PC o móvil y cambia el texto del botón.
-2. El usuario instala Númina.
-3. Aparece **Solicitar acceso para este dispositivo**.
-4. Númina crea la solicitud en Firebase.
-5. Se abre WhatsApp al número `+506 6430 5227` con el código del dispositivo.
-6. El administrador aprueba o rechaza la solicitud desde su panel.
+## Publicación
 
-## Firebase
+- Copia todos los archivos a la raíz del repositorio sin borrar `.git`.
+- Publica `firestore.rules` manualmente en Firebase Console → Firestore → Reglas.
+- Haz commit y push.
+- Después de publicar, fuerza actualización o reinstala la PWA para reemplazar la caché anterior.
 
-- Correo/Contraseña debe continuar activo para el administrador.
-- Anónimo debe estar activo para las identidades iniciales de dispositivos.
-- Las reglas de `firestore.rules` deben permanecer publicadas.
+## Seguridad
+
+- Las claves son de un solo uso y expiran.
+- Firestore guarda solamente el SHA-256 de la clave, no el texto enviado.
+- Cada clave está vinculada a un UID anónimo concreto.
+- Solo el UID administrativo puede crear claves, listar dispositivos, revocar o reactivar.

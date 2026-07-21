@@ -1,23 +1,15 @@
-NÚMINA — ACTUALIZACIÓN DE PORTADA Y CONTROL DE ACCESO
+NÚMINA v3 — ACTUALIZACIÓN A CLAVES TEMPORALES
 
 1. Copia todos los archivos de esta carpeta a la raíz del repositorio Numina.
-2. Conserva la carpeta .git de tu computadora.
-3. Acepta reemplazar los archivos anteriores.
-4. Haz commit y push.
-5. Espera a que GitHub Pages publique.
-6. Borra los datos del sitio o abre una ventana privada para evitar la versión anterior en caché.
+2. No borres la carpeta .git.
+3. En Firebase Console abre Firestore > Reglas.
+4. Reemplaza las reglas por el contenido de firestore.rules y pulsa Publicar.
+5. Haz commit y push.
+6. Espera la publicación de GitHub Pages.
+7. Borra la caché del sitio o reinstala la PWA.
 
-PORTADA PÚBLICA
-https://elberlord.github.io/Numina/
-
-PORTAL DEL DISPOSITIVO / APP INSTALADA
-https://elberlord.github.io/Numina/portal.html
-
-PANEL ADMINISTRATIVO
-https://elberlord.github.io/Numina/panel-privado-8f27c4.html
-
-IMPORTANTE
-- La portada pública no muestra ni enlaza el panel administrativo.
-- Como el repositorio de GitHub es público, el nombre del archivo administrativo puede verse al revisar el código. La seguridad real es Firebase Authentication + tu UID + Firestore Rules.
-- Mantén activo Correo/Contraseña y activa Anónimo en Firebase Authentication para las solicitudes de dispositivos.
-- El botón de solicitud abre WhatsApp al +506 6430 5227 con el código del dispositivo.
+PRUEBA
+- Desde portal.html solicita una clave.
+- Desde panel-privado-8f27c4.html pulsa Generar clave.
+- Copia la clave y úsala en el portal.
+- Crea un PIN local.

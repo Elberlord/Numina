@@ -368,3 +368,27 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   .minimal-access-card { width: 100%; min-height: 100vh; border: 0; border-radius: 0; }
   .private-login-card { min-height: 100vh; justify-content: center; border: 0; border-radius: 0; }
 }
+
+
+/* Activación con clave temporal */
+.activation-key-box {
+  display: block;
+  width: 100%;
+  padding: 18px 16px;
+  border: 1px solid rgba(96, 165, 250, .34);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, .08);
+  font: 800 clamp(1.45rem, 5vw, 2.25rem)/1.1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .12em;
+  text-align: center;
+  overflow-wrap: anywhere;
+  color: var(--ink, #111827);
+}
+.key-result-card { min-width: min(520px, 88vw); }
+#activationForm input[name="activationKey"] {
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 800;
+  text-align: center;
+}

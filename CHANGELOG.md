@@ -1,13 +1,9 @@
-# Cambios
+# Cambios — v3.0.0
 
-## v2.0.0 — Portada y acceso separados
-
-- Nueva portada pública oscura inspirada en el estilo visual indicado.
-- Detección de PC o móvil para el texto de instalación.
-- La solicitud de dispositivo aparece después de instalar o al abrir la PWA.
-- Apertura automática de WhatsApp al +506 6430 5227 con el código de solicitud.
-- Portal de dispositivos separado en `portal.html`.
-- Panel administrativo separado en `panel-privado-8f27c4.html`.
-- El panel administrativo no aparece enlazado en la portada pública.
-- El panel sigue protegido por Firebase Authentication y UID administrativo.
-- Service Worker actualizado para conservar cada ruta offline.
+- La aprobación directa fue sustituida por claves temporales de un solo uso.
+- El usuario solicita una clave y recibe por WhatsApp una clave de 12 caracteres.
+- La clave queda vinculada a la identidad anónima de esa instalación.
+- Al usarla, el equipo se afilia y solicita crear un PIN local.
+- El panel puede generar claves de activación o recuperación.
+- Las claves vencen en 10, 30 o 60 minutos y no se guardan en texto visible.
+- Se mantiene la revocación remota y el límite offline por dispositivo.

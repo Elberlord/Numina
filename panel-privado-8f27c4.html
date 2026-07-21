@@ -39,21 +39,34 @@
 <div class="hidden" id="accessNetworkBanner"></div>
 </form>
 <button class="hidden" id="startRequestBtn" type="button">Solicitar</button>
+<button class="hidden" id="enterKeyBtn" type="button">Ingresar clave</button>
 <button class="hidden" id="installAccessBtn" type="button">Instalar</button>
 </div>
 </section>
 <section class="access-shell hidden" id="requestView">
 <form class="access-card stack request-card" id="requestForm">
 <img alt="" class="access-logo" height="76" src="./icons/bingo-icon-192.png" width="76"/>
-<div><p class="eyebrow">SOLICITUD DE DISPOSITIVO</p><h1>Pedir autorización</h1><p class="muted">Escribe quién usará este equipo y cómo deseas identificarlo.</p></div>
+<div><p class="eyebrow">ACTIVACIÓN DE DISPOSITIVO</p><h1>Solicitar clave temporal</h1><p class="muted">Escribe quién usará este equipo y cómo deseas identificarlo.</p></div>
 <label>Nombre de la persona
         <input autocomplete="name" maxlength="100" name="userName" placeholder="Ej. María" required=""/>
 </label>
 <label>Nombre del dispositivo
         <input maxlength="100" name="deviceName" placeholder="Ej. Teléfono de María" required=""/>
 </label>
-<button class="primary" type="submit">Enviar solicitud</button>
+<button class="primary" type="submit">Solicitar clave</button>
 <button class="ghost" id="cancelRequestBtn" type="button">Cancelar</button>
+</form>
+</section>
+
+<section class="access-shell hidden" id="activationView">
+<form class="access-card stack request-card" id="activationForm">
+<img alt="" class="access-logo" height="76" src="./icons/bingo-icon-192.png" width="76"/>
+<div><p class="eyebrow">CLAVE DE UN SOLO USO</p><h1>Activar este dispositivo</h1><p class="muted">Introduce la clave temporal que te envió el administrador por WhatsApp.</p></div>
+<label>Clave temporal
+<input autocomplete="one-time-code" autocapitalize="characters" maxlength="20" name="activationKey" placeholder="N8K4-P2QM-9XRT" required="" spellcheck="false"/>
+</label>
+<button class="primary" type="submit">Activar dispositivo</button>
+<button class="ghost" id="backFromActivationBtn" type="button">Volver</button>
 </form>
 </section>
 <section class="access-shell hidden" id="gateView">
@@ -175,7 +188,7 @@
 <section class="view" id="view-devices">
 <div class="page-heading"><div><p class="eyebrow">SOLO ADMINISTRADOR</p><h2>Dispositivos</h2></div><button class="secondary" id="refreshDevicesBtn" type="button">Actualizar</button></div>
 <div class="grid-2">
-<article class="panel"><div class="panel-heading"><h3>Solicitudes pendientes</h3></div><p class="muted">La persona debe enviarte el código que aparece en su dispositivo.</p><div class="stack" id="requestList"></div></article>
+<article class="panel"><div class="panel-heading"><h3>Solicitudes de clave</h3></div><p class="muted">Genera una clave temporal y envíala por WhatsApp. La clave sirve una sola vez.</p><div class="stack" id="requestList"></div></article>
 <article class="panel"><div class="panel-heading"><h3>Dispositivos autorizados</h3></div><div class="stack" id="deviceList"></div></article>
 </div>
 </section>
@@ -208,15 +221,26 @@
 <div class="form-actions"><button class="primary" type="submit">Guardar cambios</button><button class="ghost" id="cancelEditDialogBtn" type="button">Cancelar</button></div>
 </form>
 </dialog>
-<dialog id="approveDialog">
-<form class="stack" id="approveForm" method="dialog">
-<div class="dialog-heading"><div><p class="eyebrow">AUTORIZAR</p><h3>Nuevo dispositivo</h3></div><button class="icon-button" id="closeApproveBtn" type="button">×</button></div>
-<input name="requestId" type="hidden"/>
+<dialog id="keyDialog">
+<form class="stack" id="keyForm" method="dialog">
+<div class="dialog-heading"><div><p class="eyebrow">CLAVE TEMPORAL</p><h3 id="keyDialogTitle">Activar dispositivo</h3></div><button class="icon-button" id="closeKeyDialogBtn" type="button">×</button></div>
+<input name="targetUid" type="hidden"/>
+<input name="mode" type="hidden" value="activation"/>
 <label>Persona<input maxlength="100" name="userName" required=""/></label>
 <label>Nombre del dispositivo<input maxlength="100" name="deviceName" required=""/></label>
+<label>La clave vence en<select name="expiresMinutes"><option value="10">10 minutos</option><option selected="" value="30">30 minutos</option><option value="60">60 minutos</option></select></label>
 <label>Permiso offline<select name="offlineHours"><option value="24">24 horas</option><option value="48">48 horas</option><option value="168">7 días</option></select></label>
-<div class="form-actions"><button class="primary" type="submit">Autorizar</button><button class="ghost" id="cancelApproveBtn" type="button">Cancelar</button></div>
+<div class="form-actions"><button class="primary" type="submit">Generar clave</button><button class="ghost" id="cancelKeyBtn" type="button">Cancelar</button></div>
 </form>
+</dialog>
+<dialog id="keyResultDialog">
+<div class="stack key-result-card">
+<div class="dialog-heading"><div><p class="eyebrow">LISTA PARA ENVIAR</p><h3>Clave temporal</h3></div><button class="icon-button" id="closeKeyResultBtn" type="button">×</button></div>
+<p class="muted" id="keyResultMessage"></p>
+<output class="activation-key-box" id="generatedKeyOutput"></output>
+<div class="form-actions"><button class="primary" id="copyGeneratedKeyBtn" type="button">Copiar clave</button><a class="secondary button-link" id="shareGeneratedKeyBtn" target="_blank" rel="noopener">Enviar por WhatsApp</a></div>
+<small class="muted">La clave no se guarda en texto visible. Si la pierdes, genera otra.</small>
+</div>
 </dialog>
 <script src="./app.bundle.js" type="module"></script>
 </body>

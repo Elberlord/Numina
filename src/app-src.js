@@ -25,7 +25,9 @@ import {
   serverTimestamp,
   addDoc,
   onSnapshot,
-  writeBatch
+  writeBatch,
+  runTransaction,
+  Timestamp
 } from 'firebase/firestore';
 
 'use strict';
@@ -43,14 +45,15 @@ const ADMIN_UID = '6zJhAeRF9JRAilw6yvQQvLiN8bc2';
 const ENTRY_MODE = document.body.dataset.entry || 'device';
 const ACCESS_WHATSAPP = '50664305227';
 let autoRequestStarted = false;
-const APP_VERSION = 'firebase-completa-v1.0.0';
+const APP_VERSION = 'firebase-completa-v1.1.0-temp-key';
 const LEGACY_STORAGE_KEY = 'numina_github_pages_data_v1';
 const ADMIN_DEVICE_ID_KEY = 'numina_admin_device_id_v1';
 const ADMIN_DEVICE_NAME_KEY = 'numina_admin_device_name_v1';
 const PIN_FAILURES_PREFIX = 'numina_pin_failures_';
 const ENTITY_COLLECTIONS = ['campaigns', 'sales', 'results', 'deliveries'];
 
-const app = initializeApp(firebaseConfig);
+const FIREBASE_APP_NAME = ENTRY_MODE === 'admin' ? 'numina-admin' : 'numina-device';
+const app = initializeApp(firebaseConfig, FIREBASE_APP_NAME);
 const auth = getAuth(app);
 const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
@@ -78,7 +81,8 @@ const state = {
   accessUnsub: null,
   leaseTimer: null,
   adminLoaded: false,
-  writeBusy: false
+  writeBusy: false,
+  generatedKey: null
 };
 
 function emptyData() {
@@ -162,6 +166,32 @@ async function sha256(text) {
   const bytes = new TextEncoder().encode(String(text));
   const hash = await crypto.subtle.digest('SHA-256', bytes);
   return Array.from(new Uint8Array(hash)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function normalizeActivationKey(value) {
+  return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function generateActivationKey() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
+  const raw = Array.from(bytes, byte => alphabet[byte % alphabet.length]).join('');
+  return `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8, 12)}`;
+}
+
+function activationKeyWhatsAppUrl(key, userName, deviceName, expiresMinutes) {
+  const message = [
+    'Númina — clave temporal de acceso',
+    '',
+    `Persona: ${userName}`,
+    `Dispositivo: ${deviceName}`,
+    `Clave: ${key}`,
+    `Vence en: ${expiresMinutes} minutos`,
+    '',
+    'Abre Númina, pulsa “Ingresar clave temporal” y copia esta clave.'
+  ].join('\n');
+  return `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
 function escapeHtml(value) {
@@ -309,16 +339,23 @@ function showBlocked(title, message) {
 
 function showPendingRequest(request) {
   state.request = request;
-  setGate('Solicitud pendiente', 'Comunica este código al administrador. La pantalla se actualizará cuando el dispositivo sea aprobado.', [
+  const statusText = request.status === 'key_issued' ? 'Clave generada' : 'Esperando clave';
+  setGate('Solicitud registrada', 'Envíale el código al administrador. Cuando recibas la clave temporal por WhatsApp, introdúcela aquí.', [
     ['Persona', request.userName || '—'],
     ['Dispositivo', request.deviceName || '—'],
     ['Código', state.user.uid.slice(0, 8).toUpperCase()],
-    ['Estado', 'Pendiente']
-  ], `<a id="whatsappRequestBtn" class="primary button-link" target="_blank" rel="noopener">Enviar solicitud por WhatsApp</a><button id="checkRequestBtn" class="ghost" type="button">Comprobar aprobación</button><button id="pendingSignOutBtn" class="link-button" type="button">Cancelar y salir</button>`);
+    ['Estado', statusText]
+  ], `<a id="whatsappRequestBtn" class="primary button-link" target="_blank" rel="noopener">Pedir clave por WhatsApp</a><button id="enterPendingKeyBtn" class="ghost" type="button">Ingresar clave temporal</button><button id="pendingSignOutBtn" class="link-button" type="button">Cancelar solicitud</button>`);
   $('#whatsappRequestBtn').href = accessWhatsAppUrl(request);
-  $('#checkRequestBtn').onclick = () => evaluateAccess({ forceServer: true });
+  $('#enterPendingKeyBtn').onclick = showActivationForm;
   $('#pendingSignOutBtn').onclick = () => signOut(auth);
-  watchOwnDevice();
+}
+
+function showActivationForm() {
+  if (!(state.user?.isAnonymous || auth.currentUser?.isAnonymous)) return toast('Primero solicita acceso para crear la identidad de este dispositivo.');
+  $('#activationForm').reset();
+  showOnly('activationView');
+  setTimeout(() => $('#activationForm input[name="activationKey"]')?.focus(), 50);
 }
 
 function showRequestForm() {
@@ -463,8 +500,8 @@ async function evaluateAccess({ forceServer = false } = {}) {
   try { requestSnapshot = await getDocFromServer(doc(db, 'deviceRequests', state.user.uid)); } catch { /* sin solicitud */ }
   if (requestSnapshot?.exists()) {
     const request = { id: requestSnapshot.id, ...requestSnapshot.data() };
-    if (request.status === 'pending') return showPendingRequest(request);
-    if (request.status === 'approved') return showBlocked('Aprobación en proceso.', 'Pulsa “Comprobar acceso” para cargar la autorización.');
+    if (request.status === 'pending' || request.status === 'key_issued') return showPendingRequest(request);
+    if (request.status === 'activated') return evaluateAccess({ forceServer: true });
   }
   showRequestForm();
 }
@@ -508,9 +545,78 @@ async function submitDeviceRequest(event) {
     throw error;
   }
   const request = { uid: state.user.uid, userName, deviceName, status: 'pending' };
+  state.request = request;
   showPendingRequest(request);
   const url = accessWhatsAppUrl(request);
   if (whatsappWindow) whatsappWindow.location.href = url;
+}
+
+
+async function activateWithTemporaryKey(event) {
+  event.preventDefault();
+  if (!state.user?.isAnonymous) return toast('Esta clave debe usarse desde la instalación que hizo la solicitud.');
+  if (!navigator.onLine) return toast('Conéctate para validar la clave temporal.');
+  const data = new FormData(event.currentTarget);
+  const plainKey = normalizeActivationKey(data.get('activationKey'));
+  if (plainKey.length !== 12) return toast('La clave temporal no tiene el formato correcto.');
+  const keyHash = await sha256(plainKey);
+  const keyRef = doc(db, 'activationKeys', keyHash);
+  const deviceRef = doc(db, 'devices', state.user.uid);
+  const requestRef = doc(db, 'deviceRequests', state.user.uid);
+
+  try {
+    const outcome = await runTransaction(db, async transaction => {
+      const keySnap = await transaction.get(keyRef);
+      if (!keySnap.exists()) throw new Error('La clave es incorrecta o no corresponde a este dispositivo.');
+      const keyData = keySnap.data();
+      if (keyData.targetUid !== state.user.uid) throw new Error('La clave pertenece a otra instalación.');
+      if (keyData.used) throw new Error('Esta clave ya fue utilizada.');
+      const expiresAtMs = keyData.expiresAt?.toMillis?.() || 0;
+      if (!expiresAtMs || expiresAtMs <= Date.now()) throw new Error('La clave temporal venció. Solicita una nueva.');
+
+      const deviceSnap = await transaction.get(deviceRef);
+      const requestSnap = await transaction.get(requestRef);
+      if (keyData.mode === 'recovery') {
+        if (!deviceSnap.exists() || !deviceSnap.data().active) throw new Error('El dispositivo no está activo para recuperar el acceso.');
+        transaction.update(deviceRef, { lastSeenAt: serverTimestamp(), appVersion: APP_VERSION });
+      } else {
+        transaction.set(deviceRef, {
+          uid: state.user.uid,
+          userName: keyData.userName || 'Operador',
+          deviceName: keyData.deviceName || defaultDeviceName(),
+          active: true,
+          role: 'operator',
+          offlineHours: Number(keyData.offlineHours || 24),
+          appVersion: APP_VERSION,
+          activationKeyHash: keyHash,
+          authorizedAt: serverTimestamp(),
+          lastSeenAt: serverTimestamp(),
+          authorizedBy: keyData.createdBy || ADMIN_UID
+        });
+        if (requestSnap.exists()) {
+          transaction.update(requestRef, {
+            status: 'activated',
+            activatedAt: serverTimestamp(),
+            activationKeyHash: keyHash
+          });
+        }
+      }
+
+      transaction.update(keyRef, {
+        used: true,
+        usedAt: serverTimestamp(),
+        usedByUid: state.user.uid
+      });
+      return { mode: keyData.mode || 'activation' };
+    });
+
+    clearLocalAccess();
+    toast(outcome.mode === 'recovery' ? 'Acceso recuperado. Crea un PIN nuevo.' : 'Dispositivo activado. Crea tu PIN.');
+    await evaluateAccess({ forceServer: true });
+  } catch (error) {
+    const message = error?.code === 'permission-denied' ? 'La clave es incorrecta, venció o pertenece a otra instalación.' : (error.message || 'No se pudo utilizar la clave.');
+    toast(message);
+  }
 }
 
 function startLeaseTimer() {
@@ -1000,7 +1106,7 @@ async function refreshDevices() {
       getDocs(query(collection(db, 'deviceRequests'), orderBy('createdAt', 'desc'))),
       getDocs(query(collection(db, 'devices'), orderBy('authorizedAt', 'desc')))
     ]);
-    const requests = requestsSnap.docs.map(item => ({ id: item.id, ...item.data() })).filter(item => item.status === 'pending');
+    const requests = requestsSnap.docs.map(item => ({ id: item.id, ...item.data() })).filter(item => ['pending', 'key_issued'].includes(item.status));
     const devices = devicesSnap.docs.map(item => ({ id: item.id, ...item.data() }));
     renderRequests(requests);
     renderDevices(devices);
@@ -1012,44 +1118,61 @@ async function refreshDevices() {
 }
 
 function renderRequests(requests) {
-  $('#requestList').innerHTML = requests.length ? requests.map(request => `<article class="record-card">
-    <header><div><strong>${escapeHtml(request.userName || 'Usuario')}</strong><span>${escapeHtml(request.deviceName || 'Dispositivo')}</span></div><span class="status-pill requested">Pendiente</span></header>
+  $('#requestList').innerHTML = requests.length ? requests.map(request => {
+    const issued = request.status === 'key_issued';
+    return `<article class="record-card">
+    <header><div><strong>${escapeHtml(request.userName || 'Usuario')}</strong><span>${escapeHtml(request.deviceName || 'Dispositivo')}</span></div><span class="status-pill requested">${issued ? 'Clave generada' : 'Pendiente'}</span></header>
     <small>Código ${escapeHtml(request.id.slice(0, 8).toUpperCase())} · ${formatDate(request.createdAt)}</small>
-    <div class="card-actions"><button class="primary" data-approve="${escapeHtml(request.id)}" type="button">Autorizar</button><button class="danger" data-reject="${escapeHtml(request.id)}" type="button">Rechazar</button></div>
-  </article>`).join('') : '<div class="empty">No hay solicitudes pendientes.</div>';
+    <div class="card-actions"><button class="primary" data-generate-key="${escapeHtml(request.id)}" type="button">${issued ? 'Generar otra clave' : 'Generar clave'}</button><button class="danger" data-reject="${escapeHtml(request.id)}" type="button">Rechazar</button></div>
+  </article>`;
+  }).join('') : '<div class="empty">No hay solicitudes pendientes.</div>';
 }
 
 function renderDevices(devices) {
   $('#deviceList').innerHTML = devices.length ? devices.map(device => `<article class="record-card">
     <header><div><strong>${escapeHtml(device.userName || 'Usuario')}</strong><span>${escapeHtml(device.deviceName || 'Dispositivo')}</span></div><span class="status-pill ${device.active ? 'active' : 'revoked'}">${device.active ? 'Activo' : 'Revocado'}</span></header>
     <small>Offline ${Number(device.offlineHours || 24)} h · ID ${escapeHtml(device.id.slice(0, 8).toUpperCase())} · Último acceso ${formatDate(device.lastSeenAt)}</small>
-    <div class="card-actions"><button class="${device.active ? 'danger' : 'secondary'}" data-toggle-device="${escapeHtml(device.id)}" data-active="${device.active ? '1' : '0'}" type="button">${device.active ? 'Revocar' : 'Reactivar'}</button></div>
+    <div class="card-actions">${device.active ? `<button class="secondary" data-recovery-key="${escapeHtml(device.id)}" type="button">Nueva clave</button>` : ''}<button class="${device.active ? 'danger' : 'secondary'}" data-toggle-device="${escapeHtml(device.id)}" data-active="${device.active ? '1' : '0'}" type="button">${device.active ? 'Revocar' : 'Reactivar'}</button></div>
   </article>`).join('') : '<div class="empty">No hay dispositivos autorizados.</div>';
 }
 
-async function approveRequest(requestId, userName, deviceName, offlineHours) {
-  if (!navigator.onLine) throw new Error('Conéctate para autorizar dispositivos.');
-  const requestSnap = await getDocFromServer(doc(db, 'deviceRequests', requestId));
-  if (!requestSnap.exists()) throw new Error('La solicitud ya no existe.');
-  const request = requestSnap.data();
-  await setDoc(doc(db, 'devices', requestId), {
-    uid: requestId,
+async function createTemporaryKey(targetUid, userName, deviceName, offlineHours, expiresMinutes, mode = 'activation') {
+  if (!navigator.onLine) throw new Error('Conéctate para generar la clave.');
+  const plainKey = generateActivationKey();
+  const normalized = normalizeActivationKey(plainKey);
+  const keyHash = await sha256(normalized);
+  const expiresAt = Timestamp.fromMillis(Date.now() + Number(expiresMinutes) * 60000);
+  const batch = writeBatch(db);
+  batch.set(doc(db, 'activationKeys', keyHash), {
+    targetUid,
     userName: userName.trim(),
     deviceName: deviceName.trim(),
-    active: true,
-    role: 'operator',
+    mode,
     offlineHours: Number(offlineHours),
-    appVersion: request.appVersion || APP_VERSION,
-    authorizedAt: serverTimestamp(),
-    lastSeenAt: serverTimestamp(),
-    authorizedBy: state.user.uid
+    expiresAt,
+    keySuffix: normalized.slice(-4),
+    used: false,
+    createdAt: serverTimestamp(),
+    createdBy: state.user.uid
   });
-  await updateDoc(doc(db, 'deviceRequests', requestId), {
-    status: 'approved',
-    approvedAt: serverTimestamp(),
-    approvedBy: state.user.uid
-  });
-  await writeAudit('device.approved', { targetUid: requestId, userName, deviceName, offlineHours: Number(offlineHours) });
+  if (mode === 'activation') {
+    batch.update(doc(db, 'deviceRequests', targetUid), {
+      status: 'key_issued',
+      keyIssuedAt: serverTimestamp(),
+      keyExpiresAt: expiresAt
+    });
+  }
+  await batch.commit();
+  await writeAudit(mode === 'recovery' ? 'device.recoveryKeyCreated' : 'device.activationKeyCreated', { targetUid, userName, deviceName, offlineHours: Number(offlineHours), expiresMinutes: Number(expiresMinutes) });
+  return { plainKey, expiresAt, userName, deviceName, expiresMinutes: Number(expiresMinutes), mode };
+}
+
+function showGeneratedKey(result) {
+  state.generatedKey = result;
+  $('#generatedKeyOutput').textContent = result.plainKey;
+  $('#keyResultMessage').textContent = `${result.mode === 'recovery' ? 'Recuperación para' : 'Activación para'} ${result.userName} · ${result.deviceName}. Vence en ${result.expiresMinutes} minutos.`;
+  $('#shareGeneratedKeyBtn').href = activationKeyWhatsAppUrl(result.plainKey, result.userName, result.deviceName, result.expiresMinutes);
+  $('#keyResultDialog').showModal();
 }
 
 async function rejectRequest(requestId) {
@@ -1146,7 +1269,7 @@ $('#resetPasswordBtn').addEventListener('click', async () => {
   }
 });
 
-$('#startRequestBtn').addEventListener('click', async () => {
+$('#startRequestBtn')?.addEventListener('click', async () => {
   if (!navigator.onLine) return toast('Conéctate para crear la solicitud inicial.');
   try {
     if (auth.currentUser) await signOut(auth);
@@ -1156,10 +1279,26 @@ $('#startRequestBtn').addEventListener('click', async () => {
   }
 });
 
-$('#requestForm').addEventListener('submit', event => submitDeviceRequest(event).catch(error => toast(error.message)));
-$('#cancelRequestBtn').addEventListener('click', () => signOut(auth));
-$('#pinForm').addEventListener('submit', handlePinSubmit);
-$('#pinSignOutBtn').addEventListener('click', changeAccount);
+$('#enterKeyBtn')?.addEventListener('click', async () => {
+  if (!navigator.onLine) return toast('Conéctate para validar una clave temporal.');
+  try {
+    if (!auth.currentUser) await signInAnonymously(auth);
+    if (!state.request) {
+      try {
+        const snap = await getDocFromServer(doc(db, 'deviceRequests', auth.currentUser.uid));
+        if (snap.exists()) state.request = { id: snap.id, ...snap.data() };
+      } catch { /* se mostrará el formulario de solicitud */ }
+    }
+    if (state.request) showActivationForm();
+    else showRequestForm();
+  } catch (error) { toast(authErrorMessage(error)); }
+});
+$('#requestForm')?.addEventListener('submit', event => submitDeviceRequest(event).catch(error => toast(error.message)));
+$('#cancelRequestBtn')?.addEventListener('click', () => signOut(auth));
+$('#activationForm')?.addEventListener('submit', activateWithTemporaryKey);
+$('#backFromActivationBtn')?.addEventListener('click', () => state.request ? showPendingRequest(state.request) : showRequestForm());
+$('#pinForm')?.addEventListener('submit', handlePinSubmit);
+$('#pinSignOutBtn')?.addEventListener('click', changeAccount);
 $('#lockBtn').addEventListener('click', () => {
   state.unlocked = false;
   stopDataSync();
@@ -1351,18 +1490,21 @@ $('#winnerSummary').addEventListener('click', async event => {
 
 $('#refreshDevicesBtn').addEventListener('click', refreshDevices);
 $('#requestList').addEventListener('click', async event => {
-  const approve = event.target.closest('[data-approve]');
+  const generate = event.target.closest('[data-generate-key]');
   const reject = event.target.closest('[data-reject]');
-  if (approve) {
-    const requestSnap = await getDoc(doc(db, 'deviceRequests', approve.dataset.approve));
+  if (generate) {
+    const requestSnap = await getDoc(doc(db, 'deviceRequests', generate.dataset.generateKey));
     if (!requestSnap.exists()) return toast('Solicitud no encontrada.');
     const request = requestSnap.data();
-    const form = $('#approveForm');
-    form.elements.namedItem('requestId').value = approve.dataset.approve;
+    const form = $('#keyForm');
+    form.elements.namedItem('targetUid').value = generate.dataset.generateKey;
+    form.elements.namedItem('mode').value = 'activation';
     form.elements.namedItem('userName').value = request.userName || 'Usuario';
     form.elements.namedItem('deviceName').value = request.deviceName || 'Dispositivo';
     form.elements.namedItem('offlineHours').value = '24';
-    $('#approveDialog').showModal();
+    form.elements.namedItem('expiresMinutes').value = '30';
+    $('#keyDialogTitle').textContent = 'Activar dispositivo';
+    $('#keyDialog').showModal();
   }
   if (reject && confirm('¿Rechazar esta solicitud?')) {
     try {
@@ -1374,6 +1516,22 @@ $('#requestList').addEventListener('click', async event => {
 });
 
 $('#deviceList').addEventListener('click', async event => {
+  const recovery = event.target.closest('[data-recovery-key]');
+  if (recovery) {
+    const deviceSnap = await getDoc(doc(db, 'devices', recovery.dataset.recoveryKey));
+    if (!deviceSnap.exists()) return toast('Dispositivo no encontrado.');
+    const device = deviceSnap.data();
+    const form = $('#keyForm');
+    form.elements.namedItem('targetUid').value = recovery.dataset.recoveryKey;
+    form.elements.namedItem('mode').value = 'recovery';
+    form.elements.namedItem('userName').value = device.userName || 'Usuario';
+    form.elements.namedItem('deviceName').value = device.deviceName || 'Dispositivo';
+    form.elements.namedItem('offlineHours').value = String(device.offlineHours || 24);
+    form.elements.namedItem('expiresMinutes').value = '30';
+    $('#keyDialogTitle').textContent = 'Recuperar acceso';
+    $('#keyDialog').showModal();
+    return;
+  }
   const button = event.target.closest('[data-toggle-device]');
   if (!button) return;
   const active = button.dataset.active === '1';
@@ -1385,18 +1543,31 @@ $('#deviceList').addEventListener('click', async event => {
   } catch (error) { toast(error.message); }
 });
 
-$('#approveForm').addEventListener('submit', async event => {
+$('#keyForm').addEventListener('submit', async event => {
   event.preventDefault();
   const data = new FormData(event.currentTarget);
   try {
-    await approveRequest(String(data.get('requestId')), String(data.get('userName')), String(data.get('deviceName')), Number(data.get('offlineHours')));
-    $('#approveDialog').close();
-    toast('Dispositivo autorizado.');
+    const result = await createTemporaryKey(
+      String(data.get('targetUid')),
+      String(data.get('userName')),
+      String(data.get('deviceName')),
+      Number(data.get('offlineHours')),
+      Number(data.get('expiresMinutes')),
+      String(data.get('mode') || 'activation')
+    );
+    $('#keyDialog').close();
+    showGeneratedKey(result);
     refreshDevices();
   } catch (error) { toast(error.message); }
 });
-$('#closeApproveBtn').addEventListener('click', () => $('#approveDialog').close());
-$('#cancelApproveBtn').addEventListener('click', () => $('#approveDialog').close());
+$('#closeKeyDialogBtn').addEventListener('click', () => $('#keyDialog').close());
+$('#cancelKeyBtn').addEventListener('click', () => $('#keyDialog').close());
+$('#closeKeyResultBtn').addEventListener('click', () => $('#keyResultDialog').close());
+$('#copyGeneratedKeyBtn').addEventListener('click', async () => {
+  if (!state.generatedKey) return;
+  await navigator.clipboard.writeText(state.generatedKey.plainKey);
+  toast('Clave copiada.');
+});
 
 $('#exportJsonBtn').addEventListener('click', exportJson);
 $('#exportCsvBtn').addEventListener('click', exportCsv);

@@ -1,7 +1,7 @@
 {
   "name": "Númina",
   "short_name": "Númina",
-  "description": "Númina con acceso privado por dispositivo.",
+  "description": "Númina con acceso privado por dispositivo y clave temporal.",
   "start_url": "./portal.html",
   "scope": "./",
   "display": "standalone",
