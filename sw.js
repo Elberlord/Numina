@@ -1,4 +1,4 @@
-const CACHE_NAME = 'numina-github-pages-v1';
+const CACHE_NAME = 'numina-github-pages-v2-bingo-icon';
 const BASE = new URL('./', self.location.href);
 const ASSETS = [
   '',
@@ -6,8 +6,11 @@ const ASSETS = [
   'styles.css',
   'app.js',
   'manifest.webmanifest',
-  'icons/icon-192.png',
-  'icons/icon-512.png'
+  'icons/favicon-64.png',
+  'icons/bingo-icon-192.png',
+  'icons/bingo-icon-512.png',
+  'icons/bingo-maskable-192.png',
+  'icons/bingo-maskable-512.png'
 ].map(path => new URL(path, BASE).href);
 
 self.addEventListener('install', event => {

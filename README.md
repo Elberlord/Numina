@@ -1,6 +1,14 @@
-# Númina — versión estática para GitHub Pages
+# Númina — versión 2 para GitHub Pages
 
 Esta carpeta contiene una PWA completa que se puede publicar directamente en GitHub Pages, abrir desde Chrome en Android e instalar como aplicación.
+
+## Cambios de esta versión
+
+- Nuevo ícono profesional con máquina de bingo.
+- El mismo diseño aparece dentro de la interfaz y como ícono de instalación en Android.
+- Se añadieron variantes `maskable` para que Android no recorte la máquina incorrectamente.
+- Se cambió el nombre de los archivos del ícono para evitar que el navegador conserve la versión anterior.
+
 
 ## Qué permite probar
 
@@ -48,3 +56,13 @@ Esta versión es adecuada para instalar y probar la interfaz y el modo offline. 
 Cada teléfono debe exportar su archivo JSON regularmente. No borres los datos de Chrome ni desinstales la app antes de generar un respaldo.
 
 El PDF se genera mediante la opción de impresión del navegador. En Android selecciona **Guardar como PDF**.
+
+## Actualizar una publicación existente
+
+Reemplaza en GitHub todos los archivos de la versión anterior por los de este paquete. Después espera a que GitHub Pages termine de publicar.
+
+Si todavía aparece el ícono anterior o una imagen rota:
+
+1. Abre la página y pulsa `Ctrl + F5` en Windows.
+2. En Android, cierra la PWA y vuelve a abrir la página desde Chrome.
+3. Si ya estaba instalada con el ícono viejo, desinstálala y vuelve a instalarla después de confirmar que la web muestra el ícono nuevo.
