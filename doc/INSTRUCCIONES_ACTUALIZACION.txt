@@ -1,0 +1,24 @@
+NÚMINA FIREBASE COMPLETA V1
+
+ANTES DE SUBIR A GITHUB:
+
+1. Firebase > Authentication > Método de acceso.
+2. Mantén Correo/Contraseña activado.
+3. Activa ANÓNIMO.
+4. Firebase > Firestore > Reglas.
+5. Sustituye todo por el archivo firestore.rules incluido.
+6. Pulsa Publicar.
+
+DESPUÉS:
+
+1. Sube TODOS los archivos de este paquete a la raíz del repositorio Numina.
+2. Reemplaza la versión anterior.
+3. Espera la publicación de GitHub Pages.
+4. Abre la página en una ventana privada.
+5. Inicia sesión como administrador.
+6. Crea el PIN de esta PC.
+
+IMPORTANTE:
+- Esta versión sí conserva campañas, ventas, consulta por número, entregas, reportes y respaldos.
+- El único panel exclusivo del administrador es Dispositivos.
+- No compartas tu contraseña de Firebase.

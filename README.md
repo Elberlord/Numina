@@ -1,68 +1,117 @@
-# Númina — versión 2 para GitHub Pages
+# Númina — Firebase completa v1
 
-Esta carpeta contiene una PWA completa que se puede publicar directamente en GitHub Pages, abrir desde Chrome en Android e instalar como aplicación.
+Esta versión integra el control de acceso de Firebase dentro de la aplicación completa de Númina.
 
-## Cambios de esta versión
+## Funciones conservadas
 
-- Nuevo ícono profesional con máquina de bingo.
-- El mismo diseño aparece dentro de la interfaz y como ícono de instalación en Android.
-- Se añadieron variantes `maskable` para que Android no recorte la máquina incorrectamente.
-- Se cambió el nombre de los archivos del ícono para evitar que el navegador conserve la versión anterior.
-
-
-## Qué permite probar
-
-- Instalación en Android desde Chrome.
-- Funcionamiento sin conexión después de la primera carga.
-- Administrador y usuarios locales con PIN.
-- Campañas con rangos personalizados.
+- Campañas con rangos numéricos personalizados.
 - Varias ventas del mismo número o números exclusivos.
-- Cliente, teléfono, cantidad, monto, estado y vendedora.
-- Registro manual de un resultado externo.
-- Lista de personas coincidentes y cantidad de participaciones.
-- Entregas pendientes o realizadas.
-- Exportación de respaldo JSON.
-- Importación de respaldo JSON.
-- Exportación CSV.
-- Reportes que se pueden guardar como PDF.
+- Cliente, teléfono, cantidad, monto, pago y notas.
+- Edición de ventas.
+- Apertura y cierre de campañas para todos los dispositivos autorizados.
+- Consulta manual por número y agrupación de coincidencias.
+- Control de entregas.
+- Reportes para imprimir o guardar como PDF.
+- Exportación CSV y respaldo JSON.
+- Importación JSON y migración de datos locales de la versión anterior.
 
-## Límite importante de esta versión
+## Control de acceso
 
-GitHub Pages sirve archivos estáticos y no incluye una base de datos privada. Por eso, **cada teléfono guarda una base independiente**. Los usuarios, ventas y resultados de un teléfono no aparecen automáticamente en los demás.
+- El administrador inicia sesión con correo y contraseña de Firebase.
+- Los demás teléfonos o tabletas usan una identidad anónima única de Firebase.
+- Cada instalación solicita autorización y muestra un código corto.
+- Solo el UID administrativo puede aprobar, revocar o reactivar dispositivos.
+- El administrador dispone de 7 días offline.
+- Los operadores disponen de 24 horas offline por defecto.
+- Los cambios realizados sin conexión quedan en la cola local de Firestore y se sincronizan automáticamente.
+- Las reglas de Firestore rechazan las operaciones pendientes si el dispositivo fue revocado antes de sincronizar.
 
-Esta versión es adecuada para instalar y probar la interfaz y el modo offline. Para que varios vendedores compartan la misma información se debe conectar después a Firebase, Supabase u otro servidor.
+## Configuración obligatoria en Firebase
 
-## Cómo subirla a GitHub Pages
+### 1. Authentication
 
-1. Crea un repositorio nuevo en GitHub.
-2. Descomprime este paquete.
-3. Sube todos los archivos y carpetas al nivel principal del repositorio. `index.html` debe quedar en la raíz.
-4. Abre **Settings → Pages**.
-5. En **Build and deployment**, elige **Deploy from a branch**.
-6. Selecciona la rama `main` y la carpeta `/ (root)`.
-7. Pulsa **Save**.
-8. GitHub mostrará la dirección pública de la aplicación cuando termine la publicación.
+Mantén activo **Correo electrónico/Contraseña**.
 
-## Cómo instalarla en Android
+Activa además:
 
-1. Abre la dirección de GitHub Pages en Chrome.
-2. Crea el administrador local.
-3. Abre el menú de Chrome.
-4. Selecciona **Instalar aplicación** o **Agregar a pantalla principal**.
-5. Abre la app instalada al menos una vez con internet para que se guarden los archivos offline.
+**Authentication → Método de acceso → Anónimo → Habilitar → Guardar**
 
-## Respaldos
+El acceso anónimo se usa para dar a cada instalación un UID distinto. Un UID anónimo no obtiene acceso a los datos hasta que el administrador crea su documento activo en `devices`.
 
-Cada teléfono debe exportar su archivo JSON regularmente. No borres los datos de Chrome ni desinstales la app antes de generar un respaldo.
+### 2. Firestore Rules
 
-El PDF se genera mediante la opción de impresión del navegador. En Android selecciona **Guardar como PDF**.
+Abre:
 
-## Actualizar una publicación existente
+**Firestore Database → Reglas**
 
-Reemplaza en GitHub todos los archivos de la versión anterior por los de este paquete. Después espera a que GitHub Pages termine de publicar.
+Reemplaza las reglas actuales por el contenido de `firestore.rules` y pulsa **Publicar**.
 
-Si todavía aparece el ícono anterior o una imagen rota:
+Las reglas anteriores del módulo de acceso no permiten las colecciones operativas. Debes publicar las reglas incluidas en este paquete antes de probar ventas, campañas o consultas.
 
-1. Abre la página y pulsa `Ctrl + F5` en Windows.
-2. En Android, cierra la PWA y vuelve a abrir la página desde Chrome.
-3. Si ya estaba instalada con el ícono viejo, desinstálala y vuelve a instalarla después de confirmar que la web muestra el ícono nuevo.
+### 3. Dominios autorizados
+
+Conserva:
+
+- `elberlord.github.io`
+- `nomina-23755.firebaseapp.com`
+- `nomina-23755.web.app`
+
+## Publicar en GitHub Pages
+
+1. Haz una copia de la versión estable actual.
+2. Extrae este ZIP.
+3. Sube el contenido interno a la raíz del repositorio `Numina`.
+4. Reemplaza los archivos anteriores.
+5. Espera a que GitHub Pages termine de publicar.
+6. Abre `https://elberlord.github.io/Numina/` en una ventana privada para la primera prueba.
+
+`index.html` debe estar en la raíz del repositorio, no dentro de otra carpeta.
+
+## Primer acceso del administrador
+
+1. Abre Númina en la PC.
+2. Ingresa con `anakinjd1985@gmail.com` y tu contraseña privada de Firebase.
+3. Firebase valida el UID administrativo configurado.
+4. Crea un PIN local de 4 a 8 números.
+5. Se abre Númina completa.
+6. El permiso offline de esa PC será de 7 días desde la última validación en línea.
+
+## Autorizar otro dispositivo
+
+1. La persona abre o instala Númina.
+2. Pulsa **Solicitar acceso para este dispositivo**.
+3. Escribe su nombre y el nombre del equipo.
+4. Te comunica el código corto mostrado.
+5. En tu PC entra a **Dispositivos**.
+6. Pulsa **Autorizar** en la solicitud correcta.
+7. La otra persona pulsa **Comprobar aprobación** y crea su PIN.
+
+## Revocar un dispositivo
+
+En **Dispositivos**, pulsa **Revocar**.
+
+- Si el teléfono está conectado, se bloquea al recibir la actualización.
+- Si está offline, podrá continuar hasta vencer su permiso local.
+- Las escrituras pendientes serán rechazadas al sincronizar si el dispositivo ya fue revocado.
+
+## Migrar la versión anterior
+
+Si el navegador conserva la base local anterior, el Resumen mostrará **Datos locales anteriores encontrados**. Pulsa **Migrar datos anteriores** para copiarlos a Firestore. Los usuarios locales antiguos no se migran; se conservan los nombres de quienes registraron las ventas.
+
+## Archivos principales
+
+- `index.html`: interfaz completa.
+- `app.bundle.js`: aplicación y SDK de Firebase empaquetados para trabajar offline.
+- `styles.css`: diseño adaptable.
+- `firestore.rules`: reglas nuevas obligatorias.
+- `sw.js`: caché PWA.
+- `manifest.webmanifest`: instalación Android y Windows.
+- `src/app-src.js`: fuente para mantenimiento.
+
+## Notas de seguridad
+
+- La configuración web de Firebase es pública por diseño.
+- No compartas la contraseña del administrador.
+- No elimines y recrees la cuenta administrativa: cambiaría su UID.
+- El PIN local protege la interfaz, pero la seguridad de servidor depende de Firebase Authentication y Firestore Rules.
+- La caché de Firestore permanece en el almacenamiento protegido por el navegador y el sistema operativo; un teléfono perdido debe revocarse cuanto antes.

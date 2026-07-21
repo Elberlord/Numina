@@ -1,39 +1,17 @@
 {
-  "name": "Númina — Campañas numeradas",
+  "name": "Númina",
   "short_name": "Númina",
-  "description": "Gestor instalable y sin conexión para campañas numeradas, ventas, resultados y entregas.",
-  "id": "./",
+  "description": "Campañas numeradas con acceso por dispositivo y sincronización Firebase.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#07123a",
+  "background_color": "#f4f5fa",
   "theme_color": "#07123a",
   "lang": "es",
-  "orientation": "portrait-primary",
   "icons": [
-    {
-      "src": "./icons/bingo-icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icons/bingo-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icons/bingo-maskable-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "./icons/bingo-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "./icons/bingo-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/bingo-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/bingo-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "./icons/bingo-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
