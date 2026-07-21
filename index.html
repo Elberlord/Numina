@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#5b3df5">
+  <meta name="description" content="Gestor instalable y sin conexión para campañas numeradas, ventas, resultados y entregas.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Númina — Campañas numeradas</title>
+</head>
+<body>
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <section id="authView" class="auth-shell">
+    <div class="auth-card">
+      <div class="brand-lockup">
+        <img src="./icons/icon-192.png" alt="" width="72" height="72">
+        <div>
+          <p class="eyebrow">APP WEB INSTALABLE</p>
+          <h1>Númina</h1>
+          <p>Campañas, números, ventas y entregas.</p>
+        </div>
+      </div>
+
+      <div id="connectionBanner" class="status-banner"></div>
+      <div class="status-banner local-note">Modo de prueba local: los datos permanecen únicamente en este dispositivo.</div>
+
+      <form id="setupForm" class="stack hidden">
+        <div>
+          <p class="eyebrow">PRIMERA CONFIGURACIÓN</p>
+          <h2>Crear administrador</h2>
+          <p class="muted">Este usuario controlará campañas, accesos, resultados y respaldos en este teléfono.</p>
+        </div>
+        <label>Nombre del administrador
+          <input name="name" required maxlength="100" autocomplete="name" placeholder="Tu nombre">
+        </label>
+        <label>PIN de acceso
+          <input name="pin" required pattern="[0-9]{4,8}" inputmode="numeric" autocomplete="new-password" placeholder="4 a 8 números">
+        </label>
+        <label>Confirmar PIN
+          <input name="pinConfirm" required pattern="[0-9]{4,8}" inputmode="numeric" autocomplete="new-password" placeholder="Repite el PIN">
+        </label>
+        <button class="primary" type="submit">Crear sistema local</button>
+      </form>
+
+      <form id="loginForm" class="stack hidden">
+        <div>
+          <p class="eyebrow">ACCESO AL DISPOSITIVO</p>
+          <h2>Ingresar</h2>
+          <p class="muted">Selecciona el usuario creado en este teléfono y escribe su PIN.</p>
+        </div>
+        <label>Usuario
+          <select name="userId" required></select>
+        </label>
+        <label>PIN
+          <input name="pin" required pattern="[0-9]{4,8}" inputmode="numeric" autocomplete="current-password" placeholder="4 a 8 números">
+        </label>
+        <button class="primary" type="submit">Entrar</button>
+        <button id="installAuthBtn" class="secondary hidden" type="button">Instalar aplicación</button>
+      </form>
+    </div>
+  </section>
+
+  <div id="appView" class="app-shell hidden">
+    <header class="topbar">
+      <button id="menuBtn" class="icon-button mobile-only" aria-label="Abrir menú">☰</button>
+      <div class="brand-mini">
+        <img src="./icons/icon-192.png" alt="" width="40" height="40">
+        <div>
+          <strong>Númina</strong>
+          <span id="activeCampaignLabel">Sin campaña activa</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span id="storageBadge" class="sync-badge">Guardado local</span>
+        <button id="installBtn" class="icon-button hidden" title="Instalar aplicación" aria-label="Instalar aplicación">⇩</button>
+        <button id="lockBtn" class="icon-button" title="Bloquear" aria-label="Bloquear">⌁</button>
+      </div>
+    </header>
+
+    <aside id="sidebar" class="sidebar">
+      <div class="user-card">
+        <div id="userAvatar" class="avatar">A</div>
+        <div>
+          <strong id="userName">Administrador</strong>
+          <span id="userRole">Administrador</span>
+        </div>
+      </div>
+      <nav id="nav" class="nav-list">
+        <button data-view="dashboard" class="active"><span>⌂</span> Resumen</button>
+        <button data-view="sale"><span>＋</span> Nueva venta</button>
+        <button data-view="sales"><span>≡</span> Ventas</button>
+        <button data-view="campaigns" data-admin-only><span>◫</span> Campañas</button>
+        <button data-view="result" data-admin-only><span>★</span> Resultado</button>
+        <button data-view="users" data-admin-only><span>♙</span> Usuarios</button>
+        <button data-view="backup"><span>⇅</span> Respaldo</button>
+      </nav>
+      <div class="sidebar-footer">
+        <span id="networkState">● Verificando conexión</span>
+        <small>La app sigue funcionando sin internet después de cargarla al menos una vez.</small>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section id="view-dashboard" class="view active">
+        <div class="page-heading">
+          <div><p class="eyebrow">PANEL GENERAL</p><h2>Resumen</h2></div>
+          <select id="dashboardCampaignFilter" aria-label="Filtrar por campaña"></select>
+        </div>
+        <div id="metrics" class="metric-grid"></div>
+        <div class="grid-2">
+          <article class="panel">
+            <div class="panel-heading"><h3>Actividad reciente</h3></div>
+            <div id="recentSales" class="list"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><h3>Estado del dispositivo</h3></div>
+            <div id="localSummary" class="sync-summary"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-sale" class="view">
+        <div class="page-heading"><div><p class="eyebrow">REGISTRO RÁPIDO</p><h2>Nueva venta</h2></div></div>
+        <form id="saleForm" class="panel form-grid">
+          <label class="span-2">Campaña
+            <select name="campaignId" required></select>
+          </label>
+          <label>Número
+            <input name="number" required inputmode="numeric" placeholder="00">
+          </label>
+          <label>Participaciones
+            <input name="quantity" required type="number" min="1" max="10000" value="1">
+          </label>
+          <label class="span-2">Nombre del cliente
+            <input name="customerName" required maxlength="120" autocomplete="name">
+          </label>
+          <label>Teléfono
+            <input name="phone" maxlength="40" inputmode="tel" autocomplete="tel">
+          </label>
+          <label>Monto total
+            <input name="amount" required type="number" min="0" step="0.01" inputmode="decimal" value="0">
+          </label>
+          <label>Estado
+            <select name="paymentStatus">
+              <option value="pending">Pendiente</option>
+              <option value="paid">Pagado</option>
+            </select>
+          </label>
+          <label class="span-2">Nota
+            <textarea name="notes" maxlength="500" rows="3" placeholder="Opcional"></textarea>
+          </label>
+          <div class="form-actions span-2">
+            <button class="primary" type="submit">Guardar venta</button>
+            <button class="ghost" type="reset">Limpiar</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="view-sales" class="view">
+        <div class="page-heading">
+          <div><p class="eyebrow">REGISTROS</p><h2>Ventas</h2></div>
+          <button id="salesPrintBtn" class="secondary">Exportar reporte PDF</button>
+        </div>
+        <div class="panel filters">
+          <select id="salesCampaignFilter"></select>
+          <input id="salesSearch" type="search" placeholder="Buscar número, nombre o teléfono">
+          <select id="salesStatusFilter">
+            <option value="all">Todos los estados</option>
+            <option value="pending">Pendientes</option>
+            <option value="paid">Pagados</option>
+            <option value="cancelled">Cancelados</option>
+          </select>
+        </div>
+        <div id="salesTable" class="data-table"></div>
+      </section>
+
+      <section id="view-campaigns" class="view">
+        <div class="page-heading"><div><p class="eyebrow">CONFIGURACIÓN</p><h2>Campañas</h2></div></div>
+        <div class="grid-2 unequal">
+          <form id="campaignForm" class="panel form-grid">
+            <h3 class="span-2">Crear campaña</h3>
+            <label class="span-2">Nombre
+              <input name="name" required maxlength="100" placeholder="Ej. Campaña de julio">
+            </label>
+            <label>Número inicial
+              <input name="numberMin" type="number" min="0" value="0" required>
+            </label>
+            <label>Número final
+              <input name="numberMax" type="number" min="0" value="99" required>
+            </label>
+            <label>Ancho visual
+              <input name="numberWidth" type="number" min="1" max="8" value="2" required>
+            </label>
+            <label>Ventas elegibles
+              <select name="eligibility">
+                <option value="paid">Solo pagadas</option>
+                <option value="paid_pending">Pagadas y pendientes</option>
+              </select>
+            </label>
+            <label class="toggle span-2"><input name="allowRepeated" type="checkbox" checked> Permitir varias ventas del mismo número</label>
+            <label class="span-2">Notas
+              <textarea name="notes" maxlength="500" rows="3"></textarea>
+            </label>
+            <button class="primary span-2" type="submit">Crear campaña</button>
+          </form>
+          <div id="campaignList" class="stack"></div>
+        </div>
+      </section>
+
+      <section id="view-result" class="view">
+        <div class="page-heading">
+          <div><p class="eyebrow">RESULTADO EXTERNO</p><h2>Coincidencias</h2></div>
+          <button id="winnerPrintBtn" class="secondary">Exportar reporte PDF</button>
+        </div>
+        <form id="resultForm" class="panel result-form">
+          <label>Campaña
+            <select name="campaignId" required></select>
+          </label>
+          <label>Número ganador
+            <input name="winningNumber" required inputmode="numeric" placeholder="00">
+          </label>
+          <label>Nota del resultado
+            <input name="notes" maxlength="500" placeholder="Opcional">
+          </label>
+          <button class="primary" type="submit">Registrar resultado</button>
+        </form>
+        <div id="winnerSummary"></div>
+      </section>
+
+      <section id="view-users" class="view">
+        <div class="page-heading"><div><p class="eyebrow">CONTROL LOCAL</p><h2>Usuarios del dispositivo</h2></div></div>
+        <div class="grid-2 unequal">
+          <form id="userForm" class="panel form-grid">
+            <h3 class="span-2">Crear acceso local</h3>
+            <label class="span-2">Nombre
+              <input name="name" required maxlength="100">
+            </label>
+            <label>PIN
+              <input name="pin" required pattern="[0-9]{4,8}" inputmode="numeric">
+            </label>
+            <label>Rol
+              <select name="role"><option value="seller">Vendedora</option><option value="admin">Administrador</option></select>
+            </label>
+            <button class="primary span-2" type="submit">Crear usuario</button>
+          </form>
+          <div id="userList" class="stack"></div>
+        </div>
+      </section>
+
+      <section id="view-backup" class="view">
+        <div class="page-heading"><div><p class="eyebrow">DATOS DEL DISPOSITIVO</p><h2>Respaldo y exportación</h2></div></div>
+        <div class="action-grid">
+          <button id="exportJsonBtn" class="action-card"><strong>Exportar respaldo JSON</strong><span>Archivo completo para restaurar este dispositivo.</span></button>
+          <button id="exportCsvBtn" class="action-card"><strong>Exportar ventas CSV</strong><span>Compatible con Excel y Google Sheets.</span></button>
+          <label id="importCard" class="action-card file-card"><strong>Importar respaldo JSON</strong><span>Reemplaza la información local con un respaldo anterior.</span><input id="importJsonInput" type="file" accept="application/json,.json"></label>
+          <button id="printAllBtn" class="action-card"><strong>Reporte general PDF</strong><span>Abre una vista lista para imprimir o guardar como PDF.</span></button>
+          <button id="installBackupBtn" class="action-card hidden"><strong>Instalar aplicación</strong><span>Agrega Númina a la pantalla de inicio de Android.</span></button>
+        </div>
+        <article class="panel danger-zone" data-admin-only-block>
+          <div><h3>Reiniciar este dispositivo</h3><p class="muted">Elimina usuarios, campañas, ventas y resultados guardados localmente.</p></div>
+          <button id="clearLocalBtn" class="danger">Borrar todos los datos</button>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="editSaleDialog">
+    <form id="editSaleForm" method="dialog" class="stack">
+      <div class="dialog-heading"><h3>Editar venta</h3><button id="closeEditDialogBtn" class="icon-button" type="button">×</button></div>
+      <input name="id" type="hidden">
+      <label>Nombre<input name="customerName" required maxlength="120"></label>
+      <label>Teléfono<input name="phone" maxlength="40"></label>
+      <div class="form-grid">
+        <label>Número<input name="number" required inputmode="numeric"></label>
+        <label>Cantidad<input name="quantity" required type="number" min="1"></label>
+        <label>Monto<input name="amount" required type="number" min="0" step="0.01"></label>
+        <label>Estado<select name="paymentStatus"><option value="pending">Pendiente</option><option value="paid">Pagado</option><option value="cancelled">Cancelado</option></select></label>
+      </div>
+      <label>Nota<textarea name="notes" maxlength="500"></textarea></label>
+      <div class="form-actions"><button class="primary" type="submit">Guardar cambios</button><button id="cancelEditDialogBtn" class="ghost" type="button">Cancelar</button></div>
+    </form>
+  </dialog>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
