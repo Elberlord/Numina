@@ -1,4 +1,4 @@
-const CACHE_NAME = 'numina-clave-temporal-v3-20260721';
+const CACHE_NAME = 'numina-clave-temporal-v3-1-20260721';
 const APP_SHELL = [
   './',
   './index.html',

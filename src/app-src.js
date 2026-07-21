@@ -45,7 +45,7 @@ const ADMIN_UID = '6zJhAeRF9JRAilw6yvQQvLiN8bc2';
 const ENTRY_MODE = document.body.dataset.entry || 'device';
 const ACCESS_WHATSAPP = '50664305227';
 let autoRequestStarted = false;
-const APP_VERSION = 'firebase-completa-v1.1.0-temp-key';
+const APP_VERSION = 'firebase-completa-v1.1.1-temp-key';
 const LEGACY_STORAGE_KEY = 'numina_github_pages_data_v1';
 const ADMIN_DEVICE_ID_KEY = 'numina_admin_device_id_v1';
 const ADMIN_DEVICE_NAME_KEY = 'numina_admin_device_name_v1';
@@ -259,7 +259,7 @@ function toast(message) {
 }
 
 function showOnly(viewId) {
-  ['bootView', 'accessView', 'requestView', 'gateView', 'pinView', 'appView'].forEach(id => {
+  ['bootView', 'accessView', 'requestView', 'activationView', 'gateView', 'pinView', 'appView'].forEach(id => {
     $(`#${id}`)?.classList.toggle('hidden', id !== viewId);
   });
 }

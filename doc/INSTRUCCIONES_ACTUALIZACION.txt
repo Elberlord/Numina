@@ -1,15 +1,11 @@
-NÚMINA v3 — ACTUALIZACIÓN A CLAVES TEMPORALES
+NÚMINA v3.1.0 — CORRECCIÓN DE ACTIVACIÓN
 
 1. Copia todos los archivos de esta carpeta a la raíz del repositorio Numina.
 2. No borres la carpeta .git.
-3. En Firebase Console abre Firestore > Reglas.
-4. Reemplaza las reglas por el contenido de firestore.rules y pulsa Publicar.
-5. Haz commit y push.
-6. Espera la publicación de GitHub Pages.
-7. Borra la caché del sitio o reinstala la PWA.
+3. Acepta reemplazar los archivos existentes.
+4. Haz commit y push.
+5. Espera a que GitHub Pages publique.
+6. Cierra por completo la PWA instalada y vuelve a abrirla.
+7. Si todavía aparece la versión anterior, desinstala la PWA o borra los datos del sitio y vuelve a instalarla.
 
-PRUEBA
-- Desde portal.html solicita una clave.
-- Desde panel-privado-8f27c4.html pulsa Generar clave.
-- Copia la clave y úsala en el portal.
-- Crea un PIN local.
+No es necesario cambiar otra vez las reglas de Firestore para esta corrección.

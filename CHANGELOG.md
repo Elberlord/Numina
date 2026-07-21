@@ -1,3 +1,9 @@
+# Númina v3.1.0
+
+- Corrige la pantalla en blanco al pulsar “Ingresar clave temporal”.
+- El formulario de activación ahora se muestra correctamente.
+- Se actualizó la caché PWA para forzar la descarga del arreglo.
+
 # Cambios — v3.0.0
 
 - La aprobación directa fue sustituida por claves temporales de un solo uso.
