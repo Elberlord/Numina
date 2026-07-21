@@ -1,14 +1,13 @@
-# Cambios — Firebase completa v1.0.0
+# Cambios
 
-- Integración de Firebase Authentication en la aplicación completa.
-- Identidad anónima única por instalación para operadores.
-- Aprobación, revocación y reactivación de dispositivos.
-- PIN local y bloqueo tras intentos fallidos.
-- Permiso offline de 168 horas para administrador y 24 horas para operadores.
-- Persistencia local de Firestore y sincronización automática.
-- Indicador de escrituras pendientes o confirmadas.
-- Campañas, ventas, pagos, consultas, entregas y reportes conservados.
-- Todos los dispositivos autorizados pueden operar campañas y registros.
-- Solo el administrador puede gestionar dispositivos.
-- Migración de la base local anterior a Firestore.
-- SDK de Firebase empaquetado localmente para mejorar el arranque offline.
+## v2.0.0 — Portada y acceso separados
+
+- Nueva portada pública oscura inspirada en el estilo visual indicado.
+- Detección de PC o móvil para el texto de instalación.
+- La solicitud de dispositivo aparece después de instalar o al abrir la PWA.
+- Apertura automática de WhatsApp al +506 6430 5227 con el código de solicitud.
+- Portal de dispositivos separado en `portal.html`.
+- Panel administrativo separado en `panel-privado-8f27c4.html`.
+- El panel administrativo no aparece enlazado en la portada pública.
+- El panel sigue protegido por Firebase Authentication y UID administrativo.
+- Service Worker actualizado para conservar cada ruta offline.

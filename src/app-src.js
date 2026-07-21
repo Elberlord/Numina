@@ -40,6 +40,9 @@ const firebaseConfig = {
 };
 
 const ADMIN_UID = '6zJhAeRF9JRAilw6yvQQvLiN8bc2';
+const ENTRY_MODE = document.body.dataset.entry || 'device';
+const ACCESS_WHATSAPP = '50664305227';
+let autoRequestStarted = false;
 const APP_VERSION = 'firebase-completa-v1.0.0';
 const LEGACY_STORAGE_KEY = 'numina_github_pages_data_v1';
 const ADMIN_DEVICE_ID_KEY = 'numina_admin_device_id_v1';
@@ -175,6 +178,18 @@ function normalizePhone(value) {
   return String(value || '').replace(/\D/g, '');
 }
 
+
+function accessWhatsAppUrl(request = {}) {
+  const code = (state.user?.uid || request.uid || '').slice(0, 8).toUpperCase();
+  const text = [
+    'Hola, solicito acceso a Númina para este dispositivo.',
+    `Código: ${code || 'SIN-CÓDIGO'}`,
+    `Persona: ${request.userName || 'Sin indicar'}`,
+    `Dispositivo: ${request.deviceName || defaultDeviceName()}`
+  ].join('\n');
+  return `https://wa.me/${ACCESS_WHATSAPP}?text=${encodeURIComponent(text)}`;
+}
+
 function formatDate(value) {
   if (!value) return '—';
   try {
@@ -299,7 +314,8 @@ function showPendingRequest(request) {
     ['Dispositivo', request.deviceName || '—'],
     ['Código', state.user.uid.slice(0, 8).toUpperCase()],
     ['Estado', 'Pendiente']
-  ], `<button id="checkRequestBtn" class="primary" type="button">Comprobar aprobación</button><button id="pendingSignOutBtn" class="ghost" type="button">Cancelar y salir</button>`);
+  ], `<a id="whatsappRequestBtn" class="primary button-link" target="_blank" rel="noopener">Enviar solicitud por WhatsApp</a><button id="checkRequestBtn" class="ghost" type="button">Comprobar aprobación</button><button id="pendingSignOutBtn" class="link-button" type="button">Cancelar y salir</button>`);
+  $('#whatsappRequestBtn').href = accessWhatsAppUrl(request);
   $('#checkRequestBtn').onclick = () => evaluateAccess({ forceServer: true });
   $('#pendingSignOutBtn').onclick = () => signOut(auth);
   watchOwnDevice();
@@ -477,15 +493,24 @@ async function submitDeviceRequest(event) {
   const deviceName = String(data.get('deviceName') || '').trim();
   if (!userName || !deviceName) return toast('Completa el nombre y el dispositivo.');
   localStorage.setItem(actorNameKey(), userName);
-  await setDoc(doc(db, 'deviceRequests', state.user.uid), {
-    uid: state.user.uid,
-    userName,
-    deviceName,
-    appVersion: APP_VERSION,
-    status: 'pending',
-    createdAt: serverTimestamp()
-  });
-  showPendingRequest({ uid: state.user.uid, userName, deviceName, status: 'pending' });
+  const whatsappWindow = window.open('', '_blank');
+  try {
+    await setDoc(doc(db, 'deviceRequests', state.user.uid), {
+      uid: state.user.uid,
+      userName,
+      deviceName,
+      appVersion: APP_VERSION,
+      status: 'pending',
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    whatsappWindow?.close();
+    throw error;
+  }
+  const request = { uid: state.user.uid, userName, deviceName, status: 'pending' };
+  showPendingRequest(request);
+  const url = accessWhatsAppUrl(request);
+  if (whatsappWindow) whatsappWindow.location.href = url;
 }
 
 function startLeaseTimer() {
@@ -1444,10 +1469,20 @@ onAuthStateChanged(auth, async user => {
   if (!user) {
     showOnly('accessView');
     updateConnectionUi();
+    if (ENTRY_MODE === 'device' && new URLSearchParams(location.search).get('solicitar') === '1' && !autoRequestStarted && navigator.onLine) {
+      autoRequestStarted = true;
+      setTimeout(() => $('#startRequestBtn')?.click(), 80);
+    }
+    return;
+  }
+  if (ENTRY_MODE === 'admin' && !state.admin) {
+    await signOut(auth);
+    const error = $('#loginError');
+    if (error) error.textContent = 'Esta cuenta no tiene permiso administrativo.';
     return;
   }
   if (!state.admin && !user.isAnonymous) {
-    showBlocked('Esta cuenta no es el administrador.', 'Los demás dispositivos deben usar “Solicitar autorización”, sin introducir un correo.');
+    showBlocked('Este dispositivo no está autorizado.', 'Solicita acceso desde la portada de Númina.');
     return;
   }
   await evaluateAccess();

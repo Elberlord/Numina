@@ -256,3 +256,115 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   .topbar-actions { gap: 5px; }
   .topbar-actions .icon-button { width: 36px; height: 36px; }
 }
+
+/* Entrada pública y panel privado v2 */
+.device-entry #accessView,
+.admin-entry #accessView,
+.device-entry #bootView,
+.admin-entry #bootView {
+  color-scheme: dark;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(34, 84, 177, .18), transparent 31%),
+    radial-gradient(circle at 88% 82%, rgba(45, 229, 109, .11), transparent 31%),
+    #020617;
+}
+.minimal-access-card,
+.private-login-wrap {
+  width: min(100%, 510px);
+  display: grid;
+  place-items: center;
+}
+.minimal-access-card {
+  min-height: min(650px, calc(100vh - 44px));
+  align-content: center;
+  gap: 28px;
+  padding: 42px 30px;
+  border: 1px solid rgba(129, 151, 193, .25);
+  border-radius: 32px;
+  background: linear-gradient(155deg, rgba(13, 27, 51, .97), rgba(2, 8, 23, .99));
+  box-shadow: 0 28px 90px rgba(0,0,0,.55);
+}
+.minimal-access-logo {
+  display: block;
+  border-radius: 29%;
+  box-shadow: 0 20px 55px rgba(0,0,0,.52), 0 0 26px rgba(48, 147, 255, .16);
+}
+.minimal-access-card h1,
+.private-login-heading h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.5rem, 10vw, 4.5rem);
+  letter-spacing: .15em;
+  text-indent: .15em;
+  font-weight: 950;
+}
+.minimal-access-button,
+.minimal-install-button,
+.private-login-button {
+  width: min(100%, 390px);
+  min-height: 56px;
+  border: 1px solid #6cf494;
+  border-radius: 999px;
+  padding: 13px 22px;
+  color: #03120a;
+  background: linear-gradient(135deg, #39e56f, #7af5a3);
+  box-shadow: 0 13px 32px rgba(57,229,111,.23);
+  font-weight: 850;
+}
+.minimal-install-button {
+  color: #78f7a3;
+  background: transparent;
+  border-color: rgba(108,244,148,.5);
+}
+.private-login-card {
+  width: min(100%, 470px);
+  padding: 40px;
+  color: #f8fafc;
+  border: 1px solid rgba(129,151,193,.26);
+  border-radius: 30px;
+  background: linear-gradient(155deg, rgba(13, 27, 51, .97), rgba(2, 8, 23, .99));
+  box-shadow: 0 28px 90px rgba(0,0,0,.55);
+}
+.private-login-card label { color: #d6deeb; }
+.private-login-card input {
+  color: #f8fafc;
+  border-color: rgba(148,163,184,.28);
+  background: rgba(15,23,42,.78);
+}
+.private-login-card input:focus { border-color: #39e56f; box-shadow: 0 0 0 4px rgba(57,229,111,.12); }
+.private-login-heading { text-align: center; margin-bottom: 10px; }
+.private-reset-button {
+  border: 0;
+  color: #75f39e;
+  background: transparent;
+  font-weight: 760;
+}
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.device-entry #requestView,
+.device-entry #gateView,
+.device-entry #pinView,
+.admin-entry #gateView,
+.admin-entry #pinView {
+  background:
+    radial-gradient(circle at 10% 10%, rgba(34, 84, 177, .15), transparent 31%),
+    radial-gradient(circle at 88% 82%, rgba(45, 229, 109, .09), transparent 31%),
+    #020617;
+}
+.device-entry #requestView .access-card,
+.device-entry #gateView .access-card,
+.device-entry #pinView .access-card,
+.admin-entry #gateView .access-card,
+.admin-entry #pinView .access-card {
+  border-color: rgba(129,151,193,.25);
+  background: #f8fafc;
+}
+@media (max-width: 560px) {
+  .device-entry #accessView, .admin-entry #accessView { padding: 0; }
+  .minimal-access-card { width: 100%; min-height: 100vh; border: 0; border-radius: 0; }
+  .private-login-card { min-height: 100vh; justify-content: center; border: 0; border-radius: 0; }
+}
