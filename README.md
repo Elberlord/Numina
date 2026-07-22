@@ -1,3 +1,25 @@
+# Númina v3.2 — Campañas con o sin serie
+
+Esta versión conserva el acceso por clave temporal y añade modalidad por campaña.
+
+## Modalidades
+
+- **Sin serie:** cada registro utiliza solo un número.
+- **Con serie:** cada registro exige número y serie. La serie conserva ceros iniciales y admite letras, por ejemplo `007` o `A12`.
+
+En campañas con serie, los registros exclusivos y las coincidencias se evalúan usando la combinación exacta **número + serie**. Las campañas creadas antes de esta actualización se interpretan automáticamente como **sin serie**.
+
+## Actualización
+
+1. Copia todos los archivos a la raíz del repositorio `Numina`.
+2. No borres la carpeta `.git`.
+3. Haz commit y push.
+4. Cierra y vuelve a abrir la PWA para descargar la nueva caché.
+
+No es necesario modificar las reglas de Firestore para esta versión.
+
+---
+
 # Númina — Activación con clave temporal v3
 
 ## Flujo

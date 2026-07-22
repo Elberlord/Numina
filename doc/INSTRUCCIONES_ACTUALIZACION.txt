@@ -1,11 +1,17 @@
-NÚMINA v3.1.0 — CORRECCIÓN DE ACTIVACIÓN
+NÚMINA v3.2 — ACTUALIZACIÓN CON SERIE
 
-1. Copia todos los archivos de esta carpeta a la raíz del repositorio Numina.
-2. No borres la carpeta .git.
-3. Acepta reemplazar los archivos existentes.
-4. Haz commit y push.
-5. Espera a que GitHub Pages publique.
-6. Cierra por completo la PWA instalada y vuelve a abrirla.
-7. Si todavía aparece la versión anterior, desinstala la PWA o borra los datos del sitio y vuelve a instalarla.
+1. Extrae el ZIP.
+2. Copia todos los archivos internos a la raíz del repositorio Numina.
+3. No borres la carpeta .git.
+4. Acepta reemplazar los archivos existentes.
+5. Ejecuta git add ., commit y push.
+6. Espera la publicación de GitHub Pages.
+7. Cierra completamente la PWA y vuelve a abrirla. Si conserva la versión anterior, desinstálala y vuelve a instalarla.
 
-No es necesario cambiar otra vez las reglas de Firestore para esta corrección.
+FIREBASE:
+- No cambies las reglas de Firestore. Son las mismas de la versión 3.1.
+
+NOVEDAD:
+- Al crear una campaña se elige Sin serie o Con serie.
+- Con serie, cada venta y consulta exige número + serie.
+- Las campañas antiguas quedan como Sin serie.

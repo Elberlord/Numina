@@ -144,6 +144,7 @@
 <form class="panel form-grid" id="saleForm">
 <label class="span-2">Campaña<select name="campaignId" required=""></select></label>
 <label>Número<input inputmode="numeric" name="number" placeholder="00" required=""/></label>
+<label class="hidden" data-series-field="sale">Serie<input autocomplete="off" maxlength="40" name="series" placeholder="Ej. 007"/></label>
 <label>Participaciones<input max="10000" min="1" name="quantity" required="" type="number" value="1"/></label>
 <label class="span-2">Nombre del cliente<input autocomplete="name" maxlength="120" name="customerName" required=""/></label>
 <label>Teléfono<input autocomplete="tel" inputmode="tel" maxlength="40" name="phone"/></label>
@@ -155,7 +156,7 @@
 </section>
 <section class="view" id="view-sales">
 <div class="page-heading"><div><p class="eyebrow">REGISTROS</p><h2>Ventas</h2></div><button class="secondary" id="salesPrintBtn">Exportar reporte PDF</button></div>
-<div class="panel filters"><select id="salesCampaignFilter"></select><input id="salesSearch" placeholder="Buscar número, nombre o teléfono" type="search"/><select id="salesStatusFilter"><option value="all">Todos los estados</option><option value="pending">Pendientes</option><option value="paid">Pagados</option><option value="cancelled">Cancelados</option></select></div>
+<div class="panel filters"><select id="salesCampaignFilter"></select><input id="salesSearch" placeholder="Buscar número, serie, nombre o teléfono" type="search"/><select id="salesStatusFilter"><option value="all">Todos los estados</option><option value="pending">Pendientes</option><option value="paid">Pagados</option><option value="cancelled">Cancelados</option></select></div>
 <div class="data-table" id="salesTable"></div>
 </section>
 <section class="view" id="view-campaigns">
@@ -167,8 +168,9 @@
 <label>Número inicial<input min="0" name="numberMin" required="" type="number" value="0"/></label>
 <label>Número final<input min="0" name="numberMax" required="" type="number" value="99"/></label>
 <label>Ancho visual<input max="8" min="1" name="numberWidth" required="" type="number" value="2"/></label>
+<label>Modalidad<select name="useSeries"><option value="false">Sin serie</option><option value="true">Con serie</option></select></label>
 <label>Registros elegibles<select name="eligibility"><option value="paid">Solo pagados</option><option value="paid_pending">Pagados y pendientes</option></select></label>
-<label class="toggle span-2"><input checked="" name="allowRepeated" type="checkbox"/> Permitir varias ventas del mismo número</label>
+<label class="toggle span-2"><input checked="" name="allowRepeated" type="checkbox"/> Permitir registros repetidos</label>
 <label class="span-2">Notas<textarea maxlength="500" name="notes" rows="3"></textarea></label>
 <button class="primary span-2" type="submit">Crear campaña</button>
 </form>
@@ -176,11 +178,12 @@
 </div>
 </section>
 <section class="view" id="view-result">
-<div class="page-heading"><div><p class="eyebrow">CONSULTA EXTERNA</p><h2>Coincidencias por número</h2></div><button class="secondary" id="winnerPrintBtn">Exportar reporte PDF</button></div>
+<div class="page-heading"><div><p class="eyebrow">CONSULTA EXTERNA</p><h2>Coincidencias</h2></div><button class="secondary" id="winnerPrintBtn">Exportar reporte PDF</button></div>
 <form class="panel result-form" id="resultForm">
 <label>Campaña<select name="campaignId" required=""></select></label>
 <label>Número consultado<input inputmode="numeric" name="winningNumber" placeholder="00" required=""/></label>
-<label>Nota de consulta<input maxlength="500" name="notes" placeholder="Opcional"/></label>
+<label class="hidden" data-series-field="result">Serie consultada<input autocomplete="off" maxlength="40" name="winningSeries" placeholder="Ej. 007"/></label>
+<label class="result-note">Nota de consulta<input maxlength="500" name="notes" placeholder="Opcional"/></label>
 <button class="primary" type="submit">Buscar y guardar</button>
 </form>
 <div id="winnerSummary"></div>
@@ -213,6 +216,7 @@
 <label>Teléfono<input maxlength="40" name="phone"/></label>
 <div class="form-grid">
 <label>Número<input inputmode="numeric" name="number" required=""/></label>
+<label class="hidden" data-series-field="edit">Serie<input autocomplete="off" maxlength="40" name="series"/></label>
 <label>Cantidad<input min="1" name="quantity" required="" type="number"/></label>
 <label>Monto<input min="0" name="amount" required="" step="0.01" type="number"/></label>
 <label>Estado<select name="paymentStatus"><option value="pending">Pendiente</option><option value="paid">Pagado</option><option value="cancelled">Cancelado</option></select></label>

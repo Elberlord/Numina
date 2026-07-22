@@ -1,3 +1,13 @@
+# Númina v3.2.0
+
+- Cada campaña puede configurarse **sin serie** o **con serie**.
+- En campañas con serie, la venta exige número y serie.
+- La exclusividad se valida por la combinación número + serie.
+- Las coincidencias de campañas con serie comparan número y serie.
+- Ventas, búsqueda, edición, panel, CSV y reportes muestran la serie.
+- Las campañas existentes siguen funcionando como campañas sin serie.
+- No requiere cambios en las reglas de Firestore.
+
 # Númina v3.1.0
 
 - Corrige la pantalla en blanco al pulsar “Ingresar clave temporal”.

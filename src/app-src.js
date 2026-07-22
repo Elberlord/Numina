@@ -45,7 +45,7 @@ const ADMIN_UID = '6zJhAeRF9JRAilw6yvQQvLiN8bc2';
 const ENTRY_MODE = document.body.dataset.entry || 'device';
 const ACCESS_WHATSAPP = '50664305227';
 let autoRequestStarted = false;
-const APP_VERSION = 'firebase-completa-v1.1.1-temp-key';
+const APP_VERSION = 'firebase-completa-v1.2.0-series';
 const LEGACY_STORAGE_KEY = 'numina_github_pages_data_v1';
 const ADMIN_DEVICE_ID_KEY = 'numina_admin_device_id_v1';
 const ADMIN_DEVICE_NAME_KEY = 'numina_admin_device_name_v1';
@@ -801,6 +801,44 @@ function numberForCampaign(value, campaign) {
   return String(numeric).padStart(Number(campaign.numberWidth || 1), '0');
 }
 
+function campaignUsesSeries(campaign) {
+  return campaign?.useSeries === true;
+}
+
+function seriesForCampaign(value, campaign) {
+  if (!campaignUsesSeries(campaign)) return '';
+  const series = String(value || '').trim().toUpperCase();
+  if (!series) throw new Error('La serie es obligatoria para esta campaña.');
+  if (series.length > 40) throw new Error('La serie no puede superar 40 caracteres.');
+  return series;
+}
+
+function numberSeriesLabel(number, series, campaign) {
+  return campaignUsesSeries(campaign) ? `${number} · Serie ${series || '—'}` : number;
+}
+
+function updateSeriesFields() {
+  const saleCampaign = getCampaign($('#saleForm select[name="campaignId"]')?.value);
+  const saleField = $('[data-series-field="sale"]');
+  const saleInput = saleField?.querySelector('input[name="series"]');
+  const saleEnabled = campaignUsesSeries(saleCampaign);
+  saleField?.classList.toggle('hidden', !saleEnabled);
+  if (saleInput) {
+    saleInput.required = saleEnabled;
+    if (!saleEnabled) saleInput.value = '';
+  }
+
+  const resultCampaign = getCampaign($('#resultForm select[name="campaignId"]')?.value);
+  const resultField = $('[data-series-field="result"]');
+  const resultInput = resultField?.querySelector('input[name="winningSeries"]');
+  const resultEnabled = campaignUsesSeries(resultCampaign);
+  resultField?.classList.toggle('hidden', !resultEnabled);
+  if (resultInput) {
+    resultInput.required = resultEnabled;
+    if (!resultEnabled) resultInput.value = '';
+  }
+}
+
 function showView(viewName) {
   if (!isAdmin() && viewName === 'devices') viewName = 'dashboard';
   state.activeView = viewName;
@@ -817,7 +855,7 @@ function populateCampaignSelect(select, { includeAll = false, activeOnly = false
   const campaigns = activeOnly ? activeCampaigns() : visibleCampaigns();
   const options = [];
   if (includeAll) options.push('<option value="all">Todas las campañas</option>');
-  options.push(...campaigns.map(campaign => `<option value="${escapeHtml(campaign.id)}">${escapeHtml(campaign.name)}</option>`));
+  options.push(...campaigns.map(campaign => `<option value="${escapeHtml(campaign.id)}">${escapeHtml(campaign.name)}${campaignUsesSeries(campaign) ? ' · con serie' : ''}</option>`));
   if (!campaigns.length && !includeAll) options.push('<option value="">No hay campañas disponibles</option>');
   select.innerHTML = options.join('');
   if (Array.from(select.options).some(option => option.value === previous)) select.value = previous;
@@ -836,6 +874,7 @@ function renderAll() {
   populateCampaignSelect($('#salesCampaignFilter'), { includeAll: true });
   populateCampaignSelect($('#saleForm select[name="campaignId"]'), { activeOnly: true });
   populateCampaignSelect($('#resultForm select[name="campaignId"]'));
+  updateSeriesFields();
 
   renderDashboard();
   renderSales();
@@ -866,7 +905,7 @@ function renderDashboard() {
   const recent = [...sales].sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0)).slice(0, 8);
   $('#recentSales').innerHTML = recent.length ? recent.map(sale => {
     const campaign = getCampaign(sale.campaignId);
-    return `<div class="list-item"><div><strong>${escapeHtml(sale.customerName)}</strong><small>${escapeHtml(campaign?.name || 'Campaña')} · Número ${escapeHtml(sale.number)} · ${escapeHtml(sale.sellerName || sale.createdByName || 'Usuario')}</small></div><div><span class="status-pill ${sale.paymentStatus}">${paymentLabel(sale.paymentStatus)}</span><small>${sale._pending ? '<span class="pending-dot"></span>Pendiente' : '<span class="server-dot"></span>Confirmado'}</small></div></div>`;
+    return `<div class="list-item"><div><strong>${escapeHtml(sale.customerName)}</strong><small>${escapeHtml(campaign?.name || 'Campaña')} · ${escapeHtml(numberSeriesLabel(sale.number, sale.series, campaign))} · ${escapeHtml(sale.sellerName || sale.createdByName || 'Usuario')}</small></div><div><span class="status-pill ${sale.paymentStatus}">${paymentLabel(sale.paymentStatus)}</span><small>${sale._pending ? '<span class="pending-dot"></span>Pendiente' : '<span class="server-dot"></span>Confirmado'}</small></div></div>`;
   }).join('') : '<div class="empty">Todavía no hay ventas registradas.</div>';
 
   $('#localSummary').innerHTML = `
@@ -890,7 +929,8 @@ function renderCampaigns() {
       <header><div><h3>${escapeHtml(campaign.name)}</h3><span class="status-pill ${campaign.status === 'active' ? 'paid' : 'cancelled'}">${campaignStatusLabel(campaign.status)}</span></div><strong>${campaign.numberMin}–${campaign.numberMax}</strong></header>
       <div class="campaign-meta">
         <span class="meta-chip">${saleCount} ventas</span>
-        <span class="meta-chip">${campaign.allowRepeated ? 'Números repetidos' : 'Números exclusivos'}</span>
+        <span class="meta-chip">${campaign.allowRepeated ? 'Registros repetidos' : 'Registros exclusivos'}</span>
+        <span class="meta-chip">${campaignUsesSeries(campaign) ? 'Número + serie' : 'Solo número'}</span>
         <span class="meta-chip">${campaign.eligibility === 'paid' ? 'Solo pagados' : 'Pagados y pendientes'}</span>
         ${campaign._pending ? '<span class="meta-chip">Pendiente de sincronizar</span>' : ''}
       </div>
@@ -911,7 +951,7 @@ function filteredSales() {
     if (campaignFilter !== 'all' && sale.campaignId !== campaignFilter) return false;
     if (statusFilter !== 'all' && sale.paymentStatus !== statusFilter) return false;
     if (searchText) {
-      const haystack = normalizeText([sale.number, sale.customerName, sale.phone, sale.sellerName, sale.createdByName].join(' '));
+      const haystack = normalizeText([sale.number, sale.series, sale.customerName, sale.phone, sale.sellerName, sale.createdByName].join(' '));
       if (!haystack.includes(searchText)) return false;
     }
     return true;
@@ -921,15 +961,18 @@ function filteredSales() {
 function renderSales() {
   const sales = filteredSales();
   const header = '<div class="table-row header"><span>Número</span><span>Cliente</span><span>Teléfono</span><span>Cantidad</span><span>Monto</span><span>Estado</span><span>Acción</span></div>';
-  const rows = sales.map(sale => `<div class="table-row">
-    <span><span class="number-chip">${escapeHtml(sale.number)}</span></span>
+  const rows = sales.map(sale => {
+    const campaign = getCampaign(sale.campaignId);
+    return `<div class="table-row">
+    <span><span class="number-chip">${escapeHtml(numberSeriesLabel(sale.number, sale.series, campaign))}</span></span>
     <span><strong>${escapeHtml(sale.customerName)}</strong><small>${escapeHtml(sale.sellerName || sale.createdByName || 'Usuario')} · ${formatDate(sale.createdAt)} ${sale._pending ? '· Pendiente' : ''}</small></span>
     <span>${escapeHtml(sale.phone || '—')}</span>
     <span>${Number(sale.quantity || 0)}</span>
     <span>${formatAmount(sale.amount)}</span>
     <span><span class="status-pill ${sale.paymentStatus}">${paymentLabel(sale.paymentStatus)}</span></span>
     <span class="table-actions"><button data-edit-sale="${sale.id}" title="Editar">✎</button></span>
-  </div>`).join('');
+  </div>`;
+  }).join('');
   $('#salesTable').innerHTML = sales.length ? header + rows : '<div class="empty">No hay ventas con esos filtros.</div>';
 }
 
@@ -943,7 +986,10 @@ function winnerGroups(result) {
   const campaign = getCampaign(result.campaignId);
   if (!campaign) return [];
   const eligibleStatuses = campaign.eligibility === 'paid' ? ['paid'] : ['paid', 'pending'];
-  const matched = state.data.sales.filter(sale => !sale.deleted && sale.campaignId === campaign.id && sale.number === result.winningNumber && eligibleStatuses.includes(sale.paymentStatus));
+  const matched = state.data.sales.filter(sale => {
+    if (sale.deleted || sale.campaignId !== campaign.id || sale.number !== result.winningNumber || !eligibleStatuses.includes(sale.paymentStatus)) return false;
+    return !campaignUsesSeries(campaign) || String(sale.series || '') === String(result.winningSeries || '');
+  });
   const groups = new Map();
   for (const sale of matched) {
     const phone = normalizePhone(sale.phone);
@@ -981,7 +1027,7 @@ function renderWinnerSummary() {
   const cards = groups.map(group => {
     const delivery = deliveryFor(result.id, group.key);
     return `<article class="winner-card">
-      <header><div><h3>${escapeHtml(group.customerName)}</h3><span class="status-pill ${delivery?.delivered ? 'delivered' : 'pending'}">${delivery?.delivered ? 'Entregado' : 'Pendiente'}</span></div><span class="number-chip">${escapeHtml(result.winningNumber)}</span></header>
+      <header><div><h3>${escapeHtml(group.customerName)}</h3><span class="status-pill ${delivery?.delivered ? 'delivered' : 'pending'}">${delivery?.delivered ? 'Entregado' : 'Pendiente'}</span></div><span class="number-chip">${escapeHtml(numberSeriesLabel(result.winningNumber, result.winningSeries, campaign))}</span></header>
       <div class="winner-details">
         <div><span>Teléfono</span><strong>${escapeHtml(group.phone || '—')}</strong></div>
         <div><span>Participaciones</span><strong>${group.quantity}</strong></div>
@@ -993,7 +1039,7 @@ function renderWinnerSummary() {
   }).join('');
   container.innerHTML = `
     <div class="winner-overview">
-      <article class="winner-stat"><span>Número consultado</span><strong>${escapeHtml(result.winningNumber)}</strong></article>
+      <article class="winner-stat"><span>${campaignUsesSeries(campaign) ? 'Número y serie consultados' : 'Número consultado'}</span><strong>${escapeHtml(numberSeriesLabel(result.winningNumber, result.winningSeries, campaign))}</strong></article>
       <article class="winner-stat"><span>Personas coincidentes</span><strong>${groups.length}</strong></article>
       <article class="winner-stat"><span>Entregas pendientes</span><strong>${pendingDeliveries}</strong></article>
     </div>
@@ -1040,13 +1086,14 @@ function csvCell(value) {
 }
 
 function exportCsv() {
-  const headers = ['Fecha', 'Campaña', 'Número', 'Cliente', 'Teléfono', 'Participaciones', 'Monto', 'Estado', 'Registrado por', 'Sincronización', 'Notas'];
+  const headers = ['Fecha', 'Campaña', 'Número', 'Serie', 'Cliente', 'Teléfono', 'Participaciones', 'Monto', 'Estado', 'Registrado por', 'Sincronización', 'Notas'];
   const rows = visibleSales().map(sale => {
     const campaign = getCampaign(sale.campaignId);
     return [
       sale.createdAt,
       campaign?.name || '',
       sale.number,
+      sale.series || '',
       sale.customerName,
       sale.phone,
       sale.quantity,
@@ -1322,7 +1369,8 @@ $('#dashboardCampaignFilter').addEventListener('change', renderDashboard);
 $('#salesCampaignFilter').addEventListener('change', renderSales);
 $('#salesStatusFilter').addEventListener('change', renderSales);
 $('#salesSearch').addEventListener('input', renderSales);
-$('#resultForm select[name="campaignId"]').addEventListener('change', renderWinnerSummary);
+$('#resultForm select[name="campaignId"]').addEventListener('change', () => { updateSeriesFields(); renderWinnerSummary(); });
+$('#saleForm select[name="campaignId"]').addEventListener('change', updateSeriesFields);
 
 $('#campaignForm').addEventListener('submit', async event => {
   event.preventDefault();
@@ -1337,6 +1385,7 @@ $('#campaignForm').addEventListener('submit', async event => {
     numberMin,
     numberMax,
     numberWidth,
+    useSeries: String(form.get('useSeries') || 'false') === 'true',
     eligibility: String(form.get('eligibility') || 'paid'),
     allowRepeated: form.get('allowRepeated') === 'on',
     notes: String(form.get('notes') || '').trim(),
@@ -1348,6 +1397,7 @@ $('#campaignForm').addEventListener('submit', async event => {
   event.currentTarget.numberMin.value = 0;
   event.currentTarget.numberMax.value = 99;
   event.currentTarget.numberWidth.value = 2;
+  event.currentTarget.useSeries.value = 'false';
   event.currentTarget.allowRepeated.checked = true;
 });
 
@@ -1377,11 +1427,14 @@ $('#saleForm').addEventListener('submit', async event => {
   const campaign = getCampaign(String(form.get('campaignId') || ''));
   if (!campaign || campaign.status !== 'active') return toast('Selecciona una campaña activa.');
   let number;
-  try { number = numberForCampaign(form.get('number'), campaign); }
-  catch (error) { return toast(error.message); }
+  let series;
+  try {
+    number = numberForCampaign(form.get('number'), campaign);
+    series = seriesForCampaign(form.get('series'), campaign);
+  } catch (error) { return toast(error.message); }
   if (!campaign.allowRepeated) {
-    const alreadyUsed = state.data.sales.some(sale => !sale.deleted && sale.campaignId === campaign.id && sale.number === number && sale.paymentStatus !== 'cancelled');
-    if (alreadyUsed) return toast(`El número ${number} ya fue registrado en esta campaña.`);
+    const alreadyUsed = state.data.sales.some(sale => !sale.deleted && sale.campaignId === campaign.id && sale.number === number && String(sale.series || '') === series && sale.paymentStatus !== 'cancelled');
+    if (alreadyUsed) return toast(`${numberSeriesLabel(number, series, campaign)} ya fue registrado en esta campaña.`);
   }
   const quantity = Number(form.get('quantity'));
   const amount = Number(form.get('amount'));
@@ -1391,6 +1444,7 @@ $('#saleForm').addEventListener('submit', async event => {
     id: makeId('sale'),
     campaignId: campaign.id,
     number,
+    series,
     quantity,
     customerName: String(form.get('customerName') || '').trim(),
     phone: String(form.get('phone') || '').trim(),
@@ -1401,10 +1455,11 @@ $('#saleForm').addEventListener('submit', async event => {
     sellerName: state.actor.name,
     deleted: false
   };
-  await saveEntity('sales', sale, `Número ${number} registrado.`, 'sale.created');
+  await saveEntity('sales', sale, `${numberSeriesLabel(number, series, campaign)} registrado.`, 'sale.created');
   event.currentTarget.reset();
   event.currentTarget.quantity.value = 1;
   event.currentTarget.amount.value = 0;
+  updateSeriesFields();
 });
 
 $('#salesTable').addEventListener('click', event => {
@@ -1417,6 +1472,13 @@ $('#salesTable').addEventListener('click', event => {
   form.elements.namedItem('customerName').value = sale.customerName;
   form.elements.namedItem('phone').value = sale.phone || '';
   form.elements.namedItem('number').value = sale.number;
+  const seriesField = $('[data-series-field="edit"]');
+  const seriesInput = form.elements.namedItem('series');
+  const campaign = getCampaign(sale.campaignId);
+  const usesSeries = campaignUsesSeries(campaign);
+  seriesField?.classList.toggle('hidden', !usesSeries);
+  seriesInput.required = usesSeries;
+  seriesInput.value = sale.series || '';
   form.elements.namedItem('quantity').value = sale.quantity;
   form.elements.namedItem('amount').value = sale.amount;
   form.elements.namedItem('paymentStatus').value = sale.paymentStatus;
@@ -1431,13 +1493,21 @@ $('#editSaleForm').addEventListener('submit', async event => {
   if (!sale) return toast('No se encontró la venta.');
   const campaign = getCampaign(sale.campaignId);
   let number;
-  try { number = numberForCampaign(form.get('number'), campaign); }
-  catch (error) { return toast(error.message); }
+  let series;
+  try {
+    number = numberForCampaign(form.get('number'), campaign);
+    series = seriesForCampaign(form.get('series'), campaign);
+  } catch (error) { return toast(error.message); }
+  if (!campaign.allowRepeated) {
+    const duplicate = state.data.sales.some(item => !item.deleted && item.id !== sale.id && item.campaignId === campaign.id && item.number === number && String(item.series || '') === series && item.paymentStatus !== 'cancelled');
+    if (duplicate) return toast(`${numberSeriesLabel(number, series, campaign)} ya fue registrado en esta campaña.`);
+  }
   const updated = {
     ...sale,
     customerName: String(form.get('customerName') || '').trim(),
     phone: String(form.get('phone') || '').trim(),
     number,
+    series,
     quantity: Math.max(1, Number(form.get('quantity')) || 1),
     amount: Math.max(0, Number(form.get('amount')) || 0),
     paymentStatus: String(form.get('paymentStatus') || 'pending'),
@@ -1456,17 +1526,20 @@ $('#resultForm').addEventListener('submit', async event => {
   const campaign = getCampaign(String(form.get('campaignId') || ''));
   if (!campaign) return toast('Selecciona una campaña.');
   let winningNumber;
-  try { winningNumber = numberForCampaign(form.get('winningNumber'), campaign); }
-  catch (error) { return toast(error.message); }
+  let winningSeries;
+  try {
+    winningNumber = numberForCampaign(form.get('winningNumber'), campaign);
+    winningSeries = seriesForCampaign(form.get('winningSeries'), campaign);
+  } catch (error) { return toast(error.message); }
   let result = state.data.results.find(item => !item.deleted && item.campaignId === campaign.id);
   if (result) {
     const relatedDeliveries = state.data.deliveries.filter(delivery => !delivery.deleted && delivery.resultId === result.id);
     await Promise.all(relatedDeliveries.map(delivery => saveEntity('deliveries', { ...delivery, deleted: true }, '', 'delivery.cleared')));
-    result = { ...result, winningNumber, notes: String(form.get('notes') || '').trim() };
+    result = { ...result, winningNumber, winningSeries, notes: String(form.get('notes') || '').trim() };
   } else {
-    result = { id: makeId('result'), campaignId: campaign.id, winningNumber, notes: String(form.get('notes') || '').trim(), deleted: false };
+    result = { id: makeId('result'), campaignId: campaign.id, winningNumber, winningSeries, notes: String(form.get('notes') || '').trim(), deleted: false };
   }
-  await saveEntity('results', result, `Consulta del número ${winningNumber} guardada.`, 'result.saved');
+  await saveEntity('results', result, `Consulta de ${numberSeriesLabel(winningNumber, winningSeries, campaign)} guardada.`, 'result.saved');
 });
 
 $('#winnerSummary').addEventListener('click', async event => {
