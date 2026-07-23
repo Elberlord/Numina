@@ -1,0 +1,42 @@
+MAPA DE MÓDULOS — NÚMINA SERIE V3.6.1
+
+src/app-src.js
+  Punto de entrada. Registra hooks entre capas, listeners DOM, autenticación y arranque general.
+
+src/modules/context.js
+  Configuración Firebase, constantes, selectores y estado compartido.
+  No depende de otros módulos locales.
+
+src/modules/core.js
+  Utilidades, formato, normalización, privacidad, PIN y pantallas básicas de acceso.
+  Usa hooks para no depender directamente de sincronización o persistencia.
+
+src/modules/domain.js
+  Funciones de dominio para campañas, registros, coincidencias y entregas.
+  No escribe en Firebase ni renderiza pantallas.
+
+src/modules/data.js
+  Autorización, sincronización Firestore, auditoría, persistencia e importación.
+  Notifica al render mediante un hook y no importa la capa de interfaz.
+
+src/modules/ui.js
+  Renderizado, filtros, exportaciones, impresión, diagnóstico e instalación PWA.
+  Usa un hook para solicitar la actualización del panel de dispositivos sin depender de admin.js.
+
+src/modules/admin.js
+  Entrada a la aplicación, panel administrativo, dispositivos, claves temporales y migración.
+
+vendor/firebase-runtime.js
+  Runtime Firebase fijado y reutilizado por la build para evitar dependencias externas no controladas.
+
+scripts/check-source.mjs
+  Valida sintaxis ESM, imports, exports y ciclos.
+
+scripts/build.mjs
+  Sincroniza versiones, ensambla módulos y reemplaza app.bundle.js de forma atómica.
+
+scripts/verify-dist.mjs
+  Comprueba la distribución final.
+
+scripts/smoke-test.mjs
+  Comprueba HTML, selectores y arranque estructural.

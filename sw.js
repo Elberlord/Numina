@@ -1,4 +1,4 @@
-const CACHE_NAME = 'numina-serie-v3-5-0-20260723';
+const CACHE_NAME = 'numina-serie-v3-6-1';
 const CACHE_PREFIX = 'numina-serie-';
 const CORE_SHELL = [
   './',

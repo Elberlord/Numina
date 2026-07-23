@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const STABILITY_VERSION = '3.5.0';
+  const STABILITY_VERSION = '3.6.1';
   const BOOT_TIMEOUT_MS = 18000;
   const SYNC_TIMEOUT_MS = 45000;
   const TAB_TTL_MS = 7000;

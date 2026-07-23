@@ -1,0 +1,18 @@
+{
+  "name": "numina-serie",
+  "version": "3.6.1",
+  "private": true,
+  "type": "module",
+  "description": "PWA Númina con código fuente modular y build reproducible sin dependencias externas.",
+  "scripts": {
+    "check": "node scripts/check-source.mjs",
+    "build": "node scripts/build.mjs",
+    "build:dev": "node scripts/build.mjs --dev",
+    "verify": "node scripts/verify-dist.mjs",
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "release:check": "npm run check && npm run build && npm run verify"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

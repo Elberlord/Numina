@@ -1,0 +1,63 @@
+NÚMINA SERIE V3.6.1 — Reparación de modularización y build reproducible
+
+BASE UTILIZADA
+- Se reparó la v3.6 tomando como referencia funcional la fuente estable de la v3.5.
+- No se modificaron reglas de Firestore.
+- No se modificó GitHub.
+
+ERRORES CORREGIDOS
+- context.js truncado.
+- data/access-data truncado.
+- helpers de dominio incompletos.
+- funciones duplicadas entre módulos.
+- imports faltantes y exports incorrectos.
+- dependencias ocultas entre utilidades, sincronización y renderizado.
+- versiones inconsistentes entre VERSION.txt, bundle, service worker y estabilidad.
+- inexistencia de un proceso reproducible para generar app.bundle.js.
+
+ARQUITECTURA FINAL
+- src/modules/context.js
+- src/modules/core.js
+- src/modules/domain.js
+- src/modules/data.js
+- src/modules/ui.js
+- src/modules/admin.js
+- src/app-src.js
+
+BUILD PROFESIONAL
+- package.json con scripts reproducibles.
+- package-lock.json generado sin dependencias externas.
+- vendor/firebase-runtime.js con runtime Firebase fijado.
+- scripts/check-source.mjs.
+- scripts/build.mjs.
+- scripts/sync-version.mjs.
+- scripts/verify-dist.mjs.
+- scripts/smoke-test.mjs.
+- BUILD.md con instrucciones.
+
+COMPORTAMIENTO DE LA BUILD
+- Lee la versión desde package.json.
+- Sincroniza VERSION.txt, APP_VERSION, CACHE_NAME y STABILITY_VERSION.
+- Comprueba módulos antes de compilar.
+- Ensambla vendor + módulos en orden controlado.
+- Valida sintaxis del bundle temporal.
+- Reemplaza app.bundle.js únicamente si todo es correcto.
+
+VALIDACIONES REALIZADAS
+- node --check para todos los módulos.
+- verificación de imports y exports locales.
+- verificación de ausencia de dependencias circulares.
+- comprobación de tipos y referencias con TypeScript 5.8.3.
+- generación real de app.bundle.js desde los módulos.
+- verificación de archivos de distribución.
+- verificación de VERSION.txt, APP_VERSION, CACHE_NAME y STABILITY_VERSION.
+- smoke test estático sobre portal.html y panel privado.
+- comprobación de 101 selectores DOM usados por el bundle.
+- comprobación de que index.html y portal.html siguen existiendo.
+
+PRUEBA EN NAVEGADOR
+- El entorno de construcción no pudo ejecutar Chromium headless ni siquiera con about:blank; por tanto, la prueba visual completa debe realizarse al alojar el proyecto en HTTPS.
+- La limitación corresponde al navegador del entorno, no a un error detectado en Númina.
+
+REGLAS DE FIRESTORE
+- No fue necesario modificarlas.

@@ -1,50 +1,54 @@
-# Númina v3.2 — Campañas con o sin serie
+# Númina Serie v3.6.1
 
-Esta versión conserva el acceso por clave temporal y añade modalidad por campaña.
+PWA para administración de campañas y registros, con Firebase Authentication, Firestore, autorización de dispositivos, PIN local, persistencia offline, respaldos, CSV, impresión y diagnóstico.
 
-## Modalidades
+## Estado técnico
 
-- **Sin serie:** cada registro utiliza solo un número.
-- **Con serie:** cada registro exige número y serie. La serie conserva ceros iniciales y admite letras, por ejemplo `007` o `A12`.
+La versión 3.6.1 repara la modularización introducida en la v3.6 y añade una build reproducible. `app.bundle.js` se genera ahora desde los módulos reales de `src/`.
 
-En campañas con serie, los registros exclusivos y las coincidencias se evalúan usando la combinación exacta **número + serie**. Las campañas creadas antes de esta actualización se interpretan automáticamente como **sin serie**.
+## Estructura principal
 
-## Actualización
+```text
+src/app-src.js
+src/modules/context.js
+src/modules/core.js
+src/modules/domain.js
+src/modules/data.js
+src/modules/ui.js
+src/modules/admin.js
+vendor/firebase-runtime.js
+scripts/
+```
 
-1. Copia todos los archivos a la raíz del repositorio `Numina`.
-2. No borres la carpeta `.git`.
-3. Haz commit y push.
-4. Cierra y vuelve a abrir la PWA para descargar la nueva caché.
+Consulta `src/MAPA_MODULOS.txt` para ver la responsabilidad de cada archivo.
 
-No es necesario modificar las reglas de Firestore para esta versión.
+## Compilación
 
----
+```bash
+npm ci
+npm run release:check
+npm run test:smoke
+```
 
-# Númina — Activación con clave temporal v3
-
-## Flujo
-
-1. El usuario instala o abre Númina.
-2. Solicita una clave y envía el mensaje por WhatsApp.
-3. El administrador abre el panel privado, localiza la solicitud y pulsa **Generar clave**.
-4. Envía la clave por WhatsApp.
-5. El usuario pulsa **Ingresar clave temporal**, activa el equipo y crea su PIN.
-6. El equipo entra normalmente con ese PIN hasta ser revocado o vencer su permiso offline.
-
-## Recuperación
-
-En un dispositivo activo, el administrador puede pulsar **Nueva clave**. Esa clave permite borrar el PIN local y crear uno nuevo, sin duplicar el dispositivo. Si el navegador fue borrado o reinstalado y cambió el UID anónimo, debe enviarse una solicitud nueva y revocarse la instalación anterior.
+Las instrucciones completas están en `BUILD.md`.
 
 ## Publicación
 
-- Copia todos los archivos a la raíz del repositorio sin borrar `.git`.
-- Publica `firestore.rules` manualmente en Firebase Console → Firestore → Reglas.
-- Haz commit y push.
-- Después de publicar, fuerza actualización o reinstala la PWA para reemplazar la caché anterior.
+1. Ejecuta la build y las verificaciones.
+2. Copia todos los archivos de la carpeta del proyecto al alojamiento HTTPS.
+3. No publiques `app.bundle.dev.js` si lo generaste para desarrollo.
+4. Cierra y vuelve a abrir la PWA para que el nuevo service worker sustituya la caché anterior.
 
-## Seguridad
+## Firestore
 
-- Las claves son de un solo uso y expiran.
-- Firestore guarda solamente el SHA-256 de la clave, no el texto enviado.
-- Cada clave está vinculada a un UID anónimo concreto.
-- Solo el UID administrativo puede crear claves, listar dispositivos, revocar o reactivar.
+Esta reparación no requiere cambiar las reglas de Firestore.
+
+## Seguridad y recuperación
+
+- Claves temporales de un solo uso.
+- PIN local reforzado.
+- Dispositivos revocables.
+- Persistencia offline con vencimiento.
+- Validación de respaldos.
+- Protección CSV.
+- Diagnóstico y recuperación de caché.

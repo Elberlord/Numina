@@ -1,0 +1,80 @@
+NÚMINA SERIE V3.6.0 — Modularización del código fuente
+
+Objetivo:
+Separar src/app-src.js en módulos para que el proyecto quede más ordenado y mantenible, sin alterar el comportamiento funcional de la aplicación.
+
+Archivos añadidos:
+- src/modules/context.js
+- src/modules/utilities.js
+- src/modules/access-data.js
+- src/modules/entities.js
+- src/modules/rendering.js
+- src/modules/exports-print-diagnostics.js
+- src/modules/admin.js
+- src/MAPA_MODULOS.txt
+
+Archivos modificados:
+- VERSION.txt
+- src/app-src.js
+
+Resumen de la reorganización:
+1. context.js
+   - configuración base de Firebase
+   - constantes principales
+   - inicialización de app/auth/db
+   - selectores DOM y estado global
+
+2. utilities.js
+   - utilidades generales
+   - PIN y hashing
+   - normalización y formato
+   - privacidad visual
+   - helpers de interfaz y bloqueo
+
+3. access-data.js
+   - validación de acceso
+   - activación de dispositivos
+   - sincronización de datos
+   - auditoría
+   - importación y prevalidación de respaldos
+
+4. entities.js
+   - helpers de campañas
+   - helpers de ventas
+   - agrupación de coincidencias
+   - helpers de entregas
+
+5. rendering.js
+   - render principal de vistas
+   - campañas
+   - ventas
+   - coincidencias
+   - filtros y formularios visuales
+
+6. exports-print-diagnostics.js
+   - respaldo JSON
+   - CSV
+   - impresión/PDF
+   - diagnóstico técnico
+   - botones de instalación/actualización
+
+7. admin.js
+   - entrada a la app
+   - panel de dispositivos
+   - generación de claves
+   - revocación/reactivación
+   - migración y cambio de cuenta
+
+Notas importantes:
+- app.bundle.js se conservó sin cambios funcionales.
+- La PWA, Firebase, sincronización, PIN, respaldos, impresión y exportaciones siguen igual.
+- La modularización se aplicó al código fuente de src/ para facilitar mantenimiento futuro.
+
+Validaciones realizadas:
+- comprobación de sintaxis JavaScript con node --check sobre src/app-src.js y todos los módulos
+- verificación de que index.html y portal.html siguen existiendo
+- verificación de que app.bundle.js sigue presente
+- verificación de que no se tocaron sw.js, manifest.webmanifest ni Firebase
+
+Reglas de Firestore:
+- no fue necesario modificar reglas
