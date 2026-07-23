@@ -1,0 +1,147 @@
+NÚMINA SERIE V3.4.0 — SEGURIDAD, RESPALDOS Y SOPORTE PWA
+
+BASE DE TRABAJO
+- Esta versión fue creada exclusivamente a partir de numina-serie-v3.3.1.zip.
+- No se creó una aplicación nueva.
+- No se modificó ni publicó nada en GitHub.
+- No se añadió App Check.
+- No se modificaron reglas de Firestore.
+
+ARCHIVOS MODIFICADOS
+- portal.html
+- panel-privado-8f27c4.html
+- src/app-src.js
+- app.bundle.js
+- styles.css
+- sw.js
+- VERSION.txt
+- CHANGELOG.md
+
+ARCHIVO NUEVO
+- CAMBIOS_V3.4.txt
+
+1. IMPORTACIÓN SEGURA DE RESPALDOS JSON
+- Límite de archivo de 20 MB.
+- Verificación de la estructura principal y de campañas, ventas, consultas y entregas.
+- Validación de identificadores para evitar rutas o claves inseguras.
+- Rechazo de objetos con claves peligrosas o anidamiento excesivo.
+- Comprobación de tipos y rangos básicos: montos, participaciones, factor y resultado manual.
+- Los registros inválidos se omiten y no reemplazan datos existentes.
+- Se conservan campañas antiguas sin factor y entregas antiguas sin resultado manual.
+
+2. PREVENCIÓN DE DUPLICADOS EN IMPORTACIÓN
+- Detecta identificadores repetidos dentro del mismo archivo.
+- Distingue registros nuevos, registros modificados y registros idénticos.
+- Los registros idénticos no se escriben nuevamente en Firebase.
+- La importación muestra un resumen antes de confirmar:
+  - total revisado;
+  - nuevos;
+  - actualizaciones;
+  - sin cambios;
+  - duplicados omitidos;
+  - inválidos omitidos.
+
+3. CONFIRMACIÓN PREVIA DE IMPORTACIÓN
+- Se añadió un cuadro de revisión antes de escribir en Firebase.
+- Muestra advertencias de referencias ausentes y registros rechazados.
+- Permite cancelar sin realizar cambios.
+
+4. PIN LOCAL REFORZADO
+- Los PIN nuevos requieren entre 6 y 8 dígitos.
+- Se almacenan con PBKDF2-SHA-256, sal aleatoria y 210 000 iteraciones.
+- Los PIN existentes de 4 a 8 dígitos siguen funcionando.
+- Después de desbloquear correctamente con un PIN antiguo, su almacenamiento se migra automáticamente al formato reforzado.
+- Bloqueo progresivo después de grupos de intentos fallidos:
+  - 30 segundos;
+  - 2 minutos;
+  - 10 minutos.
+- Un acceso correcto restablece el contador de bloqueos.
+
+5. PRIVACIDAD VISUAL
+- Se añadió un botón en la barra superior para ocultar temporalmente:
+  - teléfonos;
+  - montos;
+  - resultados manuales;
+  - nombres de operadores mostrados en registros.
+- El modo de privacidad solo afecta la visualización de la sesión actual y no modifica Firestore.
+
+6. ACTUALIZACIONES PWA
+- Nueva caché: numina-serie-v3-4-0-20260722.
+- El service worker notifica a la aplicación cuando detecta una versión posterior.
+- Se añadió el aviso “Hay una actualización disponible” con botón “Actualizar ahora”.
+- La aplicación comprueba actualizaciones del service worker periódicamente.
+
+7. ESTADO OFFLINE Y SINCRONIZACIÓN
+- El panel del dispositivo muestra:
+  - conexión actual;
+  - escrituras pendientes;
+  - última sincronización confirmada;
+  - estado de autorización;
+  - permiso offline restante.
+- La última sincronización se conserva localmente para diagnóstico.
+
+8. VALIDACIÓN DE TELÉFONOS Y CAMPOS
+- Elimina espacios iniciales y finales y reduce espacios repetidos.
+- Advierte y bloquea teléfonos con menos de 7 dígitos cuando se escribe un valor.
+- Limita teléfonos excesivamente largos.
+- Se mantiene la conservación de ceros iniciales de números mediante el ancho de campaña.
+- Se mantienen series numéricas y alfanuméricas como texto.
+
+9. PRIVACIDAD EN IMPRESIÓN Y PDF
+- Antes de imprimir se puede ocultar:
+  - teléfonos;
+  - montos;
+  - “Registrado por”;
+  - resultados manuales.
+- La selección solo se aplica al reporte actual.
+
+10. REGISTRO LOCAL DE ERRORES
+- Guarda hasta 50 errores técnicos recientes en el dispositivo.
+- No registra PIN, contraseñas ni contenido completo de los registros.
+- Los mensajes se recortan y ocultan patrones de correos y números largos.
+- El registro puede limpiarse desde el diagnóstico.
+
+11. DIAGNÓSTICO TÉCNICO
+- Se añadió una herramienta en Respaldo y exportación.
+- Informa versión, conexión, sesión, autorización, permiso offline, escrituras pendientes, última sincronización, service worker, cachés y uso de almacenamiento.
+- Permite copiar o descargar el informe TXT.
+- No incluye clientes, teléfonos, montos, resultados, PIN ni contraseñas.
+
+12. PROTECCIÓN CONTRA DOBLE CLIC
+- Se bloquean envíos repetidos rápidos en formularios sensibles.
+- Se protege el guardado de resultado manual y el cambio Entregado/Pendiente.
+- La confirmación de importación permanece deshabilitada mientras está procesando.
+
+13. PROTECCIONES WEB ADICIONALES
+- Se añadió una Content Security Policy en ambos portales.
+- Se retiró el correo administrativo precargado de los archivos HTML.
+- Se conserva la protección CSV de la versión 3.3.1 contra fórmulas iniciadas por =, +, - o @.
+
+NO SE MODIFICÓ
+- Firebase Authentication.
+- Firestore ni sus reglas.
+- App Check.
+- Claves temporales.
+- Flujo de autorización y revocación de dispositivos.
+- Campañas, ventas, series, coincidencias y entregas en su funcionamiento principal.
+- Factor como dato informativo; no se añadió ningún cálculo automático.
+- Resultado manual; sigue siendo escrito exclusivamente por el usuario.
+- manifest.webmanifest.
+- Iconos y portada pública.
+
+PRUEBAS REALIZADAS
+- Descompresión y revisión de la estructura completa.
+- Comprobación de index.html, portal.html y panel privado.
+- Validación sintáctica de src/app-src.js.
+- Validación sintáctica de app.bundle.js.
+- Validación sintáctica de sw.js.
+- Comprobación de que el código distribuido coincide con src/app-src.js.
+- Prueba de inicio de la capa de aplicación con DOM y Firebase simulados.
+- Prueba de PBKDF2 y verificación del PIN reforzado.
+- Prueba de clasificación de importación: nuevos, actualizados, idénticos, duplicados e inválidos.
+- Prueba de validación telefónica.
+- Prueba de protección CSV.
+- Verificación de selectores e identificadores HTML.
+- Verificación de que no se añadió App Check.
+- Verificación de que no existe multiplicación entre monto y factor.
+- Verificación de archivos PWA, manifest y service worker.

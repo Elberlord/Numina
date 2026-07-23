@@ -1,3 +1,13 @@
+# Númina v3.4.0
+
+- Importación JSON validada con vista previa, omisión de duplicados y registros inválidos.
+- PIN nuevos de 6 a 8 dígitos con PBKDF2 y bloqueos progresivos; compatibilidad con PIN antiguos.
+- Privacidad visual e impresión selectiva de datos sensibles.
+- Aviso de actualización PWA, última sincronización y diagnóstico técnico.
+- Registro local de errores sin datos personales y protección contra doble clic.
+- Content Security Policy y eliminación del correo administrativo precargado.
+- No requiere cambios en reglas de Firestore y no añade App Check.
+
 # Númina v3.2.0
 
 - Cada campaña puede configurarse **sin serie** o **con serie**.

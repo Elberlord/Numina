@@ -3,6 +3,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' https://*.firebaseapp.com; upgrade-insecure-requests"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <meta content="#07123a" name="theme-color"/>
 <meta content="Númina: campañas numeradas, registros y sincronización protegida con Firebase." name="description"/>
@@ -31,7 +32,7 @@
 <button class="minimal-install-button hidden" id="installAccessBtn" type="button">Instalar Númina</button>
 <div aria-hidden="true" class="dom-only hidden">
 <form id="adminLoginForm">
-<input name="email" type="email" value="anakinjd1985@gmail.com"/>
+<input name="email" type="email"/>
 <input name="password" type="password"/>
 <button id="togglePasswordBtn" type="button">Ver</button>
 <button id="resetPasswordBtn" type="button">Restablecer</button>
@@ -101,10 +102,12 @@
 <div class="topbar-actions">
 <span class="sync-badge" id="storageBadge">Conectando…</span>
 <button aria-label="Instalar aplicación" class="icon-button hidden" id="installBtn" title="Instalar aplicación">⇩</button>
+<button aria-label="Ocultar información sensible" aria-pressed="false" class="icon-button" id="privacyBtn" title="Ocultar información sensible">◌</button>
 <button aria-label="Bloquear" class="icon-button" id="lockBtn" title="Bloquear con PIN">⌁</button>
 <button aria-label="Cerrar sesión" class="icon-button" id="signOutBtn" title="Cambiar de cuenta">↪</button>
 </div>
 </header>
+<div class="update-banner hidden" id="updateBanner"><span>Hay una actualización disponible.</span><button class="primary compact" id="updateNowBtn" type="button">Actualizar ahora</button></div>
 <aside class="sidebar" id="sidebar">
 <div class="user-card">
 <div class="avatar" id="userAvatar">U</div>
@@ -203,11 +206,42 @@
 <label class="action-card file-card"><strong>Importar respaldo JSON</strong><span>Agrega o actualiza información en Firebase.</span><input accept="application/json,.json" id="importJsonInput" type="file"/></label>
 <button class="action-card" id="printAllBtn"><strong>Reporte general PDF</strong><span>Abre una vista lista para imprimir o guardar como PDF.</span></button>
 <button class="action-card hidden" id="installBackupBtn"><strong>Instalar aplicación</strong><span>Agrega Númina a la pantalla de inicio.</span></button>
+<button class="action-card" id="diagnosticBtn" type="button"><strong>Diagnóstico técnico</strong><span>Revisa versión, conexión, caché, sincronización y errores locales sin incluir datos de clientes.</span></button>
 </div>
 <article class="panel danger-zone"><div><h3>Restablecer este dispositivo</h3><p class="muted">Elimina el PIN y la autorización local. No borra la información guardada en Firebase.</p></div><button class="danger" id="resetDeviceBtn">Restablecer dispositivo</button></article>
 </section>
 </main>
 </div>
+
+<dialog id="importPreviewDialog">
+<div class="stack wide-dialog-card">
+<div class="dialog-heading"><div><p class="eyebrow">IMPORTACIÓN SEGURA</p><h3>Revisar respaldo</h3></div><button class="icon-button" id="closeImportPreviewBtn" type="button">×</button></div>
+<p class="muted" id="importPreviewMeta"></p>
+<div class="import-summary" id="importPreviewSummary"></div>
+<div class="import-issues" id="importPreviewIssues"></div>
+<p class="muted">Los registros inválidos y duplicados se omitirán. Los registros sin cambios no se escribirán otra vez.</p>
+<div class="form-actions"><button class="primary" id="confirmImportBtn" type="button">Confirmar importación</button><button class="ghost" id="cancelImportBtn" type="button">Cancelar</button></div>
+</div>
+</dialog>
+<dialog id="printOptionsDialog">
+<form class="stack" id="printOptionsForm">
+<div class="dialog-heading"><div><p class="eyebrow">PRIVACIDAD DE IMPRESIÓN</p><h3>Preparar reporte</h3></div><button class="icon-button" id="closePrintOptionsBtn" type="button">×</button></div>
+<p class="muted">Marca la información que no debe aparecer en el PDF o impresión.</p>
+<label class="toggle"><input name="hidePhone" type="checkbox"/> Ocultar teléfonos</label>
+<label class="toggle"><input name="hideAmount" type="checkbox"/> Ocultar montos</label>
+<label class="toggle"><input name="hideOperator" type="checkbox"/> Ocultar “Registrado por”</label>
+<label class="toggle"><input name="hideManual" type="checkbox"/> Ocultar resultados manuales</label>
+<div class="form-actions"><button class="primary" type="submit">Continuar a impresión</button><button class="ghost" id="cancelPrintOptionsBtn" type="button">Cancelar</button></div>
+</form>
+</dialog>
+<dialog id="diagnosticDialog">
+<div class="stack diagnostic-card">
+<div class="dialog-heading"><div><p class="eyebrow">SOPORTE</p><h3>Diagnóstico técnico</h3></div><button class="icon-button" id="closeDiagnosticBtn" type="button">×</button></div>
+<p class="muted">Este informe no incluye PIN, contraseñas, teléfonos, clientes, montos ni resultados.</p>
+<pre class="diagnostic-output" id="diagnosticOutput"></pre>
+<div class="form-actions"><button class="primary" id="copyDiagnosticBtn" type="button">Copiar</button><button class="secondary" id="downloadDiagnosticBtn" type="button">Descargar TXT</button><button class="ghost" id="clearErrorLogBtn" type="button">Limpiar errores</button></div>
+</div>
+</dialog>
 <dialog id="editSaleDialog">
 <form class="stack" id="editSaleForm" method="dialog">
 <div class="dialog-heading"><h3>Editar venta</h3><button class="icon-button" id="closeEditDialogBtn" type="button">×</button></div>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'numina-serie-v3-3-1-20260722';
+const CACHE_NAME = 'numina-serie-v3-4-0-20260722';
 const APP_SHELL = [
   './',
   './index.html',
@@ -21,9 +21,16 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    const hadPreviousVersion = keys.some(key => key.startsWith('numina-serie-') && key !== CACHE_NAME);
+    await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+    await self.clients.claim();
+    if (hadPreviousVersion) {
+      const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      clients.forEach(client => client.postMessage({ type: 'NUMINA_UPDATE_READY', version: CACHE_NAME }));
+    }
+  })());
 });
 
 function fallbackFor(url) {
