@@ -169,6 +169,8 @@
 <label>Modalidad<select name="useSeries"><option value="false">Sin serie</option><option value="true">Con serie</option></select></label>
 <label>Registros elegibles<select name="eligibility"><option value="paid">Solo pagados</option><option value="paid_pending">Pagados y pendientes</option></select></label>
 <label class="toggle span-2"><input checked="" name="allowRepeated" type="checkbox"/> Permitir registros repetidos</label>
+<label class="toggle span-2"><input name="factorEnabled" type="checkbox"/> Usar factor</label>
+<label class="span-2">Factor<input disabled="" inputmode="decimal" min="0" name="factor" placeholder="0" step="any" type="number"/></label>
 <label class="span-2">Notas<textarea maxlength="500" name="notes" rows="3"></textarea></label>
 <button class="primary span-2" type="submit">Crear campaña</button>
 </form>
@@ -176,7 +178,7 @@
 </div>
 </section>
 <section class="view" id="view-result">
-<div class="page-heading"><div><p class="eyebrow">CONSULTA EXTERNA</p><h2>Coincidencias</h2></div><button class="secondary" id="winnerPrintBtn">Exportar reporte PDF</button></div>
+<div class="page-heading"><div><p class="eyebrow">CONSULTA EXTERNA</p><h2>Coincidencias</h2></div><div class="page-heading-actions"><button class="secondary" id="winnerCsvBtn" type="button">Exportar CSV</button><button class="secondary" id="winnerPrintBtn" type="button">Exportar reporte PDF</button></div></div>
 <form class="panel result-form" id="resultForm">
 <label>Campaña<select name="campaignId" required=""></select></label>
 <label>Número consultado<input inputmode="numeric" name="winningNumber" placeholder="00" required=""/></label>

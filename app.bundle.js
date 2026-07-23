@@ -36,1748 +36,1931 @@ This typically indicates that your device does not have a healthy Internet conne
   `+e.join(`  
 `)+`
 )`}copy(e,t){let r=new n;return r.comparator=this.comparator,r.keyedMap=e,r.sortedSet=t,r}};var Pl=class{constructor(){this.au=new be(G.comparator)}track(e){let t=e.doc.key,r=this.au.get(t);r?e.type!==0&&r.type===3?this.au=this.au.insert(t,e):e.type===3&&r.type!==1?this.au=this.au.insert(t,{type:r.type,doc:e.doc}):e.type===2&&r.type===2?this.au=this.au.insert(t,{type:2,doc:e.doc}):e.type===2&&r.type===0?this.au=this.au.insert(t,{type:0,doc:e.doc}):e.type===1&&r.type===0?this.au=this.au.remove(t):e.type===1&&r.type===2?this.au=this.au.insert(t,{type:1,doc:r.doc}):e.type===0&&r.type===1?this.au=this.au.insert(t,{type:2,doc:e.doc}):K(63341,{ft:e,uu:r}):this.au=this.au.insert(t,e)}cu(){let e=[];return this.au.inorderTraversal(((t,r)=>{e.push(r)})),e}},xs=class n{constructor(e,t,r,s,i,a,o,u,l){this.query=e,this.docs=t,this.oldDocs=r,this.docChanges=s,this.mutatedKeys=i,this.fromCache=a,this.syncStateChanged=o,this.excludesMetadataChanges=u,this.hasCachedResults=l}static fromInitialDocuments(e,t,r,s,i){let a=[];return t.forEach((o=>{a.push({type:0,doc:o})})),new n(e,t,Mi.emptySet(t),a,r,s,!0,!1,i)}get hasPendingWrites(){return!this.mutatedKeys.isEmpty()}isEqual(e){if(!(this.fromCache===e.fromCache&&this.hasCachedResults===e.hasCachedResults&&this.syncStateChanged===e.syncStateChanged&&this.mutatedKeys.isEqual(e.mutatedKeys)&&Gl(this.query,e.query)&&this.docs.isEqual(e.docs)&&this.oldDocs.isEqual(e.oldDocs)))return!1;let t=this.docChanges,r=e.docChanges;if(t.length!==r.length)return!1;for(let s=0;s<t.length;s++)if(t[s].type!==r[s].type||!t[s].doc.isEqual(r[s].doc))return!1;return!0}};var am=class{constructor(){this.lu=void 0,this.Eu=[]}hu(){return this.Eu.some((e=>e.Tu()))}},om=class{constructor(){this.queries=K7(),this.onlineState="Unknown",this.Pu=new Set}terminate(){(function(t,r){let s=Q(t),i=s.queries;s.queries=K7(),i.forEach(((a,o)=>{for(let u of o.Eu)u.onError(r)}))})(this,new B(L.ABORTED,"Firestore shutting down"))}};function K7(){return new Kt((n=>R3(n)),Gl)}async function Qm(n,e){let t=Q(n),r=3,s=e.query,i=t.queries.get(s);i?!i.hu()&&e.Tu()&&(r=2):(i=new am,r=e.Tu()?0:1);try{switch(r){case 0:i.lu=await t.onListen(s,!0);break;case 1:i.lu=await t.onListen(s,!1);break;case 2:await t.onFirstRemoteStoreListen(s)}}catch(a){let o=Wm(a,`Initialization of query '${Oe(e.query)?Nn(e.query):Ja(e.query)}' failed`);return void e.onError(o)}t.queries.set(s,i),i.Eu.push(e),e.Ru(t.onlineState),i.lu&&e.Iu(i.lu)&&Jm(t)}async function Ym(n,e){let t=Q(n),r=e.query,s=3,i=t.queries.get(r);if(i){let a=i.Eu.indexOf(e);a>=0&&(i.Eu.splice(a,1),i.Eu.length===0?s=e.Tu()?0:1:!i.hu()&&e.Tu()&&(s=2))}switch(s){case 0:return t.queries.delete(r),t.onUnlisten(r,!0);case 1:return t.queries.delete(r),t.onUnlisten(r,!1);case 2:return t.onLastRemoteStoreUnlisten(r);default:return}}function Pw(n,e){let t=Q(n),r=!1;for(let s of e){let i=s.query,a=t.queries.get(i);if(a){for(let o of a.Eu)o.Iu(s)&&(r=!0);a.lu=s}}r&&Jm(t)}function Cw(n,e,t){let r=Q(n),s=r.queries.get(e);if(s)for(let i of s.Eu)i.onError(t);r.queries.delete(e)}function Jm(n){n.Pu.forEach((e=>{e.next()}))}var cm;(function(n){n.Default="default",n.Cache="cache"})(cm||(cm={}));var No=class{constructor(e,t,r){this.query=e,this.Au=t,this.Vu=!1,this.du=null,this.onlineState="Unknown",this.options=r||{}}Iu(e){if(!this.options.includeMetadataChanges){let r=[];for(let s of e.docChanges)s.type!==3&&r.push(s);e=new xs(e.query,e.docs,e.oldDocs,r,e.mutatedKeys,e.fromCache,e.syncStateChanged,!0,e.hasCachedResults)}let t=!1;return this.Vu?this.fu(e)&&(this.Au.next(e),t=!0):this.mu(e,this.onlineState)&&(this.pu(e),t=!0),this.du=e,t}onError(e){this.Au.error(e)}Ru(e){this.onlineState=e;let t=!1;return this.du&&!this.Vu&&this.mu(this.du,e)&&(this.pu(this.du),t=!0),t}mu(e,t){if(!e.fromCache||!this.Tu())return!0;let r=t!=="Offline";return(!this.options.waitForSyncWhenOnline||!r)&&(!e.docs.isEmpty()||e.hasCachedResults||t==="Offline")}fu(e){if(e.docChanges.length>0)return!0;let t=this.du&&this.du.hasPendingWrites!==e.hasPendingWrites;return!(!e.syncStateChanged&&!t)&&this.options.includeMetadataChanges===!0}pu(e){e=xs.fromInitialDocuments(e.query,e.docs,e.mutatedKeys,e.fromCache,e.hasCachedResults),this.Vu=!0,this.Au.next(e)}Tu(){return this.options.source!==cm.Cache}};var Cl=class{constructor(e){this.key=e}},Nl=class{constructor(e){this.key=e}},um=class{constructor(e,t){this.query=e,this.Ou=t,this.Mu=null,this.hasCachedResults=!1,this.current=!1,this.Nu=oe(),this.mutatedKeys=oe(),this.Lu=Oe(e)?_l(e):ql(e),this.Bu=new Mi(this.Lu)}get Uu(){return this.Ou}ku(e,t){let r=t?t.qu:new Pl,s=t?t.Bu:this.Bu,i=t?t.mutatedKeys:this.mutatedKeys,a=s,o=!1,[u,l]=this.$u(this.query,s);e.inorderTraversal(((m,y)=>{let S=s.get(m),D=L3(this.query,y)?y:null,U=!!S&&this.mutatedKeys.has(S.key),$=!!D&&(D.hasLocalMutations||this.mutatedKeys.has(D.key)&&D.hasCommittedMutations),Z=!1;S&&D?S.data.isEqual(D.data)?U!==$&&(r.track({type:3,doc:D}),Z=!0):this.Ku(S,D)||(r.track({type:2,doc:D}),Z=!0,(u&&this.Lu(D,u)>0||l&&this.Lu(D,l)<0)&&(o=!0)):!S&&D?(r.track({type:0,doc:D}),Z=!0):S&&!D&&(r.track({type:1,doc:S}),Z=!0,(u||l)&&(o=!0)),Z&&(D?(a=a.add(D),i=$?i.add(m):i.delete(m)):(a=a.delete(m),i=i.delete(m)))}));let d=this.Wu(this.query);if(d)if(Oe(this.query)){let m=[];a.forEach((D=>m.push(D)));let y=O3(this.query,m),S=new Mi(_l(this.query));for(let D of y)S=S.add(D);a.forEach((D=>{S.has(D.key)||(i=i.delete(D.key),r.track({type:1,doc:D}))})),a=S}else{let m=this.Qu(this.query);for(;a.size>d;){let y=m==="F"?a.last():a.first();a=a.delete(y.key),i=i.delete(y.key),r.track({type:1,doc:y})}}return{Bu:a,qu:r,Uo:o,mutatedKeys:i}}Wu(e){return Oe(e)?od(e)?.limit:e.limit||void 0}Qu(e){if(Oe(e)){let t=od(e);return t&&t.limit<0?"L":"F"}return e.limitType}$u(e,t){if(Oe(e)){let r=od(e)?.limit;return[t.size===r?t.last():null,null]}return[e.limitType==="F"&&t.size===this.Wu(this.query)?t.last():null,e.limitType==="L"&&t.size===this.Wu(this.query)?t.first():null]}Ku(e,t){return e.hasLocalMutations&&t.hasCommittedMutations&&!t.hasLocalMutations}applyChanges(e,t,r,s){let i=this.Bu;this.Bu=e.Bu,this.mutatedKeys=e.mutatedKeys;let a=e.qu.cu();a.sort(((d,m)=>(function(S,D){let U=$=>{switch($){case 0:return 1;case 2:case 3:return 2;case 1:return 0;default:return K(20277,{ft:$})}};return U(S)-U(D)})(d.type,m.type)||this.Lu(d.doc,m.doc))),this.Gu(r),s=s??!1;let o=t&&!s?this.zu():[],u=this.Nu.size===0&&this.current&&!s?1:0,l=u!==this.Mu;return this.Mu=u,a.length!==0||l?{snapshot:new xs(this.query,e.Bu,i,a,e.mutatedKeys,u===0,l,!1,!!r&&r.resumeToken.approximateByteSize()>0),ju:o}:{ju:o}}Ru(e){return this.current&&e==="Offline"?(this.current=!1,this.applyChanges({Bu:this.Bu,qu:new Pl,mutatedKeys:this.mutatedKeys,Uo:!1},!1)):{ju:[]}}Hu(e){return!this.Ou.has(e)&&!!this.Bu.has(e)&&!this.Bu.get(e).hasLocalMutations}Gu(e){e&&(e.addedDocuments.forEach((t=>this.Ou=this.Ou.add(t))),e.modifiedDocuments.forEach((t=>{})),e.removedDocuments.forEach((t=>this.Ou=this.Ou.delete(t))),this.current=e.current)}zu(){if(!this.current)return[];let e=this.Nu;this.Nu=oe(),this.Bu.forEach((r=>{this.Hu(r.key)&&(this.Nu=this.Nu.add(r.key))}));let t=[];return e.forEach((r=>{this.Nu.has(r)||t.push(new Nl(r))})),this.Nu.forEach((r=>{e.has(r)||t.push(new Cl(r))})),t}Ju(e){this.Ou=e.Jo,this.Nu=oe();let t=this.ku(e.documents);return this.applyChanges(t,!0)}Yu(){return xs.fromInitialDocuments(this.query,this.Bu,this.mutatedKeys,this.Mu===0,this.hasCachedResults)}},Ki="SyncEngine",lm=class{constructor(e,t,r){this.query=e,this.targetId=t,this.view=r}},hm=class{constructor(e){this.key=e,this.Zu=!1}},dm=class{constructor(e,t,r,s,i,a){this.localStore=e,this.remoteStore=t,this.eventManager=r,this.sharedClientState=s,this.currentUser=i,this.maxConcurrentLimboResolutions=a,this.Xu={},this.ec=new Kt((o=>R3(o)),Gl),this.tc=new Map,this.nc=new Set,this.rc=new be(G.comparator),this.sc=new Map,this._c=new Ro,this.oc={},this.ac=new Map,this.uc=Tr.Cs(),this.onlineState="Unknown",this.cc=void 0}get isPrimaryClient(){return this.cc===!0}};async function Nw(n,e,t=!0){let r=Ql(n),s,i=r.ec.get(e);return i?(r.sharedClientState.addLocalQueryTarget(i.targetId),s=i.view.Yu()):s=await X3(r,e,t,!0),s}async function Dw(n,e){let t=Ql(n);await X3(t,e,!0,!1)}async function X3(n,e,t,r){let s=await Tl(n.localStore,Oe(e)?e:Dt(e)),i=s.targetId,a=n.sharedClientState.addLocalQueryTarget(i,t),o;return r&&(o=await Xm(n,e,i,a==="current",s.resumeToken)),n.isPrimaryClient&&t&&Wl(n.remoteStore,s),o}async function Xm(n,e,t,r,s){n.lc=(m,y,S)=>(async function(U,$,Z,ie){let se=$.view.ku(Z);se.Uo&&(se=await Xp(U.localStore,$.query,!1).then((({documents:v})=>$.view.ku(v,se))));let Ie=ie&&ie.targetChanges.get($.targetId),Ee=ie&&ie.targetMismatches.get($.targetId)!=null,ge=$.view.applyChanges(se,U.isPrimaryClient,Ie,Ee);return fm(U,$.targetId,ge.ju),ge.snapshot})(n,m,y,S);let i=await Xp(n.localStore,e,!0),a=new um(e,i.Jo),o=a.ku(i.documents),u=uo.createSynthesizedTargetChangeForCurrentChange(t,r&&n.onlineState!=="Offline",s),l=a.applyChanges(o,n.isPrimaryClient,u);fm(n,t,l.ju);let d=new lm(e,t,a);return n.ec.set(e,d),n.tc.has(t)?n.tc.get(t).push(e):n.tc.set(t,[e]),l.snapshot}async function xw(n,e,t){let r=Q(n),s=r.ec.get(e),i=r.tc.get(s.targetId);if(i.length>1)return r.tc.set(s.targetId,i.filter((a=>!Gl(a,e)))),void r.ec.delete(e);r.isPrimaryClient?(r.sharedClientState.removeLocalQueryTarget(s.targetId),r.sharedClientState.isActiveQueryTarget(s.targetId)||await Li(r.localStore,s.targetId,!1).then((()=>{r.sharedClientState.clearQueryState(s.targetId),t&&Vi(r.remoteStore,s.targetId),Fi(r,s.targetId)})).catch(Pr)):(Fi(r,s.targetId),await Li(r.localStore,s.targetId,!0))}async function kw(n,e){let t=Q(n),r=t.ec.get(e),s=t.tc.get(r.targetId);t.isPrimaryClient&&s.length===1&&(t.sharedClientState.removeLocalQueryTarget(r.targetId),Vi(t.remoteStore,r.targetId))}async function Ow(n,e,t){let r=n2(n);try{let s=await(function(a,o){let u=Q(a),l=Ae.now(),d=o.reduce(((S,D)=>S.add(D.key)),oe()),m,y;return u.persistence.runTransaction("Locally write mutations","readwrite",(S=>{let D=We(),U=oe();return u.Qo.getEntries(S,d).next(($=>{D=$,D.forEach(((Z,ie)=>{ie.isValidDocument()||(U=U.add(Z))}))})).next((()=>u.localDocuments.getOverlayedDocuments(S,D))).next(($=>{m=$;let Z=[];for(let ie of o){let se=pE(ie,m.get(ie.key).overlayedDocument);se!=null&&Z.push(new jt(ie.key,se,C4(se.value.mapValue),Ve.exists(!0)))}return u.mutationQueue.addMutationBatch(S,l,Z,o)})).next(($=>{y=$;let Z=$.applyToLocalDocumentSet(m,U);return u.documentOverlayCache.saveOverlays(S,$.batchId,Z)}))})).then((()=>({batchId:y.batchId,changes:j4(m)})))})(r.localStore,e);r.sharedClientState.addPendingMutation(s.batchId),(function(a,o,u){let l=a.oc[a.currentUser.toKey()];l||(l=new be(re)),l=l.insert(o,u),a.oc[a.currentUser.toKey()]=l})(r,s.batchId,t),await Dr(r,s.changes),await Hi(r.remoteStore)}catch(s){let i=Wm(s,"Failed to persist write");t.reject(i)}}async function Z3(n,e){let t=Q(n);try{let r=await mw(t.localStore,e);e.targetChanges.forEach(((s,i)=>{let a=t.sc.get(i);a&&(q(s.addedDocuments.size+s.modifiedDocuments.size+s.removedDocuments.size<=1,22616),s.addedDocuments.size>0?a.Zu=!0:s.modifiedDocuments.size>0?q(a.Zu,14607):s.removedDocuments.size>0&&(q(a.Zu,42227),a.Zu=!1))})),await Dr(t,r,e)}catch(r){await Pr(r)}}function W7(n,e,t){let r=Q(n);if(r.isPrimaryClient&&t===0||!r.isPrimaryClient&&t===1){let s=[];r.ec.forEach(((i,a)=>{let o=a.view.Ru(e);o.snapshot&&s.push(o.snapshot)})),(function(a,o){let u=Q(a);u.onlineState=o;let l=!1;u.queries.forEach(((d,m)=>{for(let y of m.Eu)y.Ru(o)&&(l=!0)})),l&&Jm(u)})(r.eventManager,e),s.length&&r.Xu.zn(s),r.onlineState=e,r.isPrimaryClient&&r.sharedClientState.setOnlineState(e)}}async function Lw(n,e,t){let r=Q(n);r.sharedClientState.updateQueryState(e,"rejected",t);let s=r.sc.get(e),i=s&&s.key;if(i){let a=new be(G.comparator);a=a.insert(i,Qe.newNoDocument(i,J.min()));let o=oe().add(i),u=new Ci(J.min(),new Map,new be(re),a,We(),o);await Z3(r,u),r.rc=r.rc.remove(i),r.sc.delete(e),t2(r)}else await Li(r.localStore,e,!1).then((()=>Fi(r,e,t))).catch(Pr)}async function Vw(n,e){let t=Q(n),r=e.batch.batchId;try{let s=await pw(t.localStore,e);e2(t,r,null),Zm(t,r),t.sharedClientState.updateMutationState(r,"acknowledged"),await Dr(t,s)}catch(s){await Pr(s)}}async function Mw(n,e,t){let r=Q(n);try{let s=await(function(a,o){let u=Q(a);return u.persistence.runTransaction("Reject batch","readwrite-primary",(l=>{let d;return u.mutationQueue.lookupMutationBatch(l,o).next((m=>(q(m!==null,37113),d=m.keys(),u.mutationQueue.removeMutationBatch(l,m)))).next((()=>u.mutationQueue.performConsistencyCheck(l))).next((()=>u.documentOverlayCache.removeOverlaysForBatchId(l,d,o))).next((()=>u.localDocuments.recalculateAndSaveOverlaysForDocumentKeys(l,d))).next((()=>u.localDocuments.getDocuments(l,d)))}))})(r.localStore,e);e2(r,e,t),Zm(r,e),r.sharedClientState.updateMutationState(e,"rejected",t),await Dr(r,s)}catch(s){await Pr(s)}}function Zm(n,e){(n.ac.get(e)||[]).forEach((t=>{t.resolve()})),n.ac.delete(e)}function e2(n,e,t){let r=Q(n),s=r.oc[r.currentUser.toKey()];if(s){let i=s.get(e);i&&(t?i.reject(t):i.resolve(),s=s.remove(e)),r.oc[r.currentUser.toKey()]=s}}function Fi(n,e,t=null){n.sharedClientState.removeLocalQueryTarget(e);for(let r of n.tc.get(e))n.ec.delete(r),t&&n.Xu.Ec(r,t);n.tc.delete(e),n.isPrimaryClient&&n._c.s_(e).forEach((r=>{n._c.containsKey(r)||e9(n,r)}))}function e9(n,e){n.nc.delete(e.path.canonicalString());let t=n.rc.get(e);t!==null&&(Vi(n.remoteStore,t),n.rc=n.rc.remove(e),n.sc.delete(t),t2(n))}function fm(n,e,t){for(let r of t)r instanceof Cl?(n._c.addReference(r.key,e),Fw(n,r)):r instanceof Nl?(F(Ki,"Document no longer in limbo: "+r.key),n._c.removeReference(r.key,e),n._c.containsKey(r.key)||e9(n,r.key)):K(19791,{hc:r})}function Fw(n,e){let t=e.key,r=t.path.canonicalString();n.rc.get(t)||n.nc.has(r)||(F(Ki,"New document in limbo: "+t),n.nc.add(r),t2(n))}function t2(n){for(;n.nc.size>0&&n.rc.size<n.maxConcurrentLimboResolutions;){let e=n.nc.values().next().value;n.nc.delete(e);let t=new G(he.fromString(e)),r=n.uc.next();n.sc.set(r,new hm(t)),n.rc=n.rc.insert(t,r),Wl(n.remoteStore,new Cs(Dt(zi(t.path)),r,"TargetPurposeLimboResolution",ht.ce))}}async function Dr(n,e,t){let r=Q(n),s=[],i=[],a=[];r.ec.isEmpty()||(r.ec.forEach(((o,u)=>{a.push(r.lc(u,e,t).then((l=>{if((l||t)&&r.isPrimaryClient){let d=l?!l.fromCache:t?.targetChanges.get(u.targetId)?.current;r.sharedClientState.updateQueryState(u.targetId,d?"current":"not-current")}if(l){s.push(l);let d=Qp.vo(u.targetId,l);i.push(d)}})))})),await Promise.all(a),r.Xu.zn(s),await(async function(u,l){let d=Q(u);try{await d.persistence.runTransaction("notifyLocalViewChanges","readwrite",(m=>C.forEach(l,(y=>C.forEach(y.wo,(S=>d.persistence.referenceDelegate.addReference(m,y.targetId,S))).next((()=>C.forEach(y.bo,(S=>d.persistence.referenceDelegate.removeReference(m,y.targetId,S)))))))))}catch(m){if(!Cr(m))throw m;F(Gm,"Failed to update sequence numbers: "+m)}for(let m of l){let y=m.targetId;if(!m.fromCache){let S=d.$o.get(y),D=S.snapshotVersion,U=S.withLastLimboFreeSnapshotVersion(D);d.$o=d.$o.insert(y,U)}}})(r.localStore,i))}async function Uw(n,e){let t=Q(n);if(!t.currentUser.isEqual(e)){F(Ki,"User change. New user:",e.toKey());let r=await U3(t.localStore,e);t.currentUser=e,(function(i,a){i.ac.forEach((o=>{o.forEach((u=>{u.reject(new B(L.CANCELLED,a))}))})),i.ac.clear()})(t,"'waitForPendingWrites' promise is rejected due to a user change."),t.sharedClientState.handleUserChange(e,r.removedBatchIds,r.addedBatchIds),await Dr(t,r.zo)}}function Bw(n,e){let t=Q(n),r=t.sc.get(e);if(r&&r.Zu)return oe().add(r.key);{let s=oe(),i=t.tc.get(e);if(!i)return s;for(let a of i??[]){let o=t.ec.get(a);s=s.unionWith(o.view.Uu)}return s}}async function qw(n,e){let t=Q(n),r=await Xp(t.localStore,e.query,!0),s=e.view.Ju(r);return t.isPrimaryClient&&fm(t,e.targetId,s.ju),s}async function $w(n,e){let t=Q(n);return Zp(t.localStore,e).then((r=>Dr(t,r)))}async function zw(n,e,t,r){let s=Q(n),i=await(function(o,u){let l=Q(o),d=Q(l.mutationQueue);return l.persistence.runTransaction("Lookup mutation documents","readonly",(m=>d.ps(m,u).next((y=>y?l.localDocuments.getDocuments(m,y):C.resolve(null)))))})(s.localStore,e);i!==null?(t==="pending"?await Hi(s.remoteStore):t==="acknowledged"||t==="rejected"?(e2(s,e,r||null),Zm(s,e),(function(o,u){Q(Q(o).mutationQueue).bs(u)})(s.localStore,e)):K(6720,"Unknown batchState",{Tc:t}),await Dr(s,i)):F(Ki,"Cannot apply mutation batch with id: "+e)}async function Gw(n,e){let t=Q(n);if(Ql(t),n2(t),e===!0&&t.cc!==!0){let r=t.sharedClientState.getAllActiveQueryTargets(),s=await Q7(t,r.toArray());t.cc=!0,await sm(t.remoteStore,!0);for(let i of s)Wl(t.remoteStore,i)}else if(e===!1&&t.cc!==!1){let r=[],s=Promise.resolve();t.tc.forEach(((i,a)=>{t.sharedClientState.isLocalQueryTarget(a)?r.push(a):s=s.then((()=>(Fi(t,a),Li(t.localStore,a,!0)))),Vi(t.remoteStore,a)})),await s,await Q7(t,r),(function(a){let o=Q(a);o.sc.forEach(((u,l)=>{Vi(o.remoteStore,l)})),o._c.__(),o.sc=new Map,o.rc=new be(G.comparator)})(t),t.cc=!1,await sm(t.remoteStore,!1)}}async function Q7(n,e,t){let r=Q(n),s=[],i=[];for(let a of e){let o,u=r.tc.get(a);if(u&&u.length!==0){o=await Tl(r.localStore,Oe(u[0])?u[0]:Dt(u[0]));for(let l of u){let d=r.ec.get(l),m=await qw(r,d);m.snapshot&&i.push(m.snapshot)}}else{let l=await q3(r.localStore,a);o=await Tl(r.localStore,l),await Xm(r,t9(l),a,!1,o.resumeToken)}s.push(o)}return r.Xu.zn(i),s}function t9(n){return An(n)?n:q4(n.path,n.collectionGroup,n.orderBy,n.filters,n.limit,"F",n.startAt,n.endAt)}function Hw(n){return(function(t){return Q(Q(t).persistence).po()})(Q(n).localStore)}async function jw(n,e,t,r){let s=Q(n);if(s.cc)return void F(Ki,"Ignoring unexpected query state notification.");let i=s.tc.get(e);if(i&&i.length>0)switch(t){case"current":case"not-current":{let a;if(Oe(i[0]))switch(Cn(i[0])){case"collection_group":case"collection":a=await Zp(s.localStore,v3(i[0]));break;case"documents":a=await(function(l,d){let m=Q(l),y=oe(...al(d).map((S=>G.fromPath(S))));return m.persistence.runTransaction("Get documents for pipeline","readonly",(S=>m.Qo.getEntries(S,y))).then((S=>S))})(s.localStore,i[0]);break;default:kt(""),a=ns()}else a=await Zp(s.localStore,(function(l){return l.collectionGroup||(l.path.length%2==1?l.path.lastSegment():l.path.get(l.path.length-2))})(i[0]));let o=Ci.createSynthesizedRemoteEventForCurrentChange(e,t==="current",Ne.EMPTY_BYTE_STRING);await Dr(s,a,o);break}case"rejected":await Li(s.localStore,e,!0),Fi(s,e,r);break;default:K(64155,t)}}async function Kw(n,e,t){let r=Ql(n);if(r.cc){for(let s of e){if(r.tc.has(s)&&r.sharedClientState.isActiveQueryTarget(s)){F(Ki,"Adding an already active target "+s);continue}let i=await q3(r.localStore,s),a=await Tl(r.localStore,i);await Xm(r,t9(i),a.targetId,!1,a.resumeToken),Wl(r.remoteStore,a)}for(let s of t)r.tc.has(s)&&await Li(r.localStore,s,!1).then((()=>{Vi(r.remoteStore,s),Fi(r,s)})).catch(Pr)}}function Ql(n){let e=Q(n);return e.remoteStore.remoteSyncer.applyRemoteEvent=Z3.bind(null,e),e.remoteStore.remoteSyncer.getRemoteKeysForTarget=Bw.bind(null,e),e.remoteStore.remoteSyncer.rejectListen=Lw.bind(null,e),e.Xu.zn=Pw.bind(null,e.eventManager),e.Xu.Ec=Cw.bind(null,e.eventManager),e}function n2(n){let e=Q(n);return e.remoteStore.remoteSyncer.applySuccessfulWrite=Vw.bind(null,e),e.remoteStore.remoteSyncer.rejectFailedWrite=Mw.bind(null,e),e}var Sr=class{constructor(){this.kind="memory",this.synchronizeTabs=!1}async initialize(e){this.serializer=Uo(e.databaseInfo.databaseId),this.sharedClientState=this.Rc(e),this.persistence=this.Ic(e),await this.persistence.start(),this.localStore=this.Ac(e),this.gcScheduler=this.Vc(e,this.localStore),this.indexBackfillerScheduler=this.dc(e,this.localStore)}Vc(e,t){return null}dc(e,t){return null}Ac(e){return F3(this.persistence,new vl,e.initialUser,this.serializer)}Ic(e){return new Po(wl.C_,this.serializer)}Rc(e){return new bl}async terminate(){this.gcScheduler?.stop(),this.indexBackfillerScheduler?.stop(),this.sharedClientState.shutdown(),await this.persistence.shutdown()}};Sr.provider={build:()=>new Sr};var Dl=class extends Sr{constructor(e){super(),this.cacheSizeBytes=e}Vc(e,t){q(this.persistence.referenceDelegate instanceof Il,46915);let r=this.persistence.referenceDelegate.garbageCollector;return new Qu(r,e.asyncQueue,t)}Ic(e){let t=this.cacheSizeBytes!==void 0?It.withCacheSize(this.cacheSizeBytes):It.DEFAULT;return new Po((r=>Il.C_(r,t)),this.serializer)}},Do=class extends Sr{constructor(e,t,r){super(),this.fc=e,this.cacheSizeBytes=t,this.forceOwnership=r,this.kind="persistent",this.synchronizeTabs=!1}async initialize(e){await super.initialize(e),await this.fc.initialize(this,e),await n2(this.fc.syncEngine),await Hi(this.fc.remoteStore),await this.persistence._o((()=>(this.gcScheduler&&!this.gcScheduler.started&&this.gcScheduler.start(),this.indexBackfillerScheduler&&!this.indexBackfillerScheduler.started&&this.indexBackfillerScheduler.start(),Promise.resolve())))}Ac(e){return F3(this.persistence,new vl,e.initialUser,this.serializer)}Vc(e,t){let r=this.persistence.referenceDelegate.garbageCollector;return new Qu(r,e.asyncQueue,t)}dc(e,t){let r=new Id(t,this.persistence);return new wd(e.asyncQueue,r)}Ic(e){let t=M3(e.databaseInfo.databaseId,e.databaseInfo.persistenceKey),r=this.cacheSizeBytes!==void 0?It.withCacheSize(this.cacheSizeBytes):It.DEFAULT;return new Wp(this.synchronizeTabs,t,e.clientId,r,e.asyncQueue,j3(),Iu(),this.serializer,this.sharedClientState,!!this.forceOwnership)}Rc(e){return new bl}},xl=class extends Do{constructor(e,t){super(e,t,!1),this.fc=e,this.cacheSizeBytes=t,this.synchronizeTabs=!0}async initialize(e){await super.initialize(e);let t=this.fc.syncEngine;this.sharedClientState instanceof to&&(this.sharedClientState.syncEngine={Na:zw.bind(null,t),La:jw.bind(null,t),Ba:Kw.bind(null,t),po:Hw.bind(null,t),Ma:$w.bind(null,t)},await this.sharedClientState.start()),await this.persistence._o((async r=>{await Gw(this.fc.syncEngine,r),this.gcScheduler&&(r&&!this.gcScheduler.started?this.gcScheduler.start():r||this.gcScheduler.stop()),this.indexBackfillerScheduler&&(r&&!this.indexBackfillerScheduler.started?this.indexBackfillerScheduler.start():r||this.indexBackfillerScheduler.stop())}))}Rc(e){let t=j3();if(!to.C(t))throw new B(L.UNIMPLEMENTED,"IndexedDB persistence is only available on platforms that support LocalStorage.");let r=M3(e.databaseInfo.databaseId,e.databaseInfo.persistenceKey);return new to(t,e.asyncQueue,r,e.clientId,e.initialUser)}},br=class{async initialize(e,t){this.localStore||(this.localStore=e.localStore,this.sharedClientState=e.sharedClientState,this.datastore=this.createDatastore(t),this.remoteStore=this.createRemoteStore(t),this.eventManager=this.createEventManager(t),this.syncEngine=this.createSyncEngine(t,!e.synchronizeTabs),this.sharedClientState.onlineStateHandler=r=>W7(this.syncEngine,r,1),this.remoteStore.remoteSyncer.handleCredentialChange=Uw.bind(null,this.syncEngine),await sm(this.remoteStore,this.syncEngine.isPrimaryClient))}createEventManager(e){return(function(){return new om})()}createDatastore(e){let t=Uo(e.databaseInfo.databaseId),r=UE(e.databaseInfo);return BE(e.authCredentials,e.appCheckCredentials,r,t)}createRemoteStore(e){return(function(r,s,i,a,o){return new nm(r,s,i,a,o)})(this.localStore,this.datastore,e.asyncQueue,(t=>W7(this.syncEngine,t,0)),(function(){return ju.C()?new ju:new Kd})())}createSyncEngine(e,t){return(function(s,i,a,o,u,l,d){let m=new dm(s,i,a,o,u,l);return d&&(m.cc=!0),m})(this.localStore,this.remoteStore,this.eventManager,this.sharedClientState,e.initialUser,e.maxConcurrentLimboResolutions,t)}async terminate(){await(async function(t){let r=Q(t);F(mn,"RemoteStore shutting down."),r.tu.add(5),await $o(r),r.ru.shutdown(),r.iu.set("Unknown")})(this.remoteStore),this.datastore?.terminate(),this.eventManager?.terminate()}};br.provider={build:()=>new br};var xo=class{constructor(e){this.observer=e,this.muted=!1}next(e){this.muted||this.observer.next&&this.mc(this.observer.next,e)}error(e){this.muted||(this.observer.error?this.mc(this.observer.error,e):Be("Uncaught Error in snapshot listener:",e.toString()))}gc(){this.muted=!0}mc(e,t){setTimeout((()=>{this.muted||e(t)}),0)}};var pm=class{constructor(e){this.datastore=e,this.readVersions=new Map,this.mutations=[],this.committed=!1,this.lastTransactionError=null,this.writtenDocs=new Set}async lookup(e){if(this.ensureCommitNotCalled(),this.mutations.length>0)throw this.lastTransactionError=new B(L.INVALID_ARGUMENT,"Firestore transactions require all reads to be executed before all writes."),this.lastTransactionError;let t=await(async function(s,i){let a=Q(s),o={documents:i.map((m=>Di(a.serializer,m)))},u=await a.$t("BatchGetDocuments",a.serializer.databaseId,he.emptyPath(),o,i.length),l=new Map;u.forEach((m=>{let y=NE(a.serializer,m);l.set(y.key.toString(),y)}));let d=[];return i.forEach((m=>{let y=l.get(m.toString());q(!!y,55234,{key:m}),d.push(y)})),d})(this.datastore,e);return t.forEach((r=>this.recordVersion(r))),t}set(e,t){this.write(t.toMutation(e,this.precondition(e))),this.writtenDocs.add(e.toString())}update(e,t){try{this.write(t.toMutation(e,this.preconditionForUpdate(e)))}catch(r){this.lastTransactionError=r}this.writtenDocs.add(e.toString())}delete(e){this.write(new mr(e,this.precondition(e))),this.writtenDocs.add(e.toString())}async commit(){if(this.ensureCommitNotCalled(),this.lastTransactionError)throw this.lastTransactionError;let e=this.readVersions;this.mutations.forEach((t=>{e.delete(t.key.toString())})),e.forEach(((t,r)=>{let s=G.fromPath(r);this.mutations.push(new co(s,this.precondition(s)))})),await(async function(r,s){let i=Q(r),a={writes:s.map((o=>lo(i.serializer,o)))};await i.Bt("Commit",i.serializer.databaseId,he.emptyPath(),a)})(this.datastore,this.mutations),this.committed=!0}recordVersion(e){let t;if(e.isFoundDocument())t=e.version;else{if(!e.isNoDocument())throw K(50498,{Oc:e.constructor.name});t=J.min()}let r=this.readVersions.get(e.key.toString());if(r){if(!t.isEqual(r))throw new B(L.ABORTED,"Document version changed between two reads.")}else this.readVersions.set(e.key.toString(),t)}precondition(e){let t=this.readVersions.get(e.toString());return!this.writtenDocs.has(e.toString())&&t?t.isEqual(J.min())?Ve.exists(!1):Ve.updateTime(t):Ve.none()}preconditionForUpdate(e){let t=this.readVersions.get(e.toString());if(!this.writtenDocs.has(e.toString())&&t){if(t.isEqual(J.min()))throw new B(L.INVALID_ARGUMENT,"Can't update a document that doesn't exist.");return Ve.updateTime(t)}return Ve.exists(!0)}write(e){this.ensureCommitNotCalled(),this.mutations.push(e)}ensureCommitNotCalled(){}};var mm=class{constructor(e,t,r,s,i){this.asyncQueue=e,this.datastore=t,this.options=r,this.updateFunction=s,this.deferred=i,this.Mc=r.maxAttempts,this.xn=new fo(this.asyncQueue,"transaction_retry")}Nc(){this.Mc-=1,this.Lc()}Lc(){this.xn.mn((async()=>{let e=new pm(this.datastore),t=this.Bc(e);t&&t.then((r=>{this.asyncQueue.enqueueAndForget((()=>e.commit().then((()=>{this.deferred.resolve(r)})).catch((s=>{this.Uc(s)}))))})).catch((r=>{this.Uc(r)}))}))}Bc(e){try{let t=this.updateFunction(e);return!Lo(t)&&t.catch&&t.then?t:(this.deferred.reject(Error("Transaction callback must return a Promise")),null)}catch(t){return this.deferred.reject(t),null}}Uc(e){this.Mc>0&&this.kc(e)?(this.Mc-=1,this.asyncQueue.enqueueAndForget((()=>(this.Lc(),Promise.resolve())))):this.deferred.reject(e)}kc(e){if(e?.name==="FirebaseError"){let t=e.code;return t==="aborted"||t==="failed-precondition"||t==="already-exists"||!z4(t)}return!1}};var Rr="FirestoreClient",gm=class{constructor(e,t,r,s,i){this.authCredentials=e,this.appCheckCredentials=t,this.asyncQueue=r,this._databaseInfo=s,this.user=Xe.UNAUTHENTICATED,this.clientId=gs.newId(),this.authCredentialListener=()=>Promise.resolve(),this.appCheckCredentialListener=()=>Promise.resolve(),this._uninitializedComponentsProvider=i,this.authCredentials.start(r,(async a=>{F(Rr,"Received user=",a.uid),await this.authCredentialListener(a),this.user=a})),this.appCheckCredentials.start(r,(a=>(F(Rr,"Received new app check token=",a),this.appCheckCredentialListener(a,this.user))))}get configuration(){return{asyncQueue:this.asyncQueue,databaseInfo:this._databaseInfo,clientId:this.clientId,authCredentials:this.authCredentials,appCheckCredentials:this.appCheckCredentials,initialUser:this.user,maxConcurrentLimboResolutions:100}}setCredentialChangeListener(e){this.authCredentialListener=e}setAppCheckTokenChangeListener(e){this.appCheckCredentialListener=e}terminate(){this.asyncQueue.enterRestrictedMode();let e=new Nt;return this.asyncQueue.enqueueAndForgetEvenWhileRestricted((async()=>{try{this._onlineComponents&&await this._onlineComponents.terminate(),this._offlineComponents&&await this._offlineComponents.terminate(),this.authCredentials.shutdown(),this.appCheckCredentials.shutdown(),e.resolve()}catch(t){let r=Wm(t,"Failed to shutdown persistence");e.reject(r)}})),e.promise}};async function dd(n,e){n.asyncQueue.verifyOperationInProgress(),F(Rr,"Initializing OfflineComponentProvider");let t=n.configuration;await e.initialize(t);let r=t.initialUser;n.setCredentialChangeListener((async s=>{r.isEqual(s)||(await U3(e.localStore,s),r=s)})),e.persistence.setDatabaseDeletedListener((()=>n.terminate())),n._offlineComponents=e}async function Y7(n,e){n.asyncQueue.verifyOperationInProgress();let t=await Ww(n);F(Rr,"Initializing OnlineComponentProvider"),await e.initialize(t,n.configuration),n.setCredentialChangeListener((r=>j7(e.remoteStore,r))),n.setAppCheckTokenChangeListener(((r,s)=>j7(e.remoteStore,s))),n._onlineComponents=e}async function Ww(n){if(!n._offlineComponents)if(n._uninitializedComponentsProvider){F(Rr,"Using user provided OfflineComponentProvider");try{await dd(n,n._uninitializedComponentsProvider._offline)}catch(e){let t=e;if(!(function(s){return s.name==="FirebaseError"?s.code===L.FAILED_PRECONDITION||s.code===L.UNIMPLEMENTED:!(typeof DOMException<"u"&&s instanceof DOMException)||s.code===22||s.code===20||s.code===11})(t))throw t;kt("Error using user provided cache. Falling back to memory cache: "+t),await dd(n,new Sr)}}else F(Rr,"Using default OfflineComponentProvider"),await dd(n,new Dl(void 0));return n._offlineComponents}async function r2(n){return n._onlineComponents||(n._uninitializedComponentsProvider?(F(Rr,"Using user provided OnlineComponentProvider"),await Y7(n,n._uninitializedComponentsProvider._online)):(F(Rr,"Using default OnlineComponentProvider"),await Y7(n,new br))),n._onlineComponents}function Qw(n){return r2(n).then((e=>e.syncEngine))}function Yw(n){return r2(n).then((e=>e.datastore))}async function kl(n){let e=await r2(n),t=e.eventManager;return t.onListen=Nw.bind(null,e.syncEngine),t.onUnlisten=xw.bind(null,e.syncEngine),t.onFirstRemoteStoreListen=Dw.bind(null,e.syncEngine),t.onLastRemoteStoreUnlisten=kw.bind(null,e.syncEngine),t}function n9(n,e,t,r){let s=new xo(r),i=new No(e,s,t);return n.asyncQueue.enqueueAndForget((async()=>Qm(await kl(n),i))),()=>{s.gc(),n.asyncQueue.enqueueAndForget((async()=>Ym(await kl(n),i)))}}function s2(n,e,t={}){let r=new Nt;return n.asyncQueue.enqueueAndForget((async()=>(function(i,a,o,u,l){let d=new xo({next:y=>{d.gc(),a.enqueueAndForget((()=>Ym(i,m)));let S=y.docs.has(o);!S&&y.fromCache?l.reject(new B(L.UNAVAILABLE,"Failed to get document because the client is offline.")):S&&y.fromCache&&u&&u.source==="server"?l.reject(new B(L.UNAVAILABLE,'Failed to get document from server. (However, this document does exist in the local cache. Run again without setting source to "server" to retrieve the cached document.)')):l.resolve(y)},error:y=>l.reject(y)}),m=new No(zi(o.path),d,{includeMetadataChanges:!0,waitForSyncWhenOnline:!0});return Qm(i,m)})(await kl(n),n.asyncQueue,e,t,r))),r.promise}function r9(n,e,t={}){let r=new Nt;return n.asyncQueue.enqueueAndForget((async()=>(function(i,a,o,u,l){let d=new xo({next:y=>{d.gc(),a.enqueueAndForget((()=>Ym(i,m))),y.fromCache&&u.source==="server"?l.reject(new B(L.UNAVAILABLE,'Failed to get documents from server. (However, these documents may exist in the local cache. Run again without setting source to "server" to retrieve the cached documents.)')):l.resolve(y)},error:y=>l.reject(y)}),m=new No(o instanceof ff?iw(o):o,d,{includeMetadataChanges:!0,waitForSyncWhenOnline:!0});return Qm(i,m)})(await kl(n),n.asyncQueue,e,t,r))),r.promise}function s9(n,e){let t=new Nt;return n.asyncQueue.enqueueAndForget((async()=>Ow(await Qw(n),e,t))),t.promise}function i9(n,e,t){let r=new Nt;return n.asyncQueue.enqueueAndForget((async()=>{let s=await Yw(n);new mm(n.asyncQueue,s,t,e,r).Nc()})),r.promise}var J7="AsyncQueue",Ol=class{constructor(e=Promise.resolve()){this.qc=[],this.$c=!1,this.Kc=[],this.Wc=null,this.Qc=!1,this.Gc=!1,this.zc=[],this.xn=new fo(this,"async_queue_retry"),this.jc=()=>{let r=Iu();r&&F(J7,"Visibility state changed to "+r.visibilityState),this.xn.gn()},this.Hc=e;let t=Iu();t&&typeof t.addEventListener=="function"&&t.addEventListener("visibilitychange",this.jc)}get isShuttingDown(){return this.$c}enqueueAndForget(e){this.enqueue(e)}enqueueAndForgetEvenWhileRestricted(e){this.Jc(),this.Yc(e)}enterRestrictedMode(e){if(!this.$c){this.$c=!0,this.Gc=e||!1;let t=Iu();t&&typeof t.removeEventListener=="function"&&t.removeEventListener("visibilitychange",this.jc)}}enqueue(e){if(this.Jc(),this.$c)return new Promise((()=>{}));let t=new Nt;return this.Yc((()=>this.$c&&this.Gc?Promise.resolve():(e().then(t.resolve,t.reject),t.promise))).then((()=>t.promise))}enqueueRetryable(e){this.enqueueAndForget((()=>(this.qc.push(e),this.Zc())))}async Zc(){if(this.qc.length!==0){try{await this.qc[0](),this.qc.shift(),this.xn.reset()}catch(e){if(!Cr(e))throw e;F(J7,"Operation failed with retryable error: "+e)}this.qc.length>0&&this.xn.mn((()=>this.Zc()))}}Yc(e){let t=this.Hc.then((()=>(this.Qc=!0,e().catch((r=>{throw this.Wc=r,this.Qc=!1,Be("INTERNAL UNHANDLED ERROR: ",X7(r)),r})).then((r=>(this.Qc=!1,r))))));return this.Hc=t,t}enqueueAfterDelay(e,t,r){this.Jc(),this.zc.indexOf(e)>-1&&(t=0);let s=im.createAndSchedule(this,e,t,r,(i=>this.Xc(i)));return this.Kc.push(s),s}Jc(){this.Wc&&K(47125,{el:X7(this.Wc)})}verifyOperationInProgress(){}async tl(){let e;do e=this.Hc,await e;while(e!==this.Hc)}nl(e){for(let t of this.Kc)if(t.timerId===e)return!0;return!1}rl(e){return this.tl().then((()=>{this.Kc.sort(((t,r)=>t.targetTimeMs-r.targetTimeMs));for(let t of this.Kc)if(t.skipDelay(),e!=="all"&&t.timerId===e)break;return this.tl()}))}il(e){this.zc.push(e)}Xc(e){let t=this.Kc.indexOf(e);this.Kc.splice(t,1)}};function X7(n){let e=n.message||"";return n.stack&&(e=n.stack.includes(n.message)?n.stack:n.message+`
-`+n.stack),e}var yt=class extends po{constructor(e,t,r,s){super(e,t,r,s),this.type="firestore",this._queue=new Ol,this._persistenceKey=s?.name||"[DEFAULT]"}async _terminate(){if(this._firestoreClient){let e=this._firestoreClient.terminate();this._queue=new Ol(e),this._firestoreClient=void 0,await e}}};function i2(n,e,t){t||(t=Lu);let r=Ea(n,"firestore");if(r.isInitialized(t)){let s=r.getImmediate({identifier:t}),i=r.getOptions(t);if(Bt(i,e))return s;throw new B(L.FAILED_PRECONDITION,"initializeFirestore() has already been called with different options. To avoid this error, call initializeFirestore() with the same options as when it was originally called, or call getFirestore() to return the already initialized instance.")}if(e.cacheSizeBytes!==void 0&&e.localCache!==void 0)throw new B(L.INVALID_ARGUMENT,"cache and cacheSizeBytes cannot be specified at the same time as cacheSizeBytes willbe deprecated. Instead, specify the cache size in the cache object");if(e.cacheSizeBytes!==void 0&&e.cacheSizeBytes!==-1&&e.cacheSizeBytes<d3)throw new B(L.INVALID_ARGUMENT,"cacheSizeBytes must be at least 1048576");return e.host&&Gr(e.host)&&Ec(e.host),r.initialize({options:e,instanceIdentifier:t})}function Fn(n){if(n._terminated)throw new B(L.FAILED_PRECONDITION,"The client has already been terminated.");return n._firestoreClient||Jw(n),n._firestoreClient}function Jw(n){let e=n._freezeSettings(),t=$E(n._databaseId,n._app?.options.appId||"",n._persistenceKey,n._app?.options.apiKey,e);n._componentsProvider||e.localCache?._offlineComponentProvider&&e.localCache?._onlineComponentProvider&&(n._componentsProvider={_offline:e.localCache._offlineComponentProvider,_online:e.localCache._onlineComponentProvider}),n._firestoreClient=new gm(n._authCredentials,n._appCheckCredentials,n._queue,t,n._componentsProvider&&(function(s){let i=s?._online.build();return{_offline:s?._offline.build(i),_online:i}})(n._componentsProvider))}var Ui=class{convertValue(e,t="none"){switch(je(e)){case 0:return null;case 1:return e.booleanValue;case 2:return Se(e.integerValue||e.doubleValue);case 3:return this.convertTimestamp(e.timestampValue);case 4:return this.convertServerTimestamp(e,t);case 5:return e.stringValue;case 6:return this.convertBytes(xn(e.bytesValue));case 7:return this.convertReference(e.referenceValue);case 8:return this.convertGeoPoint(e.geoPointValue);case 9:return this.convertArray(e.arrayValue,t);case 11:return this.convertObject(e.mapValue,t);case 10:return this.convertVectorValue(e.mapValue);default:throw K(62114,{value:e})}}convertObject(e,t){return this.convertObjectMap(e.fields,t)}convertObjectMap(e,t="none"){let r={};return Nr(e,((s,i)=>{r[s]=this.convertValue(i,t)})),r}convertVectorValue(e){let t=e.fields?.[Es].arrayValue?.values?.map((r=>Se(r.doubleValue)));return new xt(t)}convertGeoPoint(e){return new Rn(Se(e.latitude),Se(e.longitude))}convertArray(e,t){return(e.values||[]).map((r=>this.convertValue(r,t)))}convertServerTimestamp(e,t){switch(t){case"previous":let r=Fo(e);return r==null?null:this.convertValue(r,t);case"estimate":return this.convertTimestamp(Ai(e));default:return null}}convertTimestamp(e){let t=Dn(e);return new Ae(t.seconds,t.nanos)}convertDocumentKey(e,t){let r=he.fromString(e);q(a3(r),9688,{name:e});let s=new ys(r.get(1),r.get(3)),i=new G(r.popFirst(5));return s.isEqual(t)||Be(`Document ${i} contains a document reference within a different database (${s.projectId}/${s.database}) which is not supported. It will be treated as a reference in the current database (${t.projectId}/${t.database}) instead.`),i}};var ks=class extends Ui{constructor(e){super(),this.firestore=e}convertBytes(e){return new Ht(e)}convertReference(e){let t=this.convertDocumentKey(e,this.firestore._databaseId);return new Ce(this.firestore,null,t)}};var a9="@firebase/firestore",o9="4.16.0";function c9(n){return(function(t,r){if(typeof t!="object"||t===null)return!1;let s=t;for(let i of r)if(i in s&&typeof s[i]=="function")return!0;return!1})(n,["next","error","complete"])}var Qi=class{constructor(e,t,r,s,i){this._firestore=e,this._userDataWriter=t,this._key=r,this._document=s,this._converter=i}get id(){return this._key.path.lastSegment()}get ref(){return new Ce(this._firestore,this._converter,this._key)}exists(){return this._document!==null}data(){if(this._document){if(this._converter){let e=new a2(this._firestore,this._userDataWriter,this._key,this._document,null);return this._converter.fromFirestore(e)}return this._userDataWriter.convertValue(this._document.data.value)}}_fieldsProto(){return this._document?.data.clone().value.mapValue.fields??void 0}get(e){if(this._document){let t=this._document.data.field(On("DocumentSnapshot.get",e));if(t!==null)return this._userDataWriter.convertValue(t)}}},a2=class extends Qi{data(){return super.data()}};function h9(n){if(n.limitType==="L"&&n.explicitOrderBy.length===0)throw new B(L.UNIMPLEMENTED,"limitToLast() queries require specifying at least one orderBy() clause")}var zo=class{},Yl=class extends zo{};function _2(n,e,...t){let r=[];e instanceof zo&&r.push(e),r=r.concat(t),(function(i){let a=i.filter((u=>u instanceof c2)).length,o=i.filter((u=>u instanceof o2)).length;if(a>1||a>0&&o>0)throw new B(L.INVALID_ARGUMENT,"InvalidQuery. When using composite filters, you cannot use more than one filter at the top level. Consider nesting the multiple filters within an `and(...)` statement. For example: change `query(query, where(...), or(...))` to `query(query, and(where(...), or(...)))`.")})(r);for(let s of r)n=s._apply(n);return n}var o2=class n extends Yl{constructor(e,t,r){super(),this._field=e,this._op=t,this._value=r,this.type="where"}static _create(e,t,r){return new n(e,t,r)}_apply(e){let t=this._parse(e);return d9(e._query,t),new dn(e.firestore,e.converter,Ul(e._query,t))}_parse(e){let t=Os(e.firestore);return(function(i,a,o,u,l,d,m){let y;if(l.isKeyField()){if(d==="array-contains"||d==="array-contains-any")throw new B(L.INVALID_ARGUMENT,`Invalid Query. You can't perform '${d}' queries on documentId().`);if(d==="in"||d==="not-in"){l9(m,d);let D=[];for(let U of m)D.push(u9(u,i,U));y={arrayValue:{values:D}}}else y=u9(u,i,m)}else d!=="in"&&d!=="not-in"&&d!=="array-contains-any"||l9(m,d),y=m3(o,a,m,d==="in"||d==="not-in");return de.create(l,d,y)})(e._query,"where",t,e.firestore._databaseId,this._field,this._op,this._value)}};var c2=class n extends zo{constructor(e,t){super(),this.type=e,this._queryConstraints=t}static _create(e,t){return new n(e,t)}_parse(e){let t=this._queryConstraints.map((r=>r._parse(e))).filter((r=>r.getFilters().length>0));return t.length===1?t[0]:_e.create(t,this._getOperator())}_apply(e){let t=this._parse(e);return t.getFilters().length===0?e:((function(s,i){let a=s,o=i.getFlattenedFilters();for(let u of o)d9(a,u),a=Ul(a,u)})(e._query,t),new dn(e.firestore,e.converter,Ul(e._query,t)))}_getQueryConstraints(){return this._queryConstraints}_getOperator(){return this.type==="and"?"and":"or"}};var u2=class n extends Yl{constructor(e,t){super(),this._field=e,this._direction=t,this.type="orderBy"}static _create(e,t){return new n(e,t)}_apply(e){let t=(function(s,i,a){if(s.startAt!==null)throw new B(L.INVALID_ARGUMENT,"Invalid query. You must not call startAt() or startAfter() before calling orderBy().");if(s.endAt!==null)throw new B(L.INVALID_ARGUMENT,"Invalid query. You must not call endAt() or endBefore() before calling orderBy().");return new gr(i,a)})(e._query,this._field,this._direction);return new dn(e.firestore,e.converter,$4(e._query,t))}};function y2(n,e="asc"){let t=e,r=On("orderBy",n);return u2._create(r,t)}function u9(n,e,t){if(typeof(t=Te(t))=="string"){if(t==="")throw new B(L.INVALID_ARGUMENT,"Invalid query. When querying with documentId(), you must provide a valid document ID, but it was an empty string.");if(!Dm(e)&&t.indexOf("/")!==-1)throw new B(L.INVALID_ARGUMENT,`Invalid query. When querying a collection by documentId(), you must provide a plain document ID, but '${t}' contains a '/' character.`);let r=e.path.child(he.fromString(t));if(!G.isDocumentKey(r))throw new B(L.INVALID_ARGUMENT,`Invalid query. When querying a collection group by documentId(), the value provided must result in a valid document path, but '${r}' is not because it has an odd number of segments (${r.length}).`);return $i(n,new G(r))}if(t instanceof Ce)return $i(n,t._key);throw new B(L.INVALID_ARGUMENT,`Invalid query. When querying with documentId(), you must provide a valid string or a DocumentReference, but it was: ${Oo(t)}.`)}function l9(n,e){if(!Array.isArray(n)||n.length===0)throw new B(L.INVALID_ARGUMENT,`Invalid Query. A non-empty array is required for '${e.toString()}' filters.`)}function d9(n,e){let t=(function(s,i){for(let a of s)for(let o of a.getFlattenedFilters())if(i.indexOf(o.op)>=0)return o.op;return null})(n.filters,(function(s){switch(s){case"!=":return["!=","not-in"];case"array-contains-any":case"in":return["not-in"];case"not-in":return["array-contains-any","in","not-in","!="];default:return[]}})(e.op));if(t!==null)throw t===e.op?new B(L.INVALID_ARGUMENT,`Invalid query. You cannot use more than one '${e.op.toString()}' filter.`):new B(L.INVALID_ARGUMENT,`Invalid query. You cannot use '${e.op.toString()}' filters with '${t.toString()}' filters.`)}function Jl(n,e,t){let r;return r=n?t&&(t.merge||t.mergeFields)?n.toFirestore(e,t):n.toFirestore(e):e,r}var l2=class extends Ui{constructor(e){super(),this.firestore=e}convertBytes(e){return new Ht(e)}convertReference(e){let t=this.convertDocumentKey(e,this.firestore._databaseId);return new Ce(this.firestore,null,t)}};var h2=class{constructor(e){let t;this.kind="persistent",e?.tabManager?(e.tabManager._initialize(e),t=e.tabManager):(t=tI(void 0),t._initialize(e)),this._onlineComponentProvider=t._onlineComponentProvider,this._offlineComponentProvider=t._offlineComponentProvider}toJSON(){return{kind:this.kind}}};function f9(n){return new h2(n)}var d2=class{constructor(e){this.forceOwnership=e,this.kind="persistentSingleTab"}toJSON(){return{kind:this.kind}}_initialize(e){this._onlineComponentProvider=br.provider,this._offlineComponentProvider={build:t=>new Do(t,e?.cacheSizeBytes,this.forceOwnership)}}},f2=class{constructor(){this.kind="PersistentMultipleTab"}toJSON(){return{kind:this.kind}}_initialize(e){this._onlineComponentProvider=br.provider,this._offlineComponentProvider={build:t=>new xl(t,e?.cacheSizeBytes)}}};function tI(n){return new d2(n?.forceOwnership)}function p9(){return new f2}var xr=class{constructor(e,t){this.hasPendingWrites=e,this.fromCache=t}isEqual(e){return this.hasPendingWrites===e.hasPendingWrites&&this.fromCache===e.fromCache}},Or=class n extends Qi{constructor(e,t,r,s,i,a){super(e,t,r,s,a),this._firestore=e,this._firestoreImpl=e,this.metadata=i}exists(){return super.exists()}data(e={}){if(this._document){if(this._converter){let t=new Wi(this._firestore,this._userDataWriter,this._key,this._document,this.metadata,null);return this._converter.fromFirestore(t,e)}return this._userDataWriter.convertValue(this._document.data.value,e.serverTimestamps)}}get(e,t={}){if(this._document){let r=this._document.data.field(On("DocumentSnapshot.get",e));if(r!==null)return this._userDataWriter.convertValue(r,t.serverTimestamps)}}toJSON(){if(this.metadata.hasPendingWrites)throw new B(L.FAILED_PRECONDITION,"DocumentSnapshot.toJSON() attempted to serialize a document with pending writes. Await waitForPendingWrites() before invoking toJSON().");let e=this._document,t={};return t.type=n._jsonSchemaVersion,t.bundle="",t.bundleSource="DocumentSnapshot",t.bundleName=this._key.toString(),!e||!e.isValidDocument()||!e.isFoundDocument()?t:(this._userDataWriter.convertObjectMap(e.data.value.mapValue.fields,"previous"),t.bundle=(this._firestore,this.ref.path,"NOT SUPPORTED"),t)}};Or._jsonSchemaVersion="firestore/documentSnapshot/1.0",Or._jsonSchema={type:qe("string",Or._jsonSchemaVersion),bundleSource:qe("string","DocumentSnapshot"),bundleName:qe("string"),bundle:qe("string")};var Wi=class extends Or{data(e={}){return super.data(e)}},Vs=class n{constructor(e,t,r,s){this._firestore=e,this._userDataWriter=t,this._snapshot=s,this.metadata=new xr(s.hasPendingWrites,s.fromCache),this.query=r}get docs(){let e=[];return this.forEach((t=>e.push(t))),e}get size(){return this._snapshot.docs.size}get empty(){return this.size===0}forEach(e,t){this._snapshot.docs.forEach((r=>{e.call(t,new Wi(this._firestore,this._userDataWriter,r.key,r,new xr(this._snapshot.mutatedKeys.has(r.key),this._snapshot.fromCache),this.query.converter))}))}docChanges(e={}){let t=!!e.includeMetadataChanges;if(t&&this._snapshot.excludesMetadataChanges)throw new B(L.INVALID_ARGUMENT,"To include metadata changes with your document changes, you must also pass { includeMetadataChanges:true } to onSnapshot().");return this._cachedChanges&&this._cachedChangesIncludeMetadataChanges===t||(this._cachedChanges=(function(s,i){if(s._snapshot.oldDocs.isEmpty()){let a=0;return s._snapshot.docChanges.map((o=>{Oe(s._snapshot.query)?_l(s._snapshot.query):ql(s.query._query);let u=new Wi(s._firestore,s._userDataWriter,o.doc.key,o.doc,new xr(s._snapshot.mutatedKeys.has(o.doc.key),s._snapshot.fromCache),s.query.converter);return o.doc,{type:"added",doc:u,oldIndex:-1,newIndex:a++}}))}{let a=s._snapshot.oldDocs;return s._snapshot.docChanges.filter((o=>i||o.type!==3)).map((o=>{let u=new Wi(s._firestore,s._userDataWriter,o.doc.key,o.doc,new xr(s._snapshot.mutatedKeys.has(o.doc.key),s._snapshot.fromCache),s.query.converter),l=-1,d=-1;return o.type!==0&&(l=a.indexOf(o.doc.key),a=a.delete(o.doc.key)),o.type!==1&&(a=a.add(o.doc),d=a.indexOf(o.doc.key)),{type:nI(o.type),doc:u,oldIndex:l,newIndex:d}}))}})(this,t),this._cachedChangesIncludeMetadataChanges=t),this._cachedChanges}toJSON(){if(this.metadata.hasPendingWrites)throw new B(L.FAILED_PRECONDITION,"QuerySnapshot.toJSON() attempted to serialize a document with pending writes. Await waitForPendingWrites() before invoking toJSON().");let e={};e.type=n._jsonSchemaVersion,e.bundleSource="QuerySnapshot",e.bundleName=gs.newId(),this._firestore._databaseId.database,this._firestore._databaseId.projectId;let t=[],r=[],s=[];return this.docs.forEach((i=>{i._document!==null&&(t.push(i._document),r.push(this._userDataWriter.convertObjectMap(i._document.data.value.mapValue.fields,"previous")),s.push(i.ref.path))})),e.bundle=(this._firestore,this.query._query,e.bundleName,"NOT SUPPORTED"),e}};function nI(n){switch(n){case 0:return"added";case 2:case 3:return"modified";case 1:return"removed";default:return K(61501,{type:n})}}Vs._jsonSchemaVersion="firestore/querySnapshot/1.0",Vs._jsonSchema={type:qe("string",Vs._jsonSchemaVersion),bundleSource:qe("string","QuerySnapshot"),bundleName:qe("string"),bundle:qe("string")};var rI={maxAttempts:5};var p2=class{constructor(e,t){this._firestore=e,this._commitHandler=t,this._mutations=[],this._committed=!1,this._dataReader=Os(e)}set(e,t,r){this._verifyNotCommitted();let s=kr(e,this._firestore),i=Jl(s.converter,t,r),a=Bo(this._dataReader,"WriteBatch.set",s._key,i,s.converter!==null,r);return this._mutations.push(a.toMutation(s._key,Ve.none())),this}update(e,t,r,...s){this._verifyNotCommitted();let i=kr(e,this._firestore),a;return a=typeof(t=Te(t))=="string"||t instanceof hn?zl(this._dataReader,"WriteBatch.update",i._key,t,r,s):$l(this._dataReader,"WriteBatch.update",i._key,t),this._mutations.push(a.toMutation(i._key,Ve.exists(!0))),this}delete(e){this._verifyNotCommitted();let t=kr(e,this._firestore);return this._mutations=this._mutations.concat(new mr(t._key,Ve.none())),this}commit(){return this._verifyNotCommitted(),this._committed=!0,this._mutations.length>0?this._commitHandler(this._mutations):Promise.resolve()}_verifyNotCommitted(){if(this._committed)throw new B(L.FAILED_PRECONDITION,"A write batch can no longer be used after commit() has been called.")}};function kr(n,e){if((n=Te(n)).firestore!==e)throw new B(L.INVALID_ARGUMENT,"Provided document reference is from a different Firestore instance.");return n}var m2=class{constructor(e,t){this._firestore=e,this._transaction=t,this._dataReader=Os(e)}get(e){let t=kr(e,this._firestore),r=new l2(this._firestore);return this._transaction.lookup([t._key]).then((s=>{if(!s||s.length!==1)return K(24041);let i=s[0];if(i.isFoundDocument())return new Qi(this._firestore,r,i.key,i,t.converter);if(i.isNoDocument())return new Qi(this._firestore,r,t._key,null,t.converter);throw K(18433,{doc:i})}))}set(e,t,r){let s=kr(e,this._firestore),i=Jl(s.converter,t,r),a=Bo(this._dataReader,"Transaction.set",s._key,i,s.converter!==null,r);return this._transaction.set(s._key,a),this}update(e,t,r,...s){let i=kr(e,this._firestore),a;return a=typeof(t=Te(t))=="string"||t instanceof hn?zl(this._dataReader,"Transaction.update",i._key,t,r,s):$l(this._dataReader,"Transaction.update",i._key,t),this._transaction.update(i._key,a),this}delete(e){let t=kr(e,this._firestore);return this._transaction.delete(t._key),this}};var g2=class extends m2{constructor(e,t){super(e,t),this._firestore=e}get(e){let t=kr(e,this._firestore),r=new ks(this._firestore);return super.get(e).then((s=>new Or(this._firestore,r,t._key,s._document,new xr(!1,!1),t.converter)))}};function m9(n,e,t){n=rt(n,yt);let r={...rI,...t};(function(a){if(a.maxAttempts<1)throw new B(L.INVALID_ARGUMENT,"Max attempts must be at least 1")})(r);let s=Fn(n);return i9(s,(i=>e(new g2(n,i))),r)}function Xl(n){n=rt(n,Ce);let e=rt(n.firestore,yt),t=Fn(e);return s2(t,n._key).then((r=>v2(e,n,r)))}function Go(n){n=rt(n,Ce);let e=rt(n.firestore,yt),t=Fn(e);return s2(t,n._key,{source:"server"}).then((r=>v2(e,n,r)))}function E2(n){n=rt(n,dn);let e=rt(n.firestore,yt),t=Fn(e),r=new ks(e);return h9(n._query),r9(t,n._query).then((s=>new Vs(e,r,n,s)))}function w2(n,e,t){n=rt(n,Ce);let r=rt(n.firestore,yt),s=Jl(n.converter,e,t),i=Os(r);return Zl(r,[Bo(i,"setDoc",n._key,s,n.converter!==null,t).toMutation(n._key,Ve.none())])}function Ho(n,e,t,...r){n=rt(n,Ce);let s=rt(n.firestore,yt),i=Os(s),a;return a=typeof(e=Te(e))=="string"||e instanceof hn?zl(i,"updateDoc",n._key,e,t,r):$l(i,"updateDoc",n._key,e),Zl(s,[a.toMutation(n._key,Ve.exists(!0))])}function g9(n,e){let t=rt(n.firestore,yt),r=Fe(n),s=Jl(n.converter,e),i=Os(n.firestore);return Zl(t,[Bo(i,"addDoc",r._key,s,n.converter!==null,{}).toMutation(r._key,Ve.exists(!1))]).then((()=>r))}function I2(n,...e){n=Te(n);let t={includeMetadataChanges:!1,source:"default"},r=0;typeof e[r]!="object"||c9(e[r])||(t=e[r++]);let s={includeMetadataChanges:t.includeMetadataChanges,source:t.source};if(c9(e[r])){let l=e[r];e[r]=l.next?.bind(l),e[r+1]=l.error?.bind(l),e[r+2]=l.complete?.bind(l)}let i,a,o;if(n instanceof Ce)a=rt(n.firestore,yt),o=zi(n._key.path),i={next:l=>{e[r]&&e[r](v2(a,n,l))},error:e[r+1],complete:e[r+2]};else{let l=rt(n,dn);a=rt(l.firestore,yt),o=l._query;let d=new ks(a);i={next:m=>{e[r]&&e[r](new Vs(a,d,l,m))},error:e[r+1],complete:e[r+2]},h9(n._query)}let u=Fn(a);return n9(u,o,s,i)}function Zl(n,e){let t=Fn(n);return s9(t,e)}function v2(n,e,t){let r=t.docs.get(e._key),s=new ks(n);return new Or(n,s,e._key,r,new xr(t.hasPendingWrites,t.fromCache),e.converter)}function T2(n){return n=rt(n,yt),Fn(n),new p2(n,(e=>Zl(n,e)))}(function(e,t=!0){Z7(Yn),Qn(new Lt("firestore",((r,{instanceIdentifier:s,options:i})=>{let a=r.getProvider("app").getImmediate(),o=new yt(new Tu(r.getProvider("auth-internal")),new Su(a,r.getProvider("app-check-internal")),S4(a,s),a);return i={useFetchStreams:t,...i},o._setSettings(i),o}),"PUBLIC").setMultipleInstances(!0)),qt(a9,o9,e),qt(a9,o9,"esm2020")})();var sI={apiKey:"AIzaSyA-5mCIkzfgg0qBB4btEM9F0YPfSbPhfcQ",authDomain:"nomina-23755.firebaseapp.com",projectId:"nomina-23755",storageBucket:"nomina-23755.firebasestorage.app",messagingSenderId:"1070622502243",appId:"1:1070622502243:web:4fa1253837b3881711f756"},v9="6zJhAeRF9JRAilw6yvQQvLiN8bc2",S2=document.body.dataset.entry||"device",iI="50664305227",_9=!1,Yi="firebase-completa-v1.2.0-series",b2="numina_github_pages_data_v1",y9="numina_admin_device_id_v1",R2="numina_admin_device_name_v1",x2="numina_pin_failures_",T9=["campaigns","sales","results","deliveries"],aI=S2==="admin"?"numina-admin":"numina-device",A9=n1(sI,aI),st=M1(A9),Pe=i2(A9,{localCache:f9({tabManager:p9()})});k1(st,tu).catch(console.error);var O=n=>document.querySelector(n),nh=n=>Array.from(document.querySelectorAll(n)),R={user:null,admin:!1,actor:null,device:null,request:null,lease:null,unlocked:!1,pinMode:"unlock",activeView:"dashboard",deferredInstallPrompt:null,data:oI(),collectionLoaded:new Set,pendingByCollection:{},dataUnsubs:[],accessUnsub:null,leaseTimer:null,adminLoaded:!1,writeBusy:!1,generatedKey:null};function oI(){return{version:2,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),campaigns:[],sales:[],results:[],deliveries:[]}}function Ji(){return new Date().toISOString()}function Wo(n){return crypto.randomUUID?`${n}_${crypto.randomUUID()}`:`${n}_${Date.now()}_${Math.random().toString(16).slice(2)}`}function k2(n){try{return JSON.parse(localStorage.getItem(n)||"null")}catch{return null}}function S9(n,e){localStorage.setItem(n,JSON.stringify(e))}function Zi(n){return`${n}${R.user?.uid||"none"}`}function jo(){return Zi("numina_pin_hash_")}function sh(){return Zi("numina_lease_")}function O2(){return Zi("numina_actor_name_")}function cI(){let n=localStorage.getItem(y9);return n||(n=crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(16).slice(2)}`,localStorage.setItem(y9,n)),n}function Xi(){let n=navigator.userAgentData?.platform||navigator.platform||"Dispositivo",e=/Android|iPhone|iPad/i.test(navigator.userAgent)?"m\xF3vil":"PC";return`${n} \xB7 ${e}`}function b9(){return R.admin?cI():R.user?.uid||""}function Fs(){return R.admin?localStorage.getItem(R2)||Xi():R.device?.deviceName||Xi()}function Ms(){return R.admin}async function rh(n){let e=new TextEncoder().encode(String(n)),t=await crypto.subtle.digest("SHA-256",e);return Array.from(new Uint8Array(t)).map(r=>r.toString(16).padStart(2,"0")).join("")}function R9(n){return String(n||"").toUpperCase().replace(/[^A-Z0-9]/g,"")}function uI(){let n="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",e=new Uint8Array(12);crypto.getRandomValues(e);let t=Array.from(e,r=>n[r%n.length]).join("");return`${t.slice(0,4)}-${t.slice(4,8)}-${t.slice(8,12)}`}function lI(n,e,t,r){let s=["N\xFAmina \u2014 clave temporal de acceso","",`Persona: ${e}`,`Dispositivo: ${t}`,`Clave: ${n}`,`Vence en: ${r} minutos`,"","Abre N\xFAmina, pulsa \u201CIngresar clave temporal\u201D y copia esta clave."].join(`
-`);return`https://wa.me/?text=${encodeURIComponent(s)}`}function me(n){return String(n??"").replace(/[&<>'"]/g,e=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#039;",'"':"&quot;"})[e])}function P2(n){return String(n||"").trim().toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g,"")}function hI(n){return String(n||"").replace(/\D/g,"")}function P9(n={}){let t=["Hola, solicito acceso a N\xFAmina para este dispositivo.",`C\xF3digo: ${(R.user?.uid||n.uid||"").slice(0,8).toUpperCase()||"SIN-C\xD3DIGO"}`,`Persona: ${n.userName||"Sin indicar"}`,`Dispositivo: ${n.deviceName||Xi()}`].join(`
-`);return`https://wa.me/${iI}?text=${encodeURIComponent(t)}`}function L2(n){if(!n)return"\u2014";try{let e=n?.toDate?n.toDate():new Date(n);return new Intl.DateTimeFormat("es-CR",{dateStyle:"short",timeStyle:"short"}).format(e)}catch{return String(n)}}function V2(n){return new Intl.NumberFormat("es-CR",{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n||0))}function M2(n){return{paid:"Pagado",pending:"Pendiente",cancelled:"Cancelado"}[n]||n}function dI(n){return n==="active"?"Activa":"Cerrada"}function Ko(n){if(n<=0)return"Vencido";let e=Math.floor(n/36e5),t=Math.floor(n%36e5/6e4);return e>=48?`${Math.floor(e/24)} d ${e%24} h`:`${e} h ${t} min`}function X(n){let e=O("#toast");e.textContent=n,e.classList.add("show"),clearTimeout(X.timer),X.timer=setTimeout(()=>e.classList.remove("show"),3e3)}function Mr(n){["bootView","accessView","requestView","activationView","gateView","pinView","appView"].forEach(e=>{O(`#${e}`)?.classList.toggle("hidden",e!==n)})}function ea(){let n=navigator.onLine,e=O("#accessNetworkBanner");e&&(e.className=`status-banner ${n?"online":"offline"}`,e.textContent=n?"\u25CF En l\xEDnea: Firebase puede validar y sincronizar.":"\u25CF Sin conexi\xF3n: solo funciona un dispositivo previamente autorizado."),O("#networkState").textContent=n?"\u25CF En l\xEDnea":"\u25CF Sin conexi\xF3n",$2()}function ih(n){return{"auth/invalid-credential":"Correo o contrase\xF1a incorrectos.","auth/invalid-email":"El correo no es v\xE1lido.","auth/too-many-requests":"Demasiados intentos. Espera y vuelve a probar.","auth/network-request-failed":"No hay conexi\xF3n con Firebase.","auth/operation-not-allowed":"Debes activar este m\xE9todo de acceso en Firebase Authentication."}[n.code]||n.message||"No se pudo completar el acceso."}function Qo(){return Number(R.device?.offlineHours||(R.admin?168:24))}function Us(){return!R.lease?.validatedAt||R.lease.uid!==R.user?.uid?0:R.lease.validatedAt+Qo()*36e5-Date.now()}function F2(){R.lease={uid:R.user.uid,validatedAt:Date.now(),offlineHours:Qo(),deviceId:b9(),appVersion:Yi},S9(sh(),R.lease)}function Yo(){localStorage.removeItem(jo()),localStorage.removeItem(sh()),localStorage.removeItem(Zi(x2)),R.lease=null,R.unlocked=!1}function fI(n,e){return`<div class="detail"><span>${me(n)}</span><strong>${me(e)}</strong></div>`}function C9(n,e,t=[],r=""){O("#gateTitle").textContent=n,O("#gateMessage").textContent=e,O("#gateDetails").innerHTML=t.map(([s,i])=>fI(s,i)).join(""),O("#gateActions").innerHTML=r,Mr("gateView")}function Wt(n,e){Fr(),C9(n,e,[["Cuenta",R.user?.email||R.actor?.name||"Dispositivo"],["C\xF3digo",(R.user?.uid||"").slice(0,8).toUpperCase()||"\u2014"],["Conexi\xF3n",navigator.onLine?"En l\xEDnea":"Sin conexi\xF3n"]],'<button id="retryAccessBtn" class="primary" type="button">Comprobar acceso</button><button id="blockedSignOutBtn" class="ghost" type="button">Cambiar de cuenta</button>'),O("#retryAccessBtn").onclick=()=>Bs({forceServer:!0}),O("#blockedSignOutBtn").onclick=()=>In(st)}function U2(n){R.request=n;let e=n.status==="key_issued"?"Clave generada":"Esperando clave";C9("Solicitud registrada","Env\xEDale el c\xF3digo al administrador. Cuando recibas la clave temporal por WhatsApp, introd\xFAcela aqu\xED.",[["Persona",n.userName||"\u2014"],["Dispositivo",n.deviceName||"\u2014"],["C\xF3digo",R.user.uid.slice(0,8).toUpperCase()],["Estado",e]],'<a id="whatsappRequestBtn" class="primary button-link" target="_blank" rel="noopener">Pedir clave por WhatsApp</a><button id="enterPendingKeyBtn" class="ghost" type="button">Ingresar clave temporal</button><button id="pendingSignOutBtn" class="link-button" type="button">Cancelar solicitud</button>'),O("#whatsappRequestBtn").href=P9(n),O("#enterPendingKeyBtn").onclick=N9,O("#pendingSignOutBtn").onclick=()=>In(st)}function N9(){if(!(R.user?.isAnonymous||st.currentUser?.isAnonymous))return X("Primero solicita acceso para crear la identidad de este dispositivo.");O("#activationForm").reset(),Mr("activationView"),setTimeout(()=>O('#activationForm input[name="activationKey"]')?.focus(),50)}function B2(){let n=localStorage.getItem(O2())||"";O('#requestForm input[name="userName"]').value=n,O('#requestForm input[name="deviceName"]').value=Xi(),Mr("requestView")}function E9(){R.pinMode="setup",O("#pinTitle").textContent="Crear PIN local",O("#pinMessage").textContent=`Este PIN proteger\xE1 el acceso en este dispositivo. Permiso offline: ${Qo()} horas.`,O("#pinConfirmLabel").classList.remove("hidden"),O('#pinForm input[name="pinConfirm"]').required=!0,O("#pinForm").reset(),Mr("pinView")}function C2(){R.pinMode="unlock",O("#pinTitle").textContent="Desbloquear N\xFAmina",O("#pinMessage").textContent=`Permiso offline restante: ${Ko(Us())}.`,O("#pinConfirmLabel").classList.add("hidden"),O('#pinForm input[name="pinConfirm"]').required=!1,O("#pinForm").reset(),Mr("pinView")}function pI(){return k2(Zi(x2))||{count:0,blockedUntil:0}}function A2(n){S9(Zi(x2),n)}async function mI(n){n.preventDefault();let e=new FormData(n.currentTarget),t=String(e.get("pin")||""),r=String(e.get("pinConfirm")||"");if(!/^\d{4,8}$/.test(t))return X("El PIN debe tener entre 4 y 8 n\xFAmeros.");if(R.pinMode==="setup"){if(t!==r)return X("Los PIN no coinciden.");localStorage.setItem(jo(),await rh(t)),A2({count:0,blockedUntil:0}),R.unlocked=!0,I9();return}let s=pI();if(s.blockedUntil>Date.now())return X(`Espera ${Ko(s.blockedUntil-Date.now())} antes de intentar otra vez.`);if(await rh(t)!==localStorage.getItem(jo())){let a=s.count+1,o=a>=5?Date.now()+5*6e4:0;return A2({count:o?0:a,blockedUntil:o}),X(o?"Demasiados intentos. Bloqueado durante 5 minutos.":"PIN incorrecto.")}A2({count:0,blockedUntil:0}),R.unlocked=!0,I9()}async function D9(){await R.user.getIdToken(!0),localStorage.getItem(R2)||localStorage.setItem(R2,Xi()),R.actor={id:R.user.uid,name:"Administrador",role:"admin",email:R.user.email||""},R.device={deviceName:Fs(),offlineHours:168,active:!0,role:"admin"},F2()}async function Bs({forceServer:n=!1}={}){if(!R.user){Mr("accessView");return}if(ea(),R.lease=k2(sh()),R.admin){let i=!1;if(navigator.onLine||n)try{await D9(),i=!0}catch(a){console.warn("No se pudo validar al administrador",a)}return!i&&Us()<=0?Wt("El permiso offline del administrador venci\xF3.","Conecta esta PC a internet e inicia sesi\xF3n nuevamente para renovar los 7 d\xEDas."):(R.actor||(R.actor={id:R.user.uid,name:"Administrador",role:"admin",email:R.user.email||""},R.device={deviceName:Fs(),offlineHours:168,active:!0,role:"admin"}),localStorage.getItem(jo())?C2():E9())}let e=Fe(Pe,"devices",R.user.uid),t=null,r=!1;if(navigator.onLine||n)try{t=await Go(e),r=!0}catch(i){console.warn("Validaci\xF3n del dispositivo no disponible",i)}if(!t)try{t=await Xl(e)}catch(i){console.warn(i)}if(t?.exists()){if(R.device={id:t.id,...t.data()},R.actor={id:R.user.uid,name:R.device.userName||"Operador",role:"operator"},localStorage.setItem(O2(),R.actor.name),!R.device.active)return Yo(),Wt("Este dispositivo fue revocado.","El administrador debe reactivarlo o autorizar una nueva instalaci\xF3n.");if(r)F2(),Ho(e,{lastSeenAt:ot(),appVersion:Yi}).catch(console.warn);else if(Us()<=0)return Wt("El permiso offline venci\xF3.",`Conecta este dispositivo a internet para renovar su acceso de ${Qo()} horas.`);return gI(),localStorage.getItem(jo())?C2():E9()}if(R.device=null,R.actor=null,!navigator.onLine)return Wt("No se pudo comprobar el dispositivo.","Con\xE9ctalo a internet para enviar o confirmar una solicitud.");let s=null;try{s=await Go(Fe(Pe,"deviceRequests",R.user.uid))}catch{}if(s?.exists()){let i={id:s.id,...s.data()};if(i.status==="pending"||i.status==="key_issued")return U2(i);if(i.status==="activated")return Bs({forceServer:!0})}B2()}function gI(){R.accessUnsub?.(),!(R.admin||!R.user)&&(R.accessUnsub=I2(Fe(Pe,"devices",R.user.uid),n=>{if(!n.exists())return;let e={id:n.id,...n.data()};if(!e.active){Yo(),Wt("Este dispositivo fue revocado.","El administrador desactiv\xF3 esta instalaci\xF3n.");return}(!R.device||R.device.active!==e.active)&&Bs({forceServer:!0})},n=>console.warn("Escucha de dispositivo",n)))}async function _I(n){if(n.preventDefault(),!R.user?.isAnonymous)return X("La solicitud debe hacerse desde una identidad de dispositivo.");if(!navigator.onLine)return X("Con\xE9ctate para enviar la solicitud.");let e=new FormData(n.currentTarget),t=String(e.get("userName")||"").trim(),r=String(e.get("deviceName")||"").trim();if(!t||!r)return X("Completa el nombre y el dispositivo.");localStorage.setItem(O2(),t);let s=window.open("","_blank");try{await w2(Fe(Pe,"deviceRequests",R.user.uid),{uid:R.user.uid,userName:t,deviceName:r,appVersion:Yi,status:"pending",createdAt:ot()})}catch(o){throw s?.close(),o}let i={uid:R.user.uid,userName:t,deviceName:r,status:"pending"};R.request=i,U2(i);let a=P9(i);s&&(s.location.href=a)}async function yI(n){if(n.preventDefault(),!R.user?.isAnonymous)return X("Esta clave debe usarse desde la instalaci\xF3n que hizo la solicitud.");if(!navigator.onLine)return X("Con\xE9ctate para validar la clave temporal.");let e=new FormData(n.currentTarget),t=R9(e.get("activationKey"));if(t.length!==12)return X("La clave temporal no tiene el formato correcto.");let r=await rh(t),s=Fe(Pe,"activationKeys",r),i=Fe(Pe,"devices",R.user.uid),a=Fe(Pe,"deviceRequests",R.user.uid);try{let o=await m9(Pe,async u=>{let l=await u.get(s);if(!l.exists())throw new Error("La clave es incorrecta o no corresponde a este dispositivo.");let d=l.data();if(d.targetUid!==R.user.uid)throw new Error("La clave pertenece a otra instalaci\xF3n.");if(d.used)throw new Error("Esta clave ya fue utilizada.");let m=d.expiresAt?.toMillis?.()||0;if(!m||m<=Date.now())throw new Error("La clave temporal venci\xF3. Solicita una nueva.");let y=await u.get(i),S=await u.get(a);if(d.mode==="recovery"){if(!y.exists()||!y.data().active)throw new Error("El dispositivo no est\xE1 activo para recuperar el acceso.");u.update(i,{lastSeenAt:ot(),appVersion:Yi})}else u.set(i,{uid:R.user.uid,userName:d.userName||"Operador",deviceName:d.deviceName||Xi(),active:!0,role:"operator",offlineHours:Number(d.offlineHours||24),appVersion:Yi,activationKeyHash:r,authorizedAt:ot(),lastSeenAt:ot(),authorizedBy:d.createdBy||v9}),S.exists()&&u.update(a,{status:"activated",activatedAt:ot(),activationKeyHash:r});return u.update(s,{used:!0,usedAt:ot(),usedByUid:R.user.uid}),{mode:d.mode||"activation"}});Yo(),X(o.mode==="recovery"?"Acceso recuperado. Crea un PIN nuevo.":"Dispositivo activado. Crea tu PIN."),await Bs({forceServer:!0})}catch(o){let u=o?.code==="permission-denied"?"La clave es incorrecta, venci\xF3 o pertenece a otra instalaci\xF3n.":o.message||"No se pudo utilizar la clave.";X(u)}}function EI(){clearInterval(R.leaseTimer),R.leaseTimer=setInterval(async()=>{!R.unlocked||!R.user||(!navigator.onLine&&Us()<=0&&(R.unlocked=!1,Fr(),Wt("El permiso offline venci\xF3.","Conecta el dispositivo para renovar la autorizaci\xF3n.")),q2())},3e4)}function q2(){let n=Us(),e=navigator.onLine?`Permiso offline: ${Ko(n)}`:`Offline restante: ${Ko(n)}`;O("#leaseState").textContent=e}async function Jo(n,e={}){if(R.user)try{await g9(Gi(Pe,"audit"),{uid:R.user.uid,actorName:R.actor?.name||"",deviceId:b9(),deviceName:Fs(),action:n,details:e,createdAt:ot(),createdAtIso:Ji()})}catch(t){console.warn("Auditor\xEDa no disponible",t)}}function Fr(){R.dataUnsubs.forEach(n=>{try{n()}catch{}}),R.dataUnsubs=[],R.collectionLoaded.clear()}function wI(){if(!R.dataUnsubs.length)for(let n of T9){let e=I2(Gi(Pe,n),{includeMetadataChanges:!0},t=>{R.data[n]=t.docs.map(r=>({id:r.id,...r.data(),_pending:r.metadata.hasPendingWrites})),R.pendingByCollection[n]=t.docs.filter(r=>r.metadata.hasPendingWrites).length,R.collectionLoaded.add(n),R.data.updatedAt=Ji(),$2(),oh()},t=>{console.error(`Sincronizaci\xF3n ${n}`,t),O("#storageBadge").textContent="Error de sincronizaci\xF3n",O("#storageBadge").className="sync-badge error",String(t.code||"").includes("permission-denied")&&(R.unlocked=!1,Fr(),Wt("Firebase rechaz\xF3 el acceso.","El dispositivo pudo haber sido revocado o las reglas deben actualizarse."))});R.dataUnsubs.push(e)}}function N2(){return Object.values(R.pendingByCollection).reduce((n,e)=>n+Number(e||0),0)}function $2(){let n=O("#storageBadge");if(!n)return;let e=N2();navigator.onLine?e?(n.textContent=`Sincronizando \xB7 ${e}`,n.className="sync-badge pending"):R.collectionLoaded.size<T9.length?(n.textContent="Cargando datos\u2026",n.className="sync-badge syncing"):(n.textContent="Todo sincronizado",n.className="sync-badge"):(n.textContent=e?`Sin conexi\xF3n \xB7 ${e} pendiente${e===1?"":"s"}`:"Sin conexi\xF3n",n.className="sync-badge offline")}function x9(n=null){let e=Ji(),t={updatedAt:e,updatedByUid:R.user.uid,updatedByName:R.actor?.name||"",updatedByDevice:Fs(),serverUpdatedAt:ot()};return n?.createdByUid||(t.createdAt=n?.createdAt||e,t.createdByUid=R.user.uid,t.createdByName=R.actor?.name||"",t.createdByDevice=Fs(),t.serverCreatedAt=ot()),t}async function Lr(n,e,t="",r=""){if(!R.unlocked||!R.user)return X("El dispositivo no est\xE1 desbloqueado.");let s={...e};delete s._pending,Object.assign(s,x9(e));try{await w2(Fe(Pe,n,s.id),s,{merge:!0}),t&&X(t),r&&Jo(r,{collection:n,id:s.id})}catch(i){console.error(i),X(i.code==="permission-denied"?"Firebase rechaz\xF3 la operaci\xF3n.":`No se pudo guardar: ${i.message}`)}}async function k9(n,e="Datos importados."){let r=[["campaigns",Array.isArray(n.campaigns)?n.campaigns:[]],["sales",Array.isArray(n.sales)?n.sales:[]],["results",Array.isArray(n.results)?n.results:[]],["deliveries",Array.isArray(n.deliveries)?n.deliveries:[]]].flatMap(([i,a])=>a.map(o=>({name:i,item:o})));if(!r.length)return X("El archivo no contiene registros para importar.");let s=0;for(let i=0;i<r.length;i+=400){let a=T2(Pe);for(let o of r.slice(i,i+400)){let u=o.item.id||Wo(o.name.slice(0,-1)),l={...o.item,id:u};delete l._pending;let d={...l,...x9(l)};a.set(Fe(Pe,o.name,u),d,{merge:!0}),s+=1}await a.commit()}Jo("data.imported",{count:s}),X(`${e} ${s} registros procesados.`)}function Xo(){return R.data.sales.filter(n=>!n.deleted)}function z2(){return R.data.campaigns.filter(n=>!n.deleted)}function O9(){return z2().filter(n=>n.status==="active")}function Ot(n){return R.data.campaigns.find(e=>e.id===n&&!e.deleted)||null}function G2(n,e){let t=Number.parseInt(String(n).trim(),10);if(!Number.isInteger(t))throw new Error("El n\xFAmero no es v\xE1lido.");if(t<Number(e.numberMin)||t>Number(e.numberMax))throw new Error(`El n\xFAmero debe estar entre ${e.numberMin} y ${e.numberMax}.`);return String(t).padStart(Number(e.numberWidth||1),"0")}function Un(n){return n?.useSeries===!0}function H2(n,e){if(!Un(e))return"";let t=String(n||"").trim().toUpperCase();if(!t)throw new Error("La serie es obligatoria para esta campa\xF1a.");if(t.length>40)throw new Error("La serie no puede superar 40 caracteres.");return t}function Vr(n,e,t){return Un(t)?`${n} \xB7 Serie ${e||"\u2014"}`:n}function ah(){let n=Ot(O('#saleForm select[name="campaignId"]')?.value),e=O('[data-series-field="sale"]'),t=e?.querySelector('input[name="series"]'),r=Un(n);e?.classList.toggle("hidden",!r),t&&(t.required=r,r||(t.value=""));let s=Ot(O('#resultForm select[name="campaignId"]')?.value),i=O('[data-series-field="result"]'),a=i?.querySelector('input[name="winningSeries"]'),o=Un(s);i?.classList.toggle("hidden",!o),a&&(a.required=o,o||(a.value=""))}function L9(n){!Ms()&&n==="devices"&&(n="dashboard"),R.activeView=n,nh(".view").forEach(e=>e.classList.toggle("active",e.id===`view-${n}`)),nh("#nav button").forEach(e=>e.classList.toggle("active",e.dataset.view===n)),O("#sidebar").classList.remove("open"),n==="result"&&K2(),n==="sales"&&Zo(),n==="devices"&&Ms()&&ta()}function eh(n,{includeAll:e=!1,activeOnly:t=!1}={}){let r=n.value,s=t?O9():z2(),i=[];e&&i.push('<option value="all">Todas las campa\xF1as</option>'),i.push(...s.map(a=>`<option value="${me(a.id)}">${me(a.name)}${Un(a)?" \xB7 con serie":""}</option>`)),!s.length&&!e&&i.push('<option value="">No hay campa\xF1as disponibles</option>'),n.innerHTML=i.join(""),Array.from(n.options).some(a=>a.value===r)&&(n.value=r)}function oh(){if(!R.unlocked||!R.actor)return;O("#userName").textContent=R.actor.name,O("#userRole").textContent=Ms()?"Administrador \xB7 7 d\xEDas offline":`${Fs()} \xB7 ${Qo()} h offline`,O("#userAvatar").textContent=R.actor.name.trim().charAt(0).toUpperCase()||"U",nh("[data-admin-only]").forEach(e=>e.classList.toggle("hidden",!Ms()));let n=O9()[0];O("#activeCampaignLabel").textContent=n?n.name:"Sin campa\xF1a activa",eh(O("#dashboardCampaignFilter"),{includeAll:!0}),eh(O("#salesCampaignFilter"),{includeAll:!0}),eh(O('#saleForm select[name="campaignId"]'),{activeOnly:!0}),eh(O('#resultForm select[name="campaignId"]')),ah(),j2(),Zo(),II(),K2(),ea(),q2(),O("#legacyMigrationPanel").classList.toggle("hidden",!localStorage.getItem(b2)),!Ms()&&R.activeView==="devices"&&L9("dashboard")}function j2(){let n=O("#dashboardCampaignFilter").value||"all",e=Xo().filter(u=>n==="all"||u.campaignId===n),t=e.filter(u=>u.paymentStatus!=="cancelled"),r=t.filter(u=>u.paymentStatus==="paid"),s=t.filter(u=>u.paymentStatus==="pending"),i=r.reduce((u,l)=>u+Number(l.amount||0),0),a=t.reduce((u,l)=>u+Number(l.quantity||0),0);O("#metrics").innerHTML=[["Ventas",t.length,"registros activos"],["Participaciones",a,"cantidad total"],["Cobrado",V2(i),"ventas pagadas"],["Pendientes",s.length,"ventas sin pagar"]].map(([u,l,d])=>`<article class="metric-card"><span>${u}</span><strong>${l}</strong><small>${d}</small></article>`).join("");let o=[...e].sort((u,l)=>Date.parse(l.createdAt||0)-Date.parse(u.createdAt||0)).slice(0,8);O("#recentSales").innerHTML=o.length?o.map(u=>{let l=Ot(u.campaignId);return`<div class="list-item"><div><strong>${me(u.customerName)}</strong><small>${me(l?.name||"Campa\xF1a")} \xB7 ${me(Vr(u.number,u.series,l))} \xB7 ${me(u.sellerName||u.createdByName||"Usuario")}</small></div><div><span class="status-pill ${u.paymentStatus}">${M2(u.paymentStatus)}</span><small>${u._pending?'<span class="pending-dot"></span>Pendiente':'<span class="server-dot"></span>Confirmado'}</small></div></div>`}).join(""):'<div class="empty">Todav\xEDa no hay ventas registradas.</div>',O("#localSummary").innerHTML=`
-    <div class="sync-line"><span>Cuenta</span><strong>${me(R.actor.name)}</strong></div>
-    <div class="sync-line"><span>Dispositivo</span><strong>${me(Fs())}</strong></div>
-    <div class="sync-line"><span>Sincronizaci\xF3n</span><strong>${N2()?`${N2()} pendiente(s)`:"Confirmada"}</strong></div>
-    <div class="sync-line"><span>Conexi\xF3n actual</span><strong>${navigator.onLine?"En l\xEDnea":"Sin conexi\xF3n"}</strong></div>
-    <div class="sync-line"><span>Permiso restante</span><strong>${Ko(Us())}</strong></div>`}function II(){let n=O("#campaignList"),e=z2().sort((t,r)=>Date.parse(r.createdAt||0)-Date.parse(t.createdAt||0));if(!e.length){n.innerHTML='<div class="panel empty">Crea la primera campa\xF1a para registrar ventas.</div>';return}n.innerHTML=e.map(t=>{let r=R.data.sales.filter(s=>!s.deleted&&s.campaignId===t.id&&s.paymentStatus!=="cancelled").length;return`<article class="campaign-card">
-      <header><div><h3>${me(t.name)}</h3><span class="status-pill ${t.status==="active"?"paid":"cancelled"}">${dI(t.status)}</span></div><strong>${t.numberMin}\u2013${t.numberMax}</strong></header>
+`+n.stack),e}var yt=class extends po{constructor(e,t,r,s){super(e,t,r,s),this.type="firestore",this._queue=new Ol,this._persistenceKey=s?.name||"[DEFAULT]"}async _terminate(){if(this._firestoreClient){let e=this._firestoreClient.terminate();this._queue=new Ol(e),this._firestoreClient=void 0,await e}}};function i2(n,e,t){t||(t=Lu);let r=Ea(n,"firestore");if(r.isInitialized(t)){let s=r.getImmediate({identifier:t}),i=r.getOptions(t);if(Bt(i,e))return s;throw new B(L.FAILED_PRECONDITION,"initializeFirestore() has already been called with different options. To avoid this error, call initializeFirestore() with the same options as when it was originally called, or call getFirestore() to return the already initialized instance.")}if(e.cacheSizeBytes!==void 0&&e.localCache!==void 0)throw new B(L.INVALID_ARGUMENT,"cache and cacheSizeBytes cannot be specified at the same time as cacheSizeBytes willbe deprecated. Instead, specify the cache size in the cache object");if(e.cacheSizeBytes!==void 0&&e.cacheSizeBytes!==-1&&e.cacheSizeBytes<d3)throw new B(L.INVALID_ARGUMENT,"cacheSizeBytes must be at least 1048576");return e.host&&Gr(e.host)&&Ec(e.host),r.initialize({options:e,instanceIdentifier:t})}function Fn(n){if(n._terminated)throw new B(L.FAILED_PRECONDITION,"The client has already been terminated.");return n._firestoreClient||Jw(n),n._firestoreClient}function Jw(n){let e=n._freezeSettings(),t=$E(n._databaseId,n._app?.options.appId||"",n._persistenceKey,n._app?.options.apiKey,e);n._componentsProvider||e.localCache?._offlineComponentProvider&&e.localCache?._onlineComponentProvider&&(n._componentsProvider={_offline:e.localCache._offlineComponentProvider,_online:e.localCache._onlineComponentProvider}),n._firestoreClient=new gm(n._authCredentials,n._appCheckCredentials,n._queue,t,n._componentsProvider&&(function(s){let i=s?._online.build();return{_offline:s?._offline.build(i),_online:i}})(n._componentsProvider))}var Ui=class{convertValue(e,t="none"){switch(je(e)){case 0:return null;case 1:return e.booleanValue;case 2:return Se(e.integerValue||e.doubleValue);case 3:return this.convertTimestamp(e.timestampValue);case 4:return this.convertServerTimestamp(e,t);case 5:return e.stringValue;case 6:return this.convertBytes(xn(e.bytesValue));case 7:return this.convertReference(e.referenceValue);case 8:return this.convertGeoPoint(e.geoPointValue);case 9:return this.convertArray(e.arrayValue,t);case 11:return this.convertObject(e.mapValue,t);case 10:return this.convertVectorValue(e.mapValue);default:throw K(62114,{value:e})}}convertObject(e,t){return this.convertObjectMap(e.fields,t)}convertObjectMap(e,t="none"){let r={};return Nr(e,((s,i)=>{r[s]=this.convertValue(i,t)})),r}convertVectorValue(e){let t=e.fields?.[Es].arrayValue?.values?.map((r=>Se(r.doubleValue)));return new xt(t)}convertGeoPoint(e){return new Rn(Se(e.latitude),Se(e.longitude))}convertArray(e,t){return(e.values||[]).map((r=>this.convertValue(r,t)))}convertServerTimestamp(e,t){switch(t){case"previous":let r=Fo(e);return r==null?null:this.convertValue(r,t);case"estimate":return this.convertTimestamp(Ai(e));default:return null}}convertTimestamp(e){let t=Dn(e);return new Ae(t.seconds,t.nanos)}convertDocumentKey(e,t){let r=he.fromString(e);q(a3(r),9688,{name:e});let s=new ys(r.get(1),r.get(3)),i=new G(r.popFirst(5));return s.isEqual(t)||Be(`Document ${i} contains a document reference within a different database (${s.projectId}/${s.database}) which is not supported. It will be treated as a reference in the current database (${t.projectId}/${t.database}) instead.`),i}};var ks=class extends Ui{constructor(e){super(),this.firestore=e}convertBytes(e){return new Ht(e)}convertReference(e){let t=this.convertDocumentKey(e,this.firestore._databaseId);return new Ce(this.firestore,null,t)}};var a9="@firebase/firestore",o9="4.16.0";function c9(n){return(function(t,r){if(typeof t!="object"||t===null)return!1;let s=t;for(let i of r)if(i in s&&typeof s[i]=="function")return!0;return!1})(n,["next","error","complete"])}var Qi=class{constructor(e,t,r,s,i){this._firestore=e,this._userDataWriter=t,this._key=r,this._document=s,this._converter=i}get id(){return this._key.path.lastSegment()}get ref(){return new Ce(this._firestore,this._converter,this._key)}exists(){return this._document!==null}data(){if(this._document){if(this._converter){let e=new a2(this._firestore,this._userDataWriter,this._key,this._document,null);return this._converter.fromFirestore(e)}return this._userDataWriter.convertValue(this._document.data.value)}}_fieldsProto(){return this._document?.data.clone().value.mapValue.fields??void 0}get(e){if(this._document){let t=this._document.data.field(On("DocumentSnapshot.get",e));if(t!==null)return this._userDataWriter.convertValue(t)}}},a2=class extends Qi{data(){return super.data()}};function h9(n){if(n.limitType==="L"&&n.explicitOrderBy.length===0)throw new B(L.UNIMPLEMENTED,"limitToLast() queries require specifying at least one orderBy() clause")}var zo=class{},Yl=class extends zo{};function _2(n,e,...t){let r=[];e instanceof zo&&r.push(e),r=r.concat(t),(function(i){let a=i.filter((u=>u instanceof c2)).length,o=i.filter((u=>u instanceof o2)).length;if(a>1||a>0&&o>0)throw new B(L.INVALID_ARGUMENT,"InvalidQuery. When using composite filters, you cannot use more than one filter at the top level. Consider nesting the multiple filters within an `and(...)` statement. For example: change `query(query, where(...), or(...))` to `query(query, and(where(...), or(...)))`.")})(r);for(let s of r)n=s._apply(n);return n}var o2=class n extends Yl{constructor(e,t,r){super(),this._field=e,this._op=t,this._value=r,this.type="where"}static _create(e,t,r){return new n(e,t,r)}_apply(e){let t=this._parse(e);return d9(e._query,t),new dn(e.firestore,e.converter,Ul(e._query,t))}_parse(e){let t=Os(e.firestore);return(function(i,a,o,u,l,d,m){let y;if(l.isKeyField()){if(d==="array-contains"||d==="array-contains-any")throw new B(L.INVALID_ARGUMENT,`Invalid Query. You can't perform '${d}' queries on documentId().`);if(d==="in"||d==="not-in"){l9(m,d);let D=[];for(let U of m)D.push(u9(u,i,U));y={arrayValue:{values:D}}}else y=u9(u,i,m)}else d!=="in"&&d!=="not-in"&&d!=="array-contains-any"||l9(m,d),y=m3(o,a,m,d==="in"||d==="not-in");return de.create(l,d,y)})(e._query,"where",t,e.firestore._databaseId,this._field,this._op,this._value)}};var c2=class n extends zo{constructor(e,t){super(),this.type=e,this._queryConstraints=t}static _create(e,t){return new n(e,t)}_parse(e){let t=this._queryConstraints.map((r=>r._parse(e))).filter((r=>r.getFilters().length>0));return t.length===1?t[0]:_e.create(t,this._getOperator())}_apply(e){let t=this._parse(e);return t.getFilters().length===0?e:((function(s,i){let a=s,o=i.getFlattenedFilters();for(let u of o)d9(a,u),a=Ul(a,u)})(e._query,t),new dn(e.firestore,e.converter,Ul(e._query,t)))}_getQueryConstraints(){return this._queryConstraints}_getOperator(){return this.type==="and"?"and":"or"}};var u2=class n extends Yl{constructor(e,t){super(),this._field=e,this._direction=t,this.type="orderBy"}static _create(e,t){return new n(e,t)}_apply(e){let t=(function(s,i,a){if(s.startAt!==null)throw new B(L.INVALID_ARGUMENT,"Invalid query. You must not call startAt() or startAfter() before calling orderBy().");if(s.endAt!==null)throw new B(L.INVALID_ARGUMENT,"Invalid query. You must not call endAt() or endBefore() before calling orderBy().");return new gr(i,a)})(e._query,this._field,this._direction);return new dn(e.firestore,e.converter,$4(e._query,t))}};function y2(n,e="asc"){let t=e,r=On("orderBy",n);return u2._create(r,t)}function u9(n,e,t){if(typeof(t=Te(t))=="string"){if(t==="")throw new B(L.INVALID_ARGUMENT,"Invalid query. When querying with documentId(), you must provide a valid document ID, but it was an empty string.");if(!Dm(e)&&t.indexOf("/")!==-1)throw new B(L.INVALID_ARGUMENT,`Invalid query. When querying a collection by documentId(), you must provide a plain document ID, but '${t}' contains a '/' character.`);let r=e.path.child(he.fromString(t));if(!G.isDocumentKey(r))throw new B(L.INVALID_ARGUMENT,`Invalid query. When querying a collection group by documentId(), the value provided must result in a valid document path, but '${r}' is not because it has an odd number of segments (${r.length}).`);return $i(n,new G(r))}if(t instanceof Ce)return $i(n,t._key);throw new B(L.INVALID_ARGUMENT,`Invalid query. When querying with documentId(), you must provide a valid string or a DocumentReference, but it was: ${Oo(t)}.`)}function l9(n,e){if(!Array.isArray(n)||n.length===0)throw new B(L.INVALID_ARGUMENT,`Invalid Query. A non-empty array is required for '${e.toString()}' filters.`)}function d9(n,e){let t=(function(s,i){for(let a of s)for(let o of a.getFlattenedFilters())if(i.indexOf(o.op)>=0)return o.op;return null})(n.filters,(function(s){switch(s){case"!=":return["!=","not-in"];case"array-contains-any":case"in":return["not-in"];case"not-in":return["array-contains-any","in","not-in","!="];default:return[]}})(e.op));if(t!==null)throw t===e.op?new B(L.INVALID_ARGUMENT,`Invalid query. You cannot use more than one '${e.op.toString()}' filter.`):new B(L.INVALID_ARGUMENT,`Invalid query. You cannot use '${e.op.toString()}' filters with '${t.toString()}' filters.`)}function Jl(n,e,t){let r;return r=n?t&&(t.merge||t.mergeFields)?n.toFirestore(e,t):n.toFirestore(e):e,r}var l2=class extends Ui{constructor(e){super(),this.firestore=e}convertBytes(e){return new Ht(e)}convertReference(e){let t=this.convertDocumentKey(e,this.firestore._databaseId);return new Ce(this.firestore,null,t)}};var h2=class{constructor(e){let t;this.kind="persistent",e?.tabManager?(e.tabManager._initialize(e),t=e.tabManager):(t=tI(void 0),t._initialize(e)),this._onlineComponentProvider=t._onlineComponentProvider,this._offlineComponentProvider=t._offlineComponentProvider}toJSON(){return{kind:this.kind}}};function f9(n){return new h2(n)}var d2=class{constructor(e){this.forceOwnership=e,this.kind="persistentSingleTab"}toJSON(){return{kind:this.kind}}_initialize(e){this._onlineComponentProvider=br.provider,this._offlineComponentProvider={build:t=>new Do(t,e?.cacheSizeBytes,this.forceOwnership)}}},f2=class{constructor(){this.kind="PersistentMultipleTab"}toJSON(){return{kind:this.kind}}_initialize(e){this._onlineComponentProvider=br.provider,this._offlineComponentProvider={build:t=>new xl(t,e?.cacheSizeBytes)}}};function tI(n){return new d2(n?.forceOwnership)}function p9(){return new f2}var xr=class{constructor(e,t){this.hasPendingWrites=e,this.fromCache=t}isEqual(e){return this.hasPendingWrites===e.hasPendingWrites&&this.fromCache===e.fromCache}},Or=class n extends Qi{constructor(e,t,r,s,i,a){super(e,t,r,s,a),this._firestore=e,this._firestoreImpl=e,this.metadata=i}exists(){return super.exists()}data(e={}){if(this._document){if(this._converter){let t=new Wi(this._firestore,this._userDataWriter,this._key,this._document,this.metadata,null);return this._converter.fromFirestore(t,e)}return this._userDataWriter.convertValue(this._document.data.value,e.serverTimestamps)}}get(e,t={}){if(this._document){let r=this._document.data.field(On("DocumentSnapshot.get",e));if(r!==null)return this._userDataWriter.convertValue(r,t.serverTimestamps)}}toJSON(){if(this.metadata.hasPendingWrites)throw new B(L.FAILED_PRECONDITION,"DocumentSnapshot.toJSON() attempted to serialize a document with pending writes. Await waitForPendingWrites() before invoking toJSON().");let e=this._document,t={};return t.type=n._jsonSchemaVersion,t.bundle="",t.bundleSource="DocumentSnapshot",t.bundleName=this._key.toString(),!e||!e.isValidDocument()||!e.isFoundDocument()?t:(this._userDataWriter.convertObjectMap(e.data.value.mapValue.fields,"previous"),t.bundle=(this._firestore,this.ref.path,"NOT SUPPORTED"),t)}};Or._jsonSchemaVersion="firestore/documentSnapshot/1.0",Or._jsonSchema={type:qe("string",Or._jsonSchemaVersion),bundleSource:qe("string","DocumentSnapshot"),bundleName:qe("string"),bundle:qe("string")};var Wi=class extends Or{data(e={}){return super.data(e)}},Vs=class n{constructor(e,t,r,s){this._firestore=e,this._userDataWriter=t,this._snapshot=s,this.metadata=new xr(s.hasPendingWrites,s.fromCache),this.query=r}get docs(){let e=[];return this.forEach((t=>e.push(t))),e}get size(){return this._snapshot.docs.size}get empty(){return this.size===0}forEach(e,t){this._snapshot.docs.forEach((r=>{e.call(t,new Wi(this._firestore,this._userDataWriter,r.key,r,new xr(this._snapshot.mutatedKeys.has(r.key),this._snapshot.fromCache),this.query.converter))}))}docChanges(e={}){let t=!!e.includeMetadataChanges;if(t&&this._snapshot.excludesMetadataChanges)throw new B(L.INVALID_ARGUMENT,"To include metadata changes with your document changes, you must also pass { includeMetadataChanges:true } to onSnapshot().");return this._cachedChanges&&this._cachedChangesIncludeMetadataChanges===t||(this._cachedChanges=(function(s,i){if(s._snapshot.oldDocs.isEmpty()){let a=0;return s._snapshot.docChanges.map((o=>{Oe(s._snapshot.query)?_l(s._snapshot.query):ql(s.query._query);let u=new Wi(s._firestore,s._userDataWriter,o.doc.key,o.doc,new xr(s._snapshot.mutatedKeys.has(o.doc.key),s._snapshot.fromCache),s.query.converter);return o.doc,{type:"added",doc:u,oldIndex:-1,newIndex:a++}}))}{let a=s._snapshot.oldDocs;return s._snapshot.docChanges.filter((o=>i||o.type!==3)).map((o=>{let u=new Wi(s._firestore,s._userDataWriter,o.doc.key,o.doc,new xr(s._snapshot.mutatedKeys.has(o.doc.key),s._snapshot.fromCache),s.query.converter),l=-1,d=-1;return o.type!==0&&(l=a.indexOf(o.doc.key),a=a.delete(o.doc.key)),o.type!==1&&(a=a.add(o.doc),d=a.indexOf(o.doc.key)),{type:nI(o.type),doc:u,oldIndex:l,newIndex:d}}))}})(this,t),this._cachedChangesIncludeMetadataChanges=t),this._cachedChanges}toJSON(){if(this.metadata.hasPendingWrites)throw new B(L.FAILED_PRECONDITION,"QuerySnapshot.toJSON() attempted to serialize a document with pending writes. Await waitForPendingWrites() before invoking toJSON().");let e={};e.type=n._jsonSchemaVersion,e.bundleSource="QuerySnapshot",e.bundleName=gs.newId(),this._firestore._databaseId.database,this._firestore._databaseId.projectId;let t=[],r=[],s=[];return this.docs.forEach((i=>{i._document!==null&&(t.push(i._document),r.push(this._userDataWriter.convertObjectMap(i._document.data.value.mapValue.fields,"previous")),s.push(i.ref.path))})),e.bundle=(this._firestore,this.query._query,e.bundleName,"NOT SUPPORTED"),e}};function nI(n){switch(n){case 0:return"added";case 2:case 3:return"modified";case 1:return"removed";default:return K(61501,{type:n})}}Vs._jsonSchemaVersion="firestore/querySnapshot/1.0",Vs._jsonSchema={type:qe("string",Vs._jsonSchemaVersion),bundleSource:qe("string","QuerySnapshot"),bundleName:qe("string"),bundle:qe("string")};var rI={maxAttempts:5};var p2=class{constructor(e,t){this._firestore=e,this._commitHandler=t,this._mutations=[],this._committed=!1,this._dataReader=Os(e)}set(e,t,r){this._verifyNotCommitted();let s=kr(e,this._firestore),i=Jl(s.converter,t,r),a=Bo(this._dataReader,"WriteBatch.set",s._key,i,s.converter!==null,r);return this._mutations.push(a.toMutation(s._key,Ve.none())),this}update(e,t,r,...s){this._verifyNotCommitted();let i=kr(e,this._firestore),a;return a=typeof(t=Te(t))=="string"||t instanceof hn?zl(this._dataReader,"WriteBatch.update",i._key,t,r,s):$l(this._dataReader,"WriteBatch.update",i._key,t),this._mutations.push(a.toMutation(i._key,Ve.exists(!0))),this}delete(e){this._verifyNotCommitted();let t=kr(e,this._firestore);return this._mutations=this._mutations.concat(new mr(t._key,Ve.none())),this}commit(){return this._verifyNotCommitted(),this._committed=!0,this._mutations.length>0?this._commitHandler(this._mutations):Promise.resolve()}_verifyNotCommitted(){if(this._committed)throw new B(L.FAILED_PRECONDITION,"A write batch can no longer be used after commit() has been called.")}};function kr(n,e){if((n=Te(n)).firestore!==e)throw new B(L.INVALID_ARGUMENT,"Provided document reference is from a different Firestore instance.");return n}var m2=class{constructor(e,t){this._firestore=e,this._transaction=t,this._dataReader=Os(e)}get(e){let t=kr(e,this._firestore),r=new l2(this._firestore);return this._transaction.lookup([t._key]).then((s=>{if(!s||s.length!==1)return K(24041);let i=s[0];if(i.isFoundDocument())return new Qi(this._firestore,r,i.key,i,t.converter);if(i.isNoDocument())return new Qi(this._firestore,r,t._key,null,t.converter);throw K(18433,{doc:i})}))}set(e,t,r){let s=kr(e,this._firestore),i=Jl(s.converter,t,r),a=Bo(this._dataReader,"Transaction.set",s._key,i,s.converter!==null,r);return this._transaction.set(s._key,a),this}update(e,t,r,...s){let i=kr(e,this._firestore),a;return a=typeof(t=Te(t))=="string"||t instanceof hn?zl(this._dataReader,"Transaction.update",i._key,t,r,s):$l(this._dataReader,"Transaction.update",i._key,t),this._transaction.update(i._key,a),this}delete(e){let t=kr(e,this._firestore);return this._transaction.delete(t._key),this}};var g2=class extends m2{constructor(e,t){super(e,t),this._firestore=e}get(e){let t=kr(e,this._firestore),r=new ks(this._firestore);return super.get(e).then((s=>new Or(this._firestore,r,t._key,s._document,new xr(!1,!1),t.converter)))}};function m9(n,e,t){n=rt(n,yt);let r={...rI,...t};(function(a){if(a.maxAttempts<1)throw new B(L.INVALID_ARGUMENT,"Max attempts must be at least 1")})(r);let s=Fn(n);return i9(s,(i=>e(new g2(n,i))),r)}function Xl(n){n=rt(n,Ce);let e=rt(n.firestore,yt),t=Fn(e);return s2(t,n._key).then((r=>v2(e,n,r)))}function Go(n){n=rt(n,Ce);let e=rt(n.firestore,yt),t=Fn(e);return s2(t,n._key,{source:"server"}).then((r=>v2(e,n,r)))}function E2(n){n=rt(n,dn);let e=rt(n.firestore,yt),t=Fn(e),r=new ks(e);return h9(n._query),r9(t,n._query).then((s=>new Vs(e,r,n,s)))}function w2(n,e,t){n=rt(n,Ce);let r=rt(n.firestore,yt),s=Jl(n.converter,e,t),i=Os(r);return Zl(r,[Bo(i,"setDoc",n._key,s,n.converter!==null,t).toMutation(n._key,Ve.none())])}function Ho(n,e,t,...r){n=rt(n,Ce);let s=rt(n.firestore,yt),i=Os(s),a;return a=typeof(e=Te(e))=="string"||e instanceof hn?zl(i,"updateDoc",n._key,e,t,r):$l(i,"updateDoc",n._key,e),Zl(s,[a.toMutation(n._key,Ve.exists(!0))])}function g9(n,e){let t=rt(n.firestore,yt),r=Fe(n),s=Jl(n.converter,e),i=Os(n.firestore);return Zl(t,[Bo(i,"addDoc",r._key,s,n.converter!==null,{}).toMutation(r._key,Ve.exists(!1))]).then((()=>r))}function I2(n,...e){n=Te(n);let t={includeMetadataChanges:!1,source:"default"},r=0;typeof e[r]!="object"||c9(e[r])||(t=e[r++]);let s={includeMetadataChanges:t.includeMetadataChanges,source:t.source};if(c9(e[r])){let l=e[r];e[r]=l.next?.bind(l),e[r+1]=l.error?.bind(l),e[r+2]=l.complete?.bind(l)}let i,a,o;if(n instanceof Ce)a=rt(n.firestore,yt),o=zi(n._key.path),i={next:l=>{e[r]&&e[r](v2(a,n,l))},error:e[r+1],complete:e[r+2]};else{let l=rt(n,dn);a=rt(l.firestore,yt),o=l._query;let d=new ks(a);i={next:m=>{e[r]&&e[r](new Vs(a,d,l,m))},error:e[r+1],complete:e[r+2]},h9(n._query)}let u=Fn(a);return n9(u,o,s,i)}function Zl(n,e){let t=Fn(n);return s9(t,e)}function v2(n,e,t){let r=t.docs.get(e._key),s=new ks(n);return new Or(n,s,e._key,r,new xr(t.hasPendingWrites,t.fromCache),e.converter)}function T2(n){return n=rt(n,yt),Fn(n),new p2(n,(e=>Zl(n,e)))}(function(e,t=!0){Z7(Yn),Qn(new Lt("firestore",((r,{instanceIdentifier:s,options:i})=>{let a=r.getProvider("app").getImmediate(),o=new yt(new Tu(r.getProvider("auth-internal")),new Su(a,r.getProvider("app-check-internal")),S4(a,s),a);return i={useFetchStreams:t,...i},o._setSettings(i),o}),"PUBLIC").setMultipleInstances(!0)),qt(a9,o9,e),qt(a9,o9,"esm2020")})();
+// Firebase aliases retained from the v3.2 bundled runtime.
+const initializeApp = n1;
+const getAuth = M1;
+const setPersistence = k1;
+const browserLocalPersistence = tu;
+const signInWithEmailAndPassword = x1;
+const signInAnonymously = eu;
+const signOut = In;
+const onAuthStateChanged = O1;
+const sendPasswordResetEmail = D1;
+const initializeFirestore = i2;
+const persistentLocalCache = f9;
+const persistentMultipleTabManager = p9;
+const doc = Fe;
+const getDoc = Xl;
+const getDocFromServer = Go;
+const setDoc = w2;
+const updateDoc = Ho;
+const collection = Gi;
+const getDocs = E2;
+const query = _2;
+const orderBy = y2;
+const serverTimestamp = ot;
+const addDoc = g9;
+const onSnapshot = I2;
+const writeBatch = T2;
+const runTransaction = m9;
+const Timestamp = Ae;
+
+'use strict';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyA-5mCIkzfgg0qBB4btEM9F0YPfSbPhfcQ',
+  authDomain: 'nomina-23755.firebaseapp.com',
+  projectId: 'nomina-23755',
+  storageBucket: 'nomina-23755.firebasestorage.app',
+  messagingSenderId: '1070622502243',
+  appId: '1:1070622502243:web:4fa1253837b3881711f756'
+};
+
+const ADMIN_UID = '6zJhAeRF9JRAilw6yvQQvLiN8bc2';
+const ENTRY_MODE = document.body.dataset.entry || 'device';
+const ACCESS_WHATSAPP = '50664305227';
+let autoRequestStarted = false;
+const APP_VERSION = 'firebase-completa-v1.3.1-series';
+const LEGACY_STORAGE_KEY = 'numina_github_pages_data_v1';
+const ADMIN_DEVICE_ID_KEY = 'numina_admin_device_id_v1';
+const ADMIN_DEVICE_NAME_KEY = 'numina_admin_device_name_v1';
+const PIN_FAILURES_PREFIX = 'numina_pin_failures_';
+const ENTITY_COLLECTIONS = ['campaigns', 'sales', 'results', 'deliveries'];
+
+const FIREBASE_APP_NAME = ENTRY_MODE === 'admin' ? 'numina-admin' : 'numina-device';
+const app = initializeApp(firebaseConfig, FIREBASE_APP_NAME);
+const auth = getAuth(app);
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
+setPersistence(auth, browserLocalPersistence).catch(console.error);
+
+const $ = selector => document.querySelector(selector);
+const $$ = selector => Array.from(document.querySelectorAll(selector));
+
+const state = {
+  user: null,
+  admin: false,
+  actor: null,
+  device: null,
+  request: null,
+  lease: null,
+  unlocked: false,
+  pinMode: 'unlock',
+  activeView: 'dashboard',
+  deferredInstallPrompt: null,
+  data: emptyData(),
+  collectionLoaded: new Set(),
+  pendingByCollection: {},
+  dataUnsubs: [],
+  accessUnsub: null,
+  leaseTimer: null,
+  adminLoaded: false,
+  writeBusy: false,
+  generatedKey: null
+};
+
+function emptyData() {
+  return {
+    version: 2,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    campaigns: [],
+    sales: [],
+    results: [],
+    deliveries: []
+  };
+}
+
+function now() {
+  return new Date().toISOString();
+}
+
+function makeId(prefix) {
+  if (crypto.randomUUID) return `${prefix}_${crypto.randomUUID()}`;
+  return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+function readJson(key) {
+  try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; }
+}
+
+function writeJson(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function userKey(prefix) {
+  return `${prefix}${state.user?.uid || 'none'}`;
+}
+
+function pinKey() {
+  return userKey('numina_pin_hash_');
+}
+
+function leaseKey() {
+  return userKey('numina_lease_');
+}
+
+function actorNameKey() {
+  return userKey('numina_actor_name_');
+}
+
+function getAdminDeviceId() {
+  let id = localStorage.getItem(ADMIN_DEVICE_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    localStorage.setItem(ADMIN_DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+
+function defaultDeviceName() {
+  const platform = navigator.userAgentData?.platform || navigator.platform || 'Dispositivo';
+  const type = /Android|iPhone|iPad/i.test(navigator.userAgent) ? 'móvil' : 'PC';
+  return `${platform} · ${type}`;
+}
+
+function currentDeviceId() {
+  return state.admin ? getAdminDeviceId() : (state.user?.uid || '');
+}
+
+function currentDeviceName() {
+  if (state.admin) return localStorage.getItem(ADMIN_DEVICE_NAME_KEY) || defaultDeviceName();
+  return state.device?.deviceName || defaultDeviceName();
+}
+
+function isAdmin() {
+  return state.admin;
+}
+
+function currentUser() {
+  return state.actor;
+}
+
+async function sha256(text) {
+  const bytes = new TextEncoder().encode(String(text));
+  const hash = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(hash)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function normalizeActivationKey(value) {
+  return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function generateActivationKey() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
+  const raw = Array.from(bytes, byte => alphabet[byte % alphabet.length]).join('');
+  return `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8, 12)}`;
+}
+
+function activationKeyWhatsAppUrl(key, userName, deviceName, expiresMinutes) {
+  const message = [
+    'Númina — clave temporal de acceso',
+    '',
+    `Persona: ${userName}`,
+    `Dispositivo: ${deviceName}`,
+    `Clave: ${key}`,
+    `Vence en: ${expiresMinutes} minutos`,
+    '',
+    'Abre Númina, pulsa “Ingresar clave temporal” y copia esta clave.'
+  ].join('\n');
+  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, character => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+  })[character]);
+}
+
+function normalizeText(value) {
+  return String(value || '').trim().toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function normalizePhone(value) {
+  return String(value || '').replace(/\D/g, '');
+}
+
+
+function accessWhatsAppUrl(request = {}) {
+  const code = (state.user?.uid || request.uid || '').slice(0, 8).toUpperCase();
+  const text = [
+    'Hola, solicito acceso a Númina para este dispositivo.',
+    `Código: ${code || 'SIN-CÓDIGO'}`,
+    `Persona: ${request.userName || 'Sin indicar'}`,
+    `Dispositivo: ${request.deviceName || defaultDeviceName()}`
+  ].join('\n');
+  return `https://wa.me/${ACCESS_WHATSAPP}?text=${encodeURIComponent(text)}`;
+}
+
+function formatDate(value) {
+  if (!value) return '—';
+  try {
+    const date = value?.toDate ? value.toDate() : new Date(value);
+    return new Intl.DateTimeFormat('es-CR', { dateStyle: 'short', timeStyle: 'short' }).format(date);
+  } catch {
+    return String(value);
+  }
+}
+
+function formatAmount(value) {
+  return new Intl.NumberFormat('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0));
+}
+
+function paymentLabel(status) {
+  return ({ paid: 'Pagado', pending: 'Pendiente', cancelled: 'Cancelado' })[status] || status;
+}
+
+function campaignStatusLabel(status) {
+  return status === 'active' ? 'Activa' : 'Cerrada';
+}
+
+function humanDuration(ms) {
+  if (ms <= 0) return 'Vencido';
+  const hours = Math.floor(ms / 3600000);
+  const minutes = Math.floor((ms % 3600000) / 60000);
+  if (hours >= 48) return `${Math.floor(hours / 24)} d ${hours % 24} h`;
+  return `${hours} h ${minutes} min`;
+}
+
+function toast(message) {
+  const element = $('#toast');
+  element.textContent = message;
+  element.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => element.classList.remove('show'), 3000);
+}
+
+function showOnly(viewId) {
+  ['bootView', 'accessView', 'requestView', 'activationView', 'gateView', 'pinView', 'appView'].forEach(id => {
+    $(`#${id}`)?.classList.toggle('hidden', id !== viewId);
+  });
+}
+
+function updateConnectionUi() {
+  const online = navigator.onLine;
+  const banner = $('#accessNetworkBanner');
+  if (banner) {
+    banner.className = `status-banner ${online ? 'online' : 'offline'}`;
+    banner.textContent = online ? '● En línea: Firebase puede validar y sincronizar.' : '● Sin conexión: solo funciona un dispositivo previamente autorizado.';
+  }
+  $('#networkState').textContent = online ? '● En línea' : '● Sin conexión';
+  updateSyncUi();
+}
+
+function authErrorMessage(error) {
+  const map = {
+    'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+    'auth/invalid-email': 'El correo no es válido.',
+    'auth/too-many-requests': 'Demasiados intentos. Espera y vuelve a probar.',
+    'auth/network-request-failed': 'No hay conexión con Firebase.',
+    'auth/operation-not-allowed': 'Debes activar este método de acceso en Firebase Authentication.'
+  };
+  return map[error.code] || error.message || 'No se pudo completar el acceso.';
+}
+
+function leaseHours() {
+  return Number(state.device?.offlineHours || (state.admin ? 168 : 24));
+}
+
+function leaseRemaining() {
+  if (!state.lease?.validatedAt || state.lease.uid !== state.user?.uid) return 0;
+  return state.lease.validatedAt + leaseHours() * 3600000 - Date.now();
+}
+
+function storeLease() {
+  state.lease = {
+    uid: state.user.uid,
+    validatedAt: Date.now(),
+    offlineHours: leaseHours(),
+    deviceId: currentDeviceId(),
+    appVersion: APP_VERSION
+  };
+  writeJson(leaseKey(), state.lease);
+}
+
+function clearLocalAccess() {
+  localStorage.removeItem(pinKey());
+  localStorage.removeItem(leaseKey());
+  localStorage.removeItem(userKey(PIN_FAILURES_PREFIX));
+  state.lease = null;
+  state.unlocked = false;
+}
+
+function gateDetail(label, value) {
+  return `<div class="detail"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+}
+
+function setGate(title, message, details = [], actions = '') {
+  $('#gateTitle').textContent = title;
+  $('#gateMessage').textContent = message;
+  $('#gateDetails').innerHTML = details.map(([label, value]) => gateDetail(label, value)).join('');
+  $('#gateActions').innerHTML = actions;
+  showOnly('gateView');
+}
+
+function showBlocked(title, message) {
+  stopDataSync();
+  setGate(title, message, [
+    ['Cuenta', state.user?.email || state.actor?.name || 'Dispositivo'],
+    ['Código', (state.user?.uid || '').slice(0, 8).toUpperCase() || '—'],
+    ['Conexión', navigator.onLine ? 'En línea' : 'Sin conexión']
+  ], `<button id="retryAccessBtn" class="primary" type="button">Comprobar acceso</button><button id="blockedSignOutBtn" class="ghost" type="button">Cambiar de cuenta</button>`);
+  $('#retryAccessBtn').onclick = () => evaluateAccess({ forceServer: true });
+  $('#blockedSignOutBtn').onclick = () => signOut(auth);
+}
+
+function showPendingRequest(request) {
+  state.request = request;
+  const statusText = request.status === 'key_issued' ? 'Clave generada' : 'Esperando clave';
+  setGate('Solicitud registrada', 'Envíale el código al administrador. Cuando recibas la clave temporal por WhatsApp, introdúcela aquí.', [
+    ['Persona', request.userName || '—'],
+    ['Dispositivo', request.deviceName || '—'],
+    ['Código', state.user.uid.slice(0, 8).toUpperCase()],
+    ['Estado', statusText]
+  ], `<a id="whatsappRequestBtn" class="primary button-link" target="_blank" rel="noopener">Pedir clave por WhatsApp</a><button id="enterPendingKeyBtn" class="ghost" type="button">Ingresar clave temporal</button><button id="pendingSignOutBtn" class="link-button" type="button">Cancelar solicitud</button>`);
+  $('#whatsappRequestBtn').href = accessWhatsAppUrl(request);
+  $('#enterPendingKeyBtn').onclick = showActivationForm;
+  $('#pendingSignOutBtn').onclick = () => signOut(auth);
+}
+
+function showActivationForm() {
+  if (!(state.user?.isAnonymous || auth.currentUser?.isAnonymous)) return toast('Primero solicita acceso para crear la identidad de este dispositivo.');
+  $('#activationForm').reset();
+  showOnly('activationView');
+  setTimeout(() => $('#activationForm input[name="activationKey"]')?.focus(), 50);
+}
+
+function showRequestForm() {
+  const savedName = localStorage.getItem(actorNameKey()) || '';
+  $('#requestForm input[name="userName"]').value = savedName;
+  $('#requestForm input[name="deviceName"]').value = defaultDeviceName();
+  showOnly('requestView');
+}
+
+function showPinSetup() {
+  state.pinMode = 'setup';
+  $('#pinTitle').textContent = 'Crear PIN local';
+  $('#pinMessage').textContent = `Este PIN protegerá el acceso en este dispositivo. Permiso offline: ${leaseHours()} horas.`;
+  $('#pinConfirmLabel').classList.remove('hidden');
+  $('#pinForm input[name="pinConfirm"]').required = true;
+  $('#pinForm').reset();
+  showOnly('pinView');
+}
+
+function showPinUnlock() {
+  state.pinMode = 'unlock';
+  $('#pinTitle').textContent = 'Desbloquear Númina';
+  $('#pinMessage').textContent = `Permiso offline restante: ${humanDuration(leaseRemaining())}.`;
+  $('#pinConfirmLabel').classList.add('hidden');
+  $('#pinForm input[name="pinConfirm"]').required = false;
+  $('#pinForm').reset();
+  showOnly('pinView');
+}
+
+function readPinFailures() {
+  return readJson(userKey(PIN_FAILURES_PREFIX)) || { count: 0, blockedUntil: 0 };
+}
+
+function savePinFailures(value) {
+  writeJson(userKey(PIN_FAILURES_PREFIX), value);
+}
+
+async function handlePinSubmit(event) {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
+  const pin = String(data.get('pin') || '');
+  const confirmPin = String(data.get('pinConfirm') || '');
+  if (!/^\d{4,8}$/.test(pin)) return toast('El PIN debe tener entre 4 y 8 números.');
+
+  if (state.pinMode === 'setup') {
+    if (pin !== confirmPin) return toast('Los PIN no coinciden.');
+    localStorage.setItem(pinKey(), await sha256(pin));
+    savePinFailures({ count: 0, blockedUntil: 0 });
+    state.unlocked = true;
+    enterApp();
+    return;
+  }
+
+  const failures = readPinFailures();
+  if (failures.blockedUntil > Date.now()) return toast(`Espera ${humanDuration(failures.blockedUntil - Date.now())} antes de intentar otra vez.`);
+  const hash = await sha256(pin);
+  if (hash !== localStorage.getItem(pinKey())) {
+    const count = failures.count + 1;
+    const blockedUntil = count >= 5 ? Date.now() + 5 * 60000 : 0;
+    savePinFailures({ count: blockedUntil ? 0 : count, blockedUntil });
+    return toast(blockedUntil ? 'Demasiados intentos. Bloqueado durante 5 minutos.' : 'PIN incorrecto.');
+  }
+  savePinFailures({ count: 0, blockedUntil: 0 });
+  state.unlocked = true;
+  enterApp();
+}
+
+async function validateAdminOnline() {
+  await state.user.getIdToken(true);
+  if (!localStorage.getItem(ADMIN_DEVICE_NAME_KEY)) localStorage.setItem(ADMIN_DEVICE_NAME_KEY, defaultDeviceName());
+  state.actor = { id: state.user.uid, name: 'Administrador', role: 'admin', email: state.user.email || '' };
+  state.device = { deviceName: currentDeviceName(), offlineHours: 168, active: true, role: 'admin' };
+  storeLease();
+}
+
+async function evaluateAccess({ forceServer = false } = {}) {
+  if (!state.user) {
+    showOnly('accessView');
+    return;
+  }
+  updateConnectionUi();
+  state.lease = readJson(leaseKey());
+
+  if (state.admin) {
+    let validated = false;
+    if (navigator.onLine || forceServer) {
+      try {
+        await validateAdminOnline();
+        validated = true;
+      } catch (error) {
+        console.warn('No se pudo validar al administrador', error);
+      }
+    }
+    if (!validated && leaseRemaining() <= 0) {
+      return showBlocked('El permiso offline del administrador venció.', 'Conecta esta PC a internet e inicia sesión nuevamente para renovar los 7 días.');
+    }
+    if (!state.actor) {
+      state.actor = { id: state.user.uid, name: 'Administrador', role: 'admin', email: state.user.email || '' };
+      state.device = { deviceName: currentDeviceName(), offlineHours: 168, active: true, role: 'admin' };
+    }
+    return localStorage.getItem(pinKey()) ? showPinUnlock() : showPinSetup();
+  }
+
+  const deviceRef = doc(db, 'devices', state.user.uid);
+  let snapshot = null;
+  let serverValidated = false;
+  if (navigator.onLine || forceServer) {
+    try {
+      snapshot = await getDocFromServer(deviceRef);
+      serverValidated = true;
+    } catch (error) {
+      console.warn('Validación del dispositivo no disponible', error);
+    }
+  }
+  if (!snapshot) {
+    try { snapshot = await getDoc(deviceRef); } catch (error) { console.warn(error); }
+  }
+
+  if (snapshot?.exists()) {
+    state.device = { id: snapshot.id, ...snapshot.data() };
+    state.actor = { id: state.user.uid, name: state.device.userName || 'Operador', role: 'operator' };
+    localStorage.setItem(actorNameKey(), state.actor.name);
+    if (!state.device.active) {
+      clearLocalAccess();
+      return showBlocked('Este dispositivo fue revocado.', 'El administrador debe reactivarlo o autorizar una nueva instalación.');
+    }
+    if (serverValidated) {
+      storeLease();
+      updateDoc(deviceRef, { lastSeenAt: serverTimestamp(), appVersion: APP_VERSION }).catch(console.warn);
+    } else if (leaseRemaining() <= 0) {
+      return showBlocked('El permiso offline venció.', `Conecta este dispositivo a internet para renovar su acceso de ${leaseHours()} horas.`);
+    }
+    watchOwnDevice();
+    return localStorage.getItem(pinKey()) ? showPinUnlock() : showPinSetup();
+  }
+
+  state.device = null;
+  state.actor = null;
+  if (!navigator.onLine) return showBlocked('No se pudo comprobar el dispositivo.', 'Conéctalo a internet para enviar o confirmar una solicitud.');
+
+  let requestSnapshot = null;
+  try { requestSnapshot = await getDocFromServer(doc(db, 'deviceRequests', state.user.uid)); } catch { /* sin solicitud */ }
+  if (requestSnapshot?.exists()) {
+    const request = { id: requestSnapshot.id, ...requestSnapshot.data() };
+    if (request.status === 'pending' || request.status === 'key_issued') return showPendingRequest(request);
+    if (request.status === 'activated') return evaluateAccess({ forceServer: true });
+  }
+  showRequestForm();
+}
+
+function watchOwnDevice() {
+  state.accessUnsub?.();
+  if (state.admin || !state.user) return;
+  state.accessUnsub = onSnapshot(doc(db, 'devices', state.user.uid), snapshot => {
+    if (!snapshot.exists()) return;
+    const device = { id: snapshot.id, ...snapshot.data() };
+    if (!device.active) {
+      clearLocalAccess();
+      showBlocked('Este dispositivo fue revocado.', 'El administrador desactivó esta instalación.');
+      return;
+    }
+    if (!state.device || state.device.active !== device.active) evaluateAccess({ forceServer: true });
+  }, error => console.warn('Escucha de dispositivo', error));
+}
+
+async function submitDeviceRequest(event) {
+  event.preventDefault();
+  if (!state.user?.isAnonymous) return toast('La solicitud debe hacerse desde una identidad de dispositivo.');
+  if (!navigator.onLine) return toast('Conéctate para enviar la solicitud.');
+  const data = new FormData(event.currentTarget);
+  const userName = String(data.get('userName') || '').trim();
+  const deviceName = String(data.get('deviceName') || '').trim();
+  if (!userName || !deviceName) return toast('Completa el nombre y el dispositivo.');
+  localStorage.setItem(actorNameKey(), userName);
+  const whatsappWindow = window.open('', '_blank');
+  try {
+    await setDoc(doc(db, 'deviceRequests', state.user.uid), {
+      uid: state.user.uid,
+      userName,
+      deviceName,
+      appVersion: APP_VERSION,
+      status: 'pending',
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    whatsappWindow?.close();
+    throw error;
+  }
+  const request = { uid: state.user.uid, userName, deviceName, status: 'pending' };
+  state.request = request;
+  showPendingRequest(request);
+  const url = accessWhatsAppUrl(request);
+  if (whatsappWindow) whatsappWindow.location.href = url;
+}
+
+
+async function activateWithTemporaryKey(event) {
+  event.preventDefault();
+  if (!state.user?.isAnonymous) return toast('Esta clave debe usarse desde la instalación que hizo la solicitud.');
+  if (!navigator.onLine) return toast('Conéctate para validar la clave temporal.');
+  const data = new FormData(event.currentTarget);
+  const plainKey = normalizeActivationKey(data.get('activationKey'));
+  if (plainKey.length !== 12) return toast('La clave temporal no tiene el formato correcto.');
+  const keyHash = await sha256(plainKey);
+  const keyRef = doc(db, 'activationKeys', keyHash);
+  const deviceRef = doc(db, 'devices', state.user.uid);
+  const requestRef = doc(db, 'deviceRequests', state.user.uid);
+
+  try {
+    const outcome = await runTransaction(db, async transaction => {
+      const keySnap = await transaction.get(keyRef);
+      if (!keySnap.exists()) throw new Error('La clave es incorrecta o no corresponde a este dispositivo.');
+      const keyData = keySnap.data();
+      if (keyData.targetUid !== state.user.uid) throw new Error('La clave pertenece a otra instalación.');
+      if (keyData.used) throw new Error('Esta clave ya fue utilizada.');
+      const expiresAtMs = keyData.expiresAt?.toMillis?.() || 0;
+      if (!expiresAtMs || expiresAtMs <= Date.now()) throw new Error('La clave temporal venció. Solicita una nueva.');
+
+      const deviceSnap = await transaction.get(deviceRef);
+      const requestSnap = await transaction.get(requestRef);
+      if (keyData.mode === 'recovery') {
+        if (!deviceSnap.exists() || !deviceSnap.data().active) throw new Error('El dispositivo no está activo para recuperar el acceso.');
+        transaction.update(deviceRef, { lastSeenAt: serverTimestamp(), appVersion: APP_VERSION });
+      } else {
+        transaction.set(deviceRef, {
+          uid: state.user.uid,
+          userName: keyData.userName || 'Operador',
+          deviceName: keyData.deviceName || defaultDeviceName(),
+          active: true,
+          role: 'operator',
+          offlineHours: Number(keyData.offlineHours || 24),
+          appVersion: APP_VERSION,
+          activationKeyHash: keyHash,
+          authorizedAt: serverTimestamp(),
+          lastSeenAt: serverTimestamp(),
+          authorizedBy: keyData.createdBy || ADMIN_UID
+        });
+        if (requestSnap.exists()) {
+          transaction.update(requestRef, {
+            status: 'activated',
+            activatedAt: serverTimestamp(),
+            activationKeyHash: keyHash
+          });
+        }
+      }
+
+      transaction.update(keyRef, {
+        used: true,
+        usedAt: serverTimestamp(),
+        usedByUid: state.user.uid
+      });
+      return { mode: keyData.mode || 'activation' };
+    });
+
+    clearLocalAccess();
+    toast(outcome.mode === 'recovery' ? 'Acceso recuperado. Crea un PIN nuevo.' : 'Dispositivo activado. Crea tu PIN.');
+    await evaluateAccess({ forceServer: true });
+  } catch (error) {
+    const message = error?.code === 'permission-denied' ? 'La clave es incorrecta, venció o pertenece a otra instalación.' : (error.message || 'No se pudo utilizar la clave.');
+    toast(message);
+  }
+}
+
+function startLeaseTimer() {
+  clearInterval(state.leaseTimer);
+  state.leaseTimer = setInterval(async () => {
+    if (!state.unlocked || !state.user) return;
+    if (!navigator.onLine && leaseRemaining() <= 0) {
+      state.unlocked = false;
+      stopDataSync();
+      showBlocked('El permiso offline venció.', 'Conecta el dispositivo para renovar la autorización.');
+    }
+    updateLeaseUi();
+  }, 30000);
+}
+
+function updateLeaseUi() {
+  const remaining = leaseRemaining();
+  const text = navigator.onLine ? `Permiso offline: ${humanDuration(remaining)}` : `Offline restante: ${humanDuration(remaining)}`;
+  $('#leaseState').textContent = text;
+}
+
+async function writeAudit(action, details = {}) {
+  if (!state.user) return;
+  try {
+    await addDoc(collection(db, 'audit'), {
+      uid: state.user.uid,
+      actorName: state.actor?.name || '',
+      deviceId: currentDeviceId(),
+      deviceName: currentDeviceName(),
+      action,
+      details,
+      createdAt: serverTimestamp(),
+      createdAtIso: now()
+    });
+  } catch (error) {
+    console.warn('Auditoría no disponible', error);
+  }
+}
+
+function stopDataSync() {
+  state.dataUnsubs.forEach(unsub => {
+    try { unsub(); } catch { /* no-op */ }
+  });
+  state.dataUnsubs = [];
+  state.collectionLoaded.clear();
+}
+
+function startDataSync() {
+  if (state.dataUnsubs.length) return;
+  for (const collectionName of ENTITY_COLLECTIONS) {
+    const unsub = onSnapshot(
+      collection(db, collectionName),
+      { includeMetadataChanges: true },
+      snapshot => {
+        state.data[collectionName] = snapshot.docs.map(item => ({ id: item.id, ...item.data(), _pending: item.metadata.hasPendingWrites }));
+        state.pendingByCollection[collectionName] = snapshot.docs.filter(item => item.metadata.hasPendingWrites).length;
+        state.collectionLoaded.add(collectionName);
+        state.data.updatedAt = now();
+        updateSyncUi();
+        renderAll();
+      },
+      error => {
+        console.error(`Sincronización ${collectionName}`, error);
+        $('#storageBadge').textContent = 'Error de sincronización';
+        $('#storageBadge').className = 'sync-badge error';
+        if (String(error.code || '').includes('permission-denied')) {
+          state.unlocked = false;
+          stopDataSync();
+          showBlocked('Firebase rechazó el acceso.', 'El dispositivo pudo haber sido revocado o las reglas deben actualizarse.');
+        }
+      }
+    );
+    state.dataUnsubs.push(unsub);
+  }
+}
+
+function pendingWriteCount() {
+  return Object.values(state.pendingByCollection).reduce((sum, value) => sum + Number(value || 0), 0);
+}
+
+function updateSyncUi() {
+  const badge = $('#storageBadge');
+  if (!badge) return;
+  const pending = pendingWriteCount();
+  if (!navigator.onLine) {
+    badge.textContent = pending ? `Sin conexión · ${pending} pendiente${pending === 1 ? '' : 's'}` : 'Sin conexión';
+    badge.className = 'sync-badge offline';
+  } else if (pending) {
+    badge.textContent = `Sincronizando · ${pending}`;
+    badge.className = 'sync-badge pending';
+  } else if (state.collectionLoaded.size < ENTITY_COLLECTIONS.length) {
+    badge.textContent = 'Cargando datos…';
+    badge.className = 'sync-badge syncing';
+  } else {
+    badge.textContent = 'Todo sincronizado';
+    badge.className = 'sync-badge';
+  }
+}
+
+function actorFields(existing = null) {
+  const stamp = now();
+  const base = {
+    updatedAt: stamp,
+    updatedByUid: state.user.uid,
+    updatedByName: state.actor?.name || '',
+    updatedByDevice: currentDeviceName(),
+    serverUpdatedAt: serverTimestamp()
+  };
+  if (!existing?.createdByUid) {
+    base.createdAt = existing?.createdAt || stamp;
+    base.createdByUid = state.user.uid;
+    base.createdByName = state.actor?.name || '';
+    base.createdByDevice = currentDeviceName();
+    base.serverCreatedAt = serverTimestamp();
+  }
+  return base;
+}
+
+async function saveEntity(collectionName, entity, message = '', auditAction = '') {
+  if (!state.unlocked || !state.user) return toast('El dispositivo no está desbloqueado.');
+  const clean = { ...entity };
+  delete clean._pending;
+  Object.assign(clean, actorFields(entity));
+  try {
+    await setDoc(doc(db, collectionName, clean.id), clean, { merge: true });
+    if (message) toast(message);
+    if (auditAction) writeAudit(auditAction, { collection: collectionName, id: clean.id });
+  } catch (error) {
+    console.error(error);
+    toast(error.code === 'permission-denied' ? 'Firebase rechazó la operación.' : `No se pudo guardar: ${error.message}`);
+  }
+}
+
+function normalizeImportedEntity(collectionName, item) {
+  const normalized = { ...item };
+  if (collectionName === 'campaigns') {
+    normalized.factorEnabled = item?.factorEnabled === true;
+    const value = Number(item?.factor);
+    normalized.factor = normalized.factorEnabled && Number.isFinite(value) && value >= 0 ? value : null;
+  }
+  if (collectionName === 'deliveries') {
+    const value = Number(item?.manualResult);
+    const validManualResult = item?.manualResult !== null && item?.manualResult !== undefined && item?.manualResult !== '' && Number.isFinite(value) && value >= 0;
+    normalized.manualResult = validManualResult ? value : null;
+    normalized.manualResultUpdatedAt = item?.manualResultUpdatedAt || null;
+    normalized.manualResultUpdatedBy = item?.manualResultUpdatedBy || null;
+  }
+  return normalized;
+}
+
+async function saveManyFromData(data, message = 'Datos importados.') {
+  const groups = [
+    ['campaigns', Array.isArray(data.campaigns) ? data.campaigns : []],
+    ['sales', Array.isArray(data.sales) ? data.sales : []],
+    ['results', Array.isArray(data.results) ? data.results : []],
+    ['deliveries', Array.isArray(data.deliveries) ? data.deliveries : []]
+  ];
+  const operations = groups.flatMap(([name, items]) => items.map(item => ({ name, item })));
+  if (!operations.length) return toast('El archivo no contiene registros para importar.');
+  let completed = 0;
+  for (let index = 0; index < operations.length; index += 400) {
+    const batch = writeBatch(db);
+    for (const operation of operations.slice(index, index + 400)) {
+      const id = operation.item.id || makeId(operation.name.slice(0, -1));
+      const existing = normalizeImportedEntity(operation.name, { ...operation.item, id });
+      delete existing._pending;
+      const payload = { ...existing, ...actorFields(existing) };
+      batch.set(doc(db, operation.name, id), payload, { merge: true });
+      completed += 1;
+    }
+    await batch.commit();
+  }
+  writeAudit('data.imported', { count: completed });
+  toast(`${message} ${completed} registros procesados.`);
+}
+
+function visibleSales() {
+  return state.data.sales.filter(sale => !sale.deleted);
+}
+
+function visibleCampaigns() {
+  return state.data.campaigns.filter(campaign => !campaign.deleted);
+}
+
+function activeCampaigns() {
+  return visibleCampaigns().filter(campaign => campaign.status === 'active');
+}
+
+function getCampaign(campaignId) {
+  return state.data.campaigns.find(campaign => campaign.id === campaignId && !campaign.deleted) || null;
+}
+
+function numberForCampaign(value, campaign) {
+  const numeric = Number.parseInt(String(value).trim(), 10);
+  if (!Number.isInteger(numeric)) throw new Error('El número no es válido.');
+  if (numeric < Number(campaign.numberMin) || numeric > Number(campaign.numberMax)) {
+    throw new Error(`El número debe estar entre ${campaign.numberMin} y ${campaign.numberMax}.`);
+  }
+  return String(numeric).padStart(Number(campaign.numberWidth || 1), '0');
+}
+
+function campaignUsesSeries(campaign) {
+  return campaign?.useSeries === true;
+}
+
+function campaignFactorEnabled(campaign) {
+  return campaign?.factorEnabled === true;
+}
+
+function campaignFactor(campaign) {
+  if (!campaignFactorEnabled(campaign)) return null;
+  const value = Number(campaign?.factor);
+  return Number.isFinite(value) && value >= 0 ? value : null;
+}
+
+function formatPlainNumber(value) {
+  return new Intl.NumberFormat('es-CR', { maximumFractionDigits: 20 }).format(Number(value));
+}
+
+function campaignFactorLabel(campaign) {
+  const value = campaignFactor(campaign);
+  return value === null ? 'Sin factor' : `Factor ${formatPlainNumber(value)}`;
+}
+
+function hasManualResult(delivery) {
+  if (!delivery || delivery.manualResult === null || delivery.manualResult === undefined || delivery.manualResult === '') return false;
+  const value = Number(delivery.manualResult);
+  return Number.isFinite(value) && value >= 0;
+}
+
+function manualResultValue(delivery) {
+  return hasManualResult(delivery) ? Number(delivery.manualResult) : null;
+}
+
+function seriesForCampaign(value, campaign) {
+  if (!campaignUsesSeries(campaign)) return '';
+  const series = String(value || '').trim().toUpperCase();
+  if (!series) throw new Error('La serie es obligatoria para esta campaña.');
+  if (series.length > 40) throw new Error('La serie no puede superar 40 caracteres.');
+  return series;
+}
+
+function numberSeriesLabel(number, series, campaign) {
+  return campaignUsesSeries(campaign) ? `${number} · Serie ${series || '—'}` : number;
+}
+
+function updateFactorField({ clearWhenDisabled = false } = {}) {
+  const form = $('#campaignForm');
+  const checkbox = form?.elements.namedItem('factorEnabled');
+  const input = form?.elements.namedItem('factor');
+  if (!checkbox || !input) return;
+  const enabled = checkbox.checked;
+  input.disabled = !enabled;
+  input.required = enabled;
+  if (!enabled && clearWhenDisabled) input.value = '';
+}
+
+function updateSeriesFields() {
+  const saleCampaign = getCampaign($('#saleForm select[name="campaignId"]')?.value);
+  const saleField = $('[data-series-field="sale"]');
+  const saleInput = saleField?.querySelector('input[name="series"]');
+  const saleEnabled = campaignUsesSeries(saleCampaign);
+  saleField?.classList.toggle('hidden', !saleEnabled);
+  if (saleInput) {
+    saleInput.required = saleEnabled;
+    if (!saleEnabled) saleInput.value = '';
+  }
+
+  const resultCampaign = getCampaign($('#resultForm select[name="campaignId"]')?.value);
+  const resultField = $('[data-series-field="result"]');
+  const resultInput = resultField?.querySelector('input[name="winningSeries"]');
+  const resultEnabled = campaignUsesSeries(resultCampaign);
+  resultField?.classList.toggle('hidden', !resultEnabled);
+  if (resultInput) {
+    resultInput.required = resultEnabled;
+    if (!resultEnabled) resultInput.value = '';
+  }
+}
+
+function showView(viewName) {
+  if (!isAdmin() && viewName === 'devices') viewName = 'dashboard';
+  state.activeView = viewName;
+  $$('.view').forEach(view => view.classList.toggle('active', view.id === `view-${viewName}`));
+  $$('#nav button').forEach(button => button.classList.toggle('active', button.dataset.view === viewName));
+  $('#sidebar').classList.remove('open');
+  if (viewName === 'result') renderWinnerSummary();
+  if (viewName === 'sales') renderSales();
+  if (viewName === 'devices' && isAdmin()) refreshDevices();
+}
+
+function populateCampaignSelect(select, { includeAll = false, activeOnly = false } = {}) {
+  const previous = select.value;
+  const campaigns = activeOnly ? activeCampaigns() : visibleCampaigns();
+  const options = [];
+  if (includeAll) options.push('<option value="all">Todas las campañas</option>');
+  options.push(...campaigns.map(campaign => `<option value="${escapeHtml(campaign.id)}">${escapeHtml(campaign.name)}${campaignUsesSeries(campaign) ? ' · con serie' : ''}</option>`));
+  if (!campaigns.length && !includeAll) options.push('<option value="">No hay campañas disponibles</option>');
+  select.innerHTML = options.join('');
+  if (Array.from(select.options).some(option => option.value === previous)) select.value = previous;
+}
+
+function renderAll() {
+  if (!state.unlocked || !state.actor) return;
+  $('#userName').textContent = state.actor.name;
+  $('#userRole').textContent = isAdmin() ? 'Administrador · 7 días offline' : `${currentDeviceName()} · ${leaseHours()} h offline`;
+  $('#userAvatar').textContent = state.actor.name.trim().charAt(0).toUpperCase() || 'U';
+  $$('[data-admin-only]').forEach(element => element.classList.toggle('hidden', !isAdmin()));
+
+  const active = activeCampaigns()[0];
+  $('#activeCampaignLabel').textContent = active ? active.name : 'Sin campaña activa';
+  populateCampaignSelect($('#dashboardCampaignFilter'), { includeAll: true });
+  populateCampaignSelect($('#salesCampaignFilter'), { includeAll: true });
+  populateCampaignSelect($('#saleForm select[name="campaignId"]'), { activeOnly: true });
+  populateCampaignSelect($('#resultForm select[name="campaignId"]'));
+  updateSeriesFields();
+  updateFactorField();
+
+  renderDashboard();
+  renderSales();
+  renderCampaigns();
+  renderWinnerSummary();
+  updateConnectionUi();
+  updateLeaseUi();
+  $('#legacyMigrationPanel').classList.toggle('hidden', !localStorage.getItem(LEGACY_STORAGE_KEY));
+  if (!isAdmin() && state.activeView === 'devices') showView('dashboard');
+}
+
+function renderDashboard() {
+  const filter = $('#dashboardCampaignFilter').value || 'all';
+  const sales = visibleSales().filter(sale => filter === 'all' || sale.campaignId === filter);
+  const valid = sales.filter(sale => sale.paymentStatus !== 'cancelled');
+  const paid = valid.filter(sale => sale.paymentStatus === 'paid');
+  const pending = valid.filter(sale => sale.paymentStatus === 'pending');
+  const totalAmount = paid.reduce((sum, sale) => sum + Number(sale.amount || 0), 0);
+  const participationCount = valid.reduce((sum, sale) => sum + Number(sale.quantity || 0), 0);
+
+  $('#metrics').innerHTML = [
+    ['Ventas', valid.length, 'registros activos'],
+    ['Participaciones', participationCount, 'cantidad total'],
+    ['Cobrado', formatAmount(totalAmount), 'ventas pagadas'],
+    ['Pendientes', pending.length, 'ventas sin pagar']
+  ].map(([label, value, note]) => `<article class="metric-card"><span>${label}</span><strong>${value}</strong><small>${note}</small></article>`).join('');
+
+  const recent = [...sales].sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0)).slice(0, 8);
+  $('#recentSales').innerHTML = recent.length ? recent.map(sale => {
+    const campaign = getCampaign(sale.campaignId);
+    return `<div class="list-item"><div><strong>${escapeHtml(sale.customerName)}</strong><small>${escapeHtml(campaign?.name || 'Campaña')} · ${escapeHtml(numberSeriesLabel(sale.number, sale.series, campaign))} · ${escapeHtml(sale.sellerName || sale.createdByName || 'Usuario')}</small></div><div><span class="status-pill ${sale.paymentStatus}">${paymentLabel(sale.paymentStatus)}</span><small>${sale._pending ? '<span class="pending-dot"></span>Pendiente' : '<span class="server-dot"></span>Confirmado'}</small></div></div>`;
+  }).join('') : '<div class="empty">Todavía no hay ventas registradas.</div>';
+
+  $('#localSummary').innerHTML = `
+    <div class="sync-line"><span>Cuenta</span><strong>${escapeHtml(state.actor.name)}</strong></div>
+    <div class="sync-line"><span>Dispositivo</span><strong>${escapeHtml(currentDeviceName())}</strong></div>
+    <div class="sync-line"><span>Sincronización</span><strong>${pendingWriteCount() ? `${pendingWriteCount()} pendiente(s)` : 'Confirmada'}</strong></div>
+    <div class="sync-line"><span>Conexión actual</span><strong>${navigator.onLine ? 'En línea' : 'Sin conexión'}</strong></div>
+    <div class="sync-line"><span>Permiso restante</span><strong>${humanDuration(leaseRemaining())}</strong></div>`;
+}
+
+function renderCampaigns() {
+  const container = $('#campaignList');
+  const campaigns = visibleCampaigns().sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0));
+  if (!campaigns.length) {
+    container.innerHTML = '<div class="panel empty">Crea la primera campaña para registrar ventas.</div>';
+    return;
+  }
+  container.innerHTML = campaigns.map(campaign => {
+    const saleCount = state.data.sales.filter(sale => !sale.deleted && sale.campaignId === campaign.id && sale.paymentStatus !== 'cancelled').length;
+    return `<article class="campaign-card">
+      <header><div><h3>${escapeHtml(campaign.name)}</h3><span class="status-pill ${campaign.status === 'active' ? 'paid' : 'cancelled'}">${campaignStatusLabel(campaign.status)}</span></div><strong>${campaign.numberMin}–${campaign.numberMax}</strong></header>
       <div class="campaign-meta">
-        <span class="meta-chip">${r} ventas</span>
-        <span class="meta-chip">${t.allowRepeated?"Registros repetidos":"Registros exclusivos"}</span>
-        <span class="meta-chip">${Un(t)?"N\xFAmero + serie":"Solo n\xFAmero"}</span>
-        <span class="meta-chip">${t.eligibility==="paid"?"Solo pagados":"Pagados y pendientes"}</span>
-        ${t._pending?'<span class="meta-chip">Pendiente de sincronizar</span>':""}
+        <span class="meta-chip">${saleCount} ventas</span>
+        <span class="meta-chip">${campaign.allowRepeated ? 'Registros repetidos' : 'Registros exclusivos'}</span>
+        <span class="meta-chip">${campaignUsesSeries(campaign) ? 'Número + serie' : 'Solo número'}</span>
+        <span class="meta-chip">${campaign.eligibility === 'paid' ? 'Solo pagados' : 'Pagados y pendientes'}</span>
+        <span class="meta-chip factor-chip">${escapeHtml(campaignFactorLabel(campaign))}</span>
+        ${campaign._pending ? '<span class="meta-chip">Pendiente de sincronizar</span>' : ''}
       </div>
-      ${t.notes?`<p class="muted">${me(t.notes)}</p>`:""}
+      ${campaign.notes ? `<p class="muted">${escapeHtml(campaign.notes)}</p>` : ''}
       <div class="card-actions">
-        <button class="secondary" data-campaign-toggle="${t.id}">${t.status==="active"?"Cerrar campa\xF1a":"Activar campa\xF1a"}</button>
-        <button class="danger" data-campaign-delete="${t.id}" ${r?'disabled title="No se puede eliminar una campa\xF1a con ventas"':""}>Eliminar</button>
+        <button class="secondary" data-campaign-toggle="${campaign.id}">${campaign.status === 'active' ? 'Cerrar campaña' : 'Activar campaña'}</button>
+        <button class="danger" data-campaign-delete="${campaign.id}" ${saleCount ? 'disabled title="No se puede eliminar una campaña con ventas"' : ''}>Eliminar</button>
       </div>
-    </article>`}).join("")}function vI(){let n=O("#salesCampaignFilter").value||"all",e=O("#salesStatusFilter").value||"all",t=P2(O("#salesSearch").value);return Xo().filter(r=>!(n!=="all"&&r.campaignId!==n||e!=="all"&&r.paymentStatus!==e||t&&!P2([r.number,r.series,r.customerName,r.phone,r.sellerName,r.createdByName].join(" ")).includes(t))).sort((r,s)=>Date.parse(s.createdAt||0)-Date.parse(r.createdAt||0))}function Zo(){let n=vI(),e='<div class="table-row header"><span>N\xFAmero</span><span>Cliente</span><span>Tel\xE9fono</span><span>Cantidad</span><span>Monto</span><span>Estado</span><span>Acci\xF3n</span></div>',t=n.map(r=>{let s=Ot(r.campaignId);return`<div class="table-row">
-    <span><span class="number-chip">${me(Vr(r.number,r.series,s))}</span></span>
-    <span><strong>${me(r.customerName)}</strong><small>${me(r.sellerName||r.createdByName||"Usuario")} \xB7 ${L2(r.createdAt)} ${r._pending?"\xB7 Pendiente":""}</small></span>
-    <span>${me(r.phone||"\u2014")}</span>
-    <span>${Number(r.quantity||0)}</span>
-    <span>${V2(r.amount)}</span>
-    <span><span class="status-pill ${r.paymentStatus}">${M2(r.paymentStatus)}</span></span>
-    <span class="table-actions"><button data-edit-sale="${r.id}" title="Editar">\u270E</button></span>
-  </div>`}).join("");O("#salesTable").innerHTML=n.length?e+t:'<div class="empty">No hay ventas con esos filtros.</div>'}function TI(){let n=O('#resultForm select[name="campaignId"]').value;return R.data.results.find(e=>!e.deleted&&e.campaignId===n)||null}function AI(n){if(!n)return[];let e=Ot(n.campaignId);if(!e)return[];let t=e.eligibility==="paid"?["paid"]:["paid","pending"],r=R.data.sales.filter(i=>i.deleted||i.campaignId!==e.id||i.number!==n.winningNumber||!t.includes(i.paymentStatus)?!1:!Un(e)||String(i.series||"")===String(n.winningSeries||"")),s=new Map;for(let i of r){let a=hI(i.phone),o=a?`phone:${a}`:`name:${P2(i.customerName)}`,u=s.get(o)||{key:o,customerName:i.customerName,phone:i.phone,quantity:0,amount:0,sellers:new Set,sales:[]};u.quantity+=Number(i.quantity||0),u.amount+=Number(i.amount||0),u.sellers.add(i.sellerName||i.createdByName||"Usuario"),u.sales.push(i),!u.phone&&i.phone&&(u.phone=i.phone),s.set(o,u)}return Array.from(s.values()).map(i=>({...i,sellers:Array.from(i.sellers)}))}function D2(n,e){return R.data.deliveries.find(t=>!t.deleted&&t.resultId===n&&t.groupKey===e)||null}function K2(){let n=Ot(O('#resultForm select[name="campaignId"]').value),e=TI(),t=O("#winnerSummary");if(!n){t.innerHTML='<div class="panel empty">Crea una campa\xF1a para consultar coincidencias.</div>';return}if(!e){t.innerHTML='<div class="panel empty">Escribe un n\xFAmero para buscar coincidencias en esta campa\xF1a.</div>';return}let r=AI(e),s=r.reduce((o,u)=>o+u.quantity,0),i=r.filter(o=>!D2(e.id,o.key)?.delivered).length,a=r.map(o=>{let u=D2(e.id,o.key);return`<article class="winner-card">
-      <header><div><h3>${me(o.customerName)}</h3><span class="status-pill ${u?.delivered?"delivered":"pending"}">${u?.delivered?"Entregado":"Pendiente"}</span></div><span class="number-chip">${me(Vr(e.winningNumber,e.winningSeries,n))}</span></header>
+    </article>`;
+  }).join('');
+}
+
+function filteredSales() {
+  const campaignFilter = $('#salesCampaignFilter').value || 'all';
+  const statusFilter = $('#salesStatusFilter').value || 'all';
+  const searchText = normalizeText($('#salesSearch').value);
+  return visibleSales().filter(sale => {
+    if (campaignFilter !== 'all' && sale.campaignId !== campaignFilter) return false;
+    if (statusFilter !== 'all' && sale.paymentStatus !== statusFilter) return false;
+    if (searchText) {
+      const haystack = normalizeText([sale.number, sale.series, sale.customerName, sale.phone, sale.sellerName, sale.createdByName].join(' '));
+      if (!haystack.includes(searchText)) return false;
+    }
+    return true;
+  }).sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0));
+}
+
+function renderSales() {
+  const sales = filteredSales();
+  const header = '<div class="table-row header"><span>Número</span><span>Cliente</span><span>Teléfono</span><span>Cantidad</span><span>Monto</span><span>Estado</span><span>Acción</span></div>';
+  const rows = sales.map(sale => {
+    const campaign = getCampaign(sale.campaignId);
+    return `<div class="table-row">
+    <span><span class="number-chip">${escapeHtml(numberSeriesLabel(sale.number, sale.series, campaign))}</span></span>
+    <span><strong>${escapeHtml(sale.customerName)}</strong><small>${escapeHtml(campaign?.name || 'Campaña')} · ${escapeHtml(campaignFactorLabel(campaign))}</small><small>${escapeHtml(sale.sellerName || sale.createdByName || 'Usuario')} · ${formatDate(sale.createdAt)} ${sale._pending ? '· Pendiente' : ''}</small></span>
+    <span>${escapeHtml(sale.phone || '—')}</span>
+    <span>${Number(sale.quantity || 0)}</span>
+    <span>${formatAmount(sale.amount)}</span>
+    <span><span class="status-pill ${sale.paymentStatus}">${paymentLabel(sale.paymentStatus)}</span></span>
+    <span class="table-actions"><button data-edit-sale="${sale.id}" title="Editar">✎</button></span>
+  </div>`;
+  }).join('');
+  $('#salesTable').innerHTML = sales.length ? header + rows : '<div class="empty">No hay ventas con esos filtros.</div>';
+}
+
+function currentResult() {
+  const campaignId = $('#resultForm select[name="campaignId"]').value;
+  return state.data.results.find(result => !result.deleted && result.campaignId === campaignId) || null;
+}
+
+function winnerGroups(result) {
+  if (!result) return [];
+  const campaign = getCampaign(result.campaignId);
+  if (!campaign) return [];
+  const eligibleStatuses = campaign.eligibility === 'paid' ? ['paid'] : ['paid', 'pending'];
+  const matched = state.data.sales.filter(sale => {
+    if (sale.deleted || sale.campaignId !== campaign.id || sale.number !== result.winningNumber || !eligibleStatuses.includes(sale.paymentStatus)) return false;
+    return !campaignUsesSeries(campaign) || String(sale.series || '') === String(result.winningSeries || '');
+  });
+  const groups = new Map();
+  for (const sale of matched) {
+    const phone = normalizePhone(sale.phone);
+    const key = phone ? `phone:${phone}` : `name:${normalizeText(sale.customerName)}`;
+    const existing = groups.get(key) || { key, customerName: sale.customerName, phone: sale.phone, quantity: 0, amount: 0, sellers: new Set(), sales: [] };
+    existing.quantity += Number(sale.quantity || 0);
+    existing.amount += Number(sale.amount || 0);
+    existing.sellers.add(sale.sellerName || sale.createdByName || 'Usuario');
+    existing.sales.push(sale);
+    if (!existing.phone && sale.phone) existing.phone = sale.phone;
+    groups.set(key, existing);
+  }
+  return Array.from(groups.values()).map(group => ({ ...group, sellers: Array.from(group.sellers) }));
+}
+
+function deliveryFor(resultId, groupKey) {
+  return state.data.deliveries.find(delivery => !delivery.deleted && delivery.resultId === resultId && delivery.groupKey === groupKey) || null;
+}
+
+function renderWinnerSummary() {
+  const campaign = getCampaign($('#resultForm select[name="campaignId"]').value);
+  const result = currentResult();
+  const container = $('#winnerSummary');
+  if (!campaign) {
+    container.innerHTML = '<div class="panel empty">Crea una campaña para consultar coincidencias.</div>';
+    return;
+  }
+  if (!result) {
+    container.innerHTML = '<div class="panel empty">Escribe un número para buscar coincidencias en esta campaña.</div>';
+    return;
+  }
+  const groups = winnerGroups(result);
+  const totalParticipations = groups.reduce((sum, group) => sum + group.quantity, 0);
+  const pendingDeliveries = groups.filter(group => !deliveryFor(result.id, group.key)?.delivered).length;
+  const cards = groups.map(group => {
+    const delivery = deliveryFor(result.id, group.key);
+    const savedManualResult = manualResultValue(delivery);
+    const factorValue = campaignFactor(campaign);
+    const seriesDetail = campaignUsesSeries(campaign) ? `<div><span>Serie</span><strong>${escapeHtml(result.winningSeries || '—')}</strong></div>` : '';
+    const factorDetail = campaignFactorEnabled(campaign) ? `<div><span>Factor</span><strong>${factorValue === null ? '—' : escapeHtml(formatPlainNumber(factorValue))}</strong></div>` : '';
+    const manualMetadata = hasManualResult(delivery) && (delivery.manualResultUpdatedBy || delivery.manualResultUpdatedAt)
+      ? `<small>Actualizado${delivery.manualResultUpdatedBy ? ` por ${escapeHtml(delivery.manualResultUpdatedBy)}` : ''}${delivery.manualResultUpdatedAt ? ` · ${formatDate(delivery.manualResultUpdatedAt)}` : ''}</small>`
+      : '';
+    return `<article class="winner-card">
+      <header><div><h3>${escapeHtml(group.customerName)}</h3><span class="status-pill ${delivery?.delivered ? 'delivered' : 'pending'}">${delivery?.delivered ? 'Entregado' : 'Pendiente'}</span></div></header>
       <div class="winner-details">
-        <div><span>Tel\xE9fono</span><strong>${me(o.phone||"\u2014")}</strong></div>
-        <div><span>Participaciones</span><strong>${o.quantity}</strong></div>
-        <div><span>Registrado por</span><strong>${me(o.sellers.join(", "))}</strong></div>
-        <div><span>Monto registrado</span><strong>${V2(o.amount)}</strong></div>
+        <div><span>Teléfono</span><strong>${escapeHtml(group.phone || '—')}</strong></div>
+        <div><span>Número</span><strong>${escapeHtml(result.winningNumber)}</strong></div>
+        ${seriesDetail}
+        <div><span>Participaciones</span><strong>${group.quantity}</strong></div>
+        <div><span>Monto registrado</span><strong>${formatAmount(group.amount)}</strong></div>
+        ${factorDetail}
+        <div><span>Registrado por</span><strong>${escapeHtml(group.sellers.join(', '))}</strong></div>
       </div>
-      <div class="card-actions"><button class="${u?.delivered?"ghost":"primary"}" data-delivery-key="${me(o.key)}" data-result-id="${e.id}">${u?.delivered?"Marcar pendiente":"Marcar entregado"}</button></div>
-    </article>`}).join("");t.innerHTML=`
+      <div class="manual-result-block">
+        <label class="manual-result-editor">Resultado manual
+          <input data-manual-result-input inputmode="decimal" min="0" step="any" type="number" value="${savedManualResult === null ? '' : escapeHtml(String(savedManualResult))}" placeholder="0"/>
+          ${manualMetadata}
+        </label>
+        <div class="manual-result-print"><span>Resultado manual</span><strong>${savedManualResult === null ? '—' : escapeHtml(formatPlainNumber(savedManualResult))}</strong></div>
+      </div>
+      <div class="card-actions">
+        <button class="secondary" data-save-manual-result="${escapeHtml(group.key)}" data-result-id="${result.id}" type="button">Guardar resultado</button>
+        <button class="${delivery?.delivered ? 'ghost' : 'primary'}" data-delivery-key="${escapeHtml(group.key)}" data-result-id="${result.id}" type="button">${delivery?.delivered ? 'Marcar pendiente' : 'Marcar entregado'}</button>
+      </div>
+    </article>`;
+  }).join('');
+  const factorOverview = campaignFactorEnabled(campaign)
+    ? `<article class="winner-stat"><span>Factor</span><strong>${campaignFactor(campaign) === null ? '—' : escapeHtml(formatPlainNumber(campaignFactor(campaign)))}</strong></article>`
+    : '';
+  container.innerHTML = `
     <div class="winner-overview">
-      <article class="winner-stat"><span>${Un(n)?"N\xFAmero y serie consultados":"N\xFAmero consultado"}</span><strong>${me(Vr(e.winningNumber,e.winningSeries,n))}</strong></article>
-      <article class="winner-stat"><span>Personas coincidentes</span><strong>${r.length}</strong></article>
-      <article class="winner-stat"><span>Entregas pendientes</span><strong>${i}</strong></article>
+      <article class="winner-stat"><span>${campaignUsesSeries(campaign) ? 'Número y serie consultados' : 'Número consultado'}</span><strong>${escapeHtml(numberSeriesLabel(result.winningNumber, result.winningSeries, campaign))}</strong></article>
+      <article class="winner-stat"><span>Personas coincidentes</span><strong>${groups.length}</strong></article>
+      <article class="winner-stat"><span>Entregas pendientes</span><strong>${pendingDeliveries}</strong></article>
+      ${factorOverview}
     </div>
-    <article class="panel"><p><strong>Total de participaciones coincidentes:</strong> ${s}</p>${e.notes?`<p class="muted">${me(e.notes)}</p>`:""}</article>
-    <div class="winner-list">${a||'<div class="panel empty">No hay registros elegibles con ese n\xFAmero.</div>'}</div>`}function V9(n,e,t){let r=new Blob([e],{type:t}),s=URL.createObjectURL(r),i=document.createElement("a");i.href=s,i.download=n,document.body.appendChild(i),i.click(),i.remove(),URL.revokeObjectURL(s)}function th(n){let e={...n};return delete e._pending,delete e.serverCreatedAt,delete e.serverUpdatedAt,e}function SI(){let n={version:2,exportedAt:Ji(),campaigns:R.data.campaigns.map(th),sales:R.data.sales.map(th),results:R.data.results.map(th),deliveries:R.data.deliveries.map(th)},e=new Date().toISOString().slice(0,10);V9(`numina-respaldo-${e}.json`,JSON.stringify(n,null,2),"application/json")}function w9(n){return`"${String(n??"").replace(/"/g,'""')}"`}function bI(){let n=["Fecha","Campa\xF1a","N\xFAmero","Serie","Cliente","Tel\xE9fono","Participaciones","Monto","Estado","Registrado por","Sincronizaci\xF3n","Notas"],e=Xo().map(r=>{let s=Ot(r.campaignId);return[r.createdAt,s?.name||"",r.number,r.series||"",r.customerName,r.phone,r.quantity,r.amount,M2(r.paymentStatus),r.sellerName||r.createdByName||"",r._pending?"Pendiente":"Confirmada",r.notes].map(w9).join(",")}),t=new Date().toISOString().slice(0,10);V9(`numina-ventas-${t}.csv`,"\uFEFF"+[n.map(w9).join(","),...e].join(`
-`),"text/csv;charset=utf-8")}function W2(n){let e=O(`#view-${n}`);nh(".view").forEach(t=>t.classList.remove("print-target")),e.classList.add("print-target"),window.print(),setTimeout(()=>e.classList.remove("print-target"),500)}function ch(){let n=!!R.deferredInstallPrompt;["#installBtn","#installAccessBtn","#installBackupBtn"].forEach(e=>O(e)?.classList.toggle("hidden",!n))}async function RI(){if(!R.deferredInstallPrompt){X("En Chrome o Edge, abre el men\xFA y elige \u201CInstalar aplicaci\xF3n\u201D o \u201CAgregar a pantalla principal\u201D.");return}R.deferredInstallPrompt.prompt(),await R.deferredInstallPrompt.userChoice,R.deferredInstallPrompt=null,ch()}async function I9(){!R.unlocked||!R.actor||(Mr("appView"),wI(),EI(),oh(),Ms()&&ta())}async function ta(){if(Ms()){if(!navigator.onLine){O("#requestList").innerHTML='<div class="empty">Con\xE9ctate para administrar solicitudes.</div>',O("#deviceList").innerHTML='<div class="empty">La revocaci\xF3n requiere conexi\xF3n.</div>';return}try{let[n,e]=await Promise.all([E2(_2(Gi(Pe,"deviceRequests"),y2("createdAt","desc"))),E2(_2(Gi(Pe,"devices"),y2("authorizedAt","desc")))]),t=n.docs.map(s=>({id:s.id,...s.data()})).filter(s=>["pending","key_issued"].includes(s.status)),r=e.docs.map(s=>({id:s.id,...s.data()}));PI(t),CI(r)}catch(n){console.error(n),O("#requestList").innerHTML=`<div class="empty">No se pudieron cargar solicitudes: ${me(n.message)}</div>`,O("#deviceList").innerHTML='<div class="empty">Revisa que las reglas nuevas de Firestore est\xE9n publicadas.</div>'}}}function PI(n){O("#requestList").innerHTML=n.length?n.map(e=>{let t=e.status==="key_issued";return`<article class="record-card">
-    <header><div><strong>${me(e.userName||"Usuario")}</strong><span>${me(e.deviceName||"Dispositivo")}</span></div><span class="status-pill requested">${t?"Clave generada":"Pendiente"}</span></header>
-    <small>C\xF3digo ${me(e.id.slice(0,8).toUpperCase())} \xB7 ${L2(e.createdAt)}</small>
-    <div class="card-actions"><button class="primary" data-generate-key="${me(e.id)}" type="button">${t?"Generar otra clave":"Generar clave"}</button><button class="danger" data-reject="${me(e.id)}" type="button">Rechazar</button></div>
-  </article>`}).join(""):'<div class="empty">No hay solicitudes pendientes.</div>'}function CI(n){O("#deviceList").innerHTML=n.length?n.map(e=>`<article class="record-card">
-    <header><div><strong>${me(e.userName||"Usuario")}</strong><span>${me(e.deviceName||"Dispositivo")}</span></div><span class="status-pill ${e.active?"active":"revoked"}">${e.active?"Activo":"Revocado"}</span></header>
-    <small>Offline ${Number(e.offlineHours||24)} h \xB7 ID ${me(e.id.slice(0,8).toUpperCase())} \xB7 \xDAltimo acceso ${L2(e.lastSeenAt)}</small>
-    <div class="card-actions">${e.active?`<button class="secondary" data-recovery-key="${me(e.id)}" type="button">Nueva clave</button>`:""}<button class="${e.active?"danger":"secondary"}" data-toggle-device="${me(e.id)}" data-active="${e.active?"1":"0"}" type="button">${e.active?"Revocar":"Reactivar"}</button></div>
-  </article>`).join(""):'<div class="empty">No hay dispositivos autorizados.</div>'}async function NI(n,e,t,r,s,i="activation"){if(!navigator.onLine)throw new Error("Con\xE9ctate para generar la clave.");let a=uI(),o=R9(a),u=await rh(o),l=Ae.fromMillis(Date.now()+Number(s)*6e4),d=T2(Pe);return d.set(Fe(Pe,"activationKeys",u),{targetUid:n,userName:e.trim(),deviceName:t.trim(),mode:i,offlineHours:Number(r),expiresAt:l,keySuffix:o.slice(-4),used:!1,createdAt:ot(),createdBy:R.user.uid}),i==="activation"&&d.update(Fe(Pe,"deviceRequests",n),{status:"key_issued",keyIssuedAt:ot(),keyExpiresAt:l}),await d.commit(),await Jo(i==="recovery"?"device.recoveryKeyCreated":"device.activationKeyCreated",{targetUid:n,userName:e,deviceName:t,offlineHours:Number(r),expiresMinutes:Number(s)}),{plainKey:a,expiresAt:l,userName:e,deviceName:t,expiresMinutes:Number(s),mode:i}}function DI(n){R.generatedKey=n,O("#generatedKeyOutput").textContent=n.plainKey,O("#keyResultMessage").textContent=`${n.mode==="recovery"?"Recuperaci\xF3n para":"Activaci\xF3n para"} ${n.userName} \xB7 ${n.deviceName}. Vence en ${n.expiresMinutes} minutos.`,O("#shareGeneratedKeyBtn").href=lI(n.plainKey,n.userName,n.deviceName,n.expiresMinutes),O("#keyResultDialog").showModal()}async function xI(n){await Ho(Fe(Pe,"deviceRequests",n),{status:"rejected",rejectedAt:ot(),rejectedBy:R.user.uid}),await Jo("device.requestRejected",{targetUid:n})}async function kI(n,e){await Ho(Fe(Pe,"devices",n),{active:!e,statusChangedAt:ot(),statusChangedBy:R.user.uid}),await Jo(e?"device.revoked":"device.reactivated",{targetUid:n})}async function OI(){let n=localStorage.getItem(b2);if(!n)return X("No se encontraron datos anteriores.");let e;try{e=JSON.parse(n)}catch{return X("Los datos anteriores no se pudieron leer.")}if(confirm("\xBFCopiar a Firebase las campa\xF1as y registros de la versi\xF3n anterior?"))try{await k9(e,"Migraci\xF3n completada."),localStorage.removeItem(b2),O("#legacyMigrationPanel").classList.add("hidden")}catch(t){X(`No se pudo migrar: ${t.message}`)}}async function M9(){!R.admin&&R.user?.isAnonymous&&!confirm("Cerrar esta sesi\xF3n desvincular\xE1 esta instalaci\xF3n. Para volver a entrar necesitar\xE1s una nueva autorizaci\xF3n. \xBFContinuar?")||await In(st)}async function F9(){if(!(!R.user||!navigator.onLine))try{if(R.admin)await D9();else{let n=await Go(Fe(Pe,"devices",R.user.uid));if(!n.exists()||!n.data().active)return Yo(),Fr(),Wt("Este dispositivo fue revocado.","El administrador desactiv\xF3 esta instalaci\xF3n.");R.device={id:n.id,...n.data()},R.actor={id:R.user.uid,name:R.device.userName||"Operador",role:"operator"},F2(),Ho(Fe(Pe,"devices",R.user.uid),{lastSeenAt:ot(),appVersion:Yi}).catch(console.warn)}q2(),$2()}catch(n){console.warn("Renovaci\xF3n silenciosa",n)}}O("#adminLoginForm").addEventListener("submit",async n=>{n.preventDefault(),O("#loginError").textContent="";let e=new FormData(n.currentTarget);try{st.currentUser&&await In(st),await x1(st,String(e.get("email")).trim(),String(e.get("password")))}catch(t){O("#loginError").textContent=ih(t)}});O("#togglePasswordBtn").addEventListener("click",()=>{let n=O('#adminLoginForm input[name="password"]');n.type=n.type==="password"?"text":"password",O("#togglePasswordBtn").textContent=n.type==="password"?"Ver":"Ocultar"});O("#resetPasswordBtn").addEventListener("click",async()=>{let n=O('#adminLoginForm input[name="email"]').value.trim();if(!n)return X("Escribe primero el correo.");try{await D1(st,n),X("Firebase envi\xF3 el correo de recuperaci\xF3n.")}catch(e){X(ih(e))}});O("#startRequestBtn")?.addEventListener("click",async()=>{if(!navigator.onLine)return X("Con\xE9ctate para crear la solicitud inicial.");try{st.currentUser&&await In(st),await eu(st)}catch(n){X(ih(n))}});O("#enterKeyBtn")?.addEventListener("click",async()=>{if(!navigator.onLine)return X("Con\xE9ctate para validar una clave temporal.");try{if(st.currentUser||await eu(st),!R.request)try{let n=await Go(Fe(Pe,"deviceRequests",st.currentUser.uid));n.exists()&&(R.request={id:n.id,...n.data()})}catch{}R.request?N9():B2()}catch(n){X(ih(n))}});O("#requestForm")?.addEventListener("submit",n=>_I(n).catch(e=>X(e.message)));O("#cancelRequestBtn")?.addEventListener("click",()=>In(st));O("#activationForm")?.addEventListener("submit",yI);O("#backFromActivationBtn")?.addEventListener("click",()=>R.request?U2(R.request):B2());O("#pinForm")?.addEventListener("submit",mI);O("#pinSignOutBtn")?.addEventListener("click",M9);O("#lockBtn").addEventListener("click",()=>{R.unlocked=!1,Fr(),C2()});O("#signOutBtn").addEventListener("click",M9);O("#validateNowBtn").addEventListener("click",async()=>{if(!navigator.onLine)return X("Con\xE9ctate para validar con Firebase.");await F9(),X("Validaci\xF3n completada."),j2()});O("#menuBtn").addEventListener("click",()=>O("#sidebar").classList.toggle("open"));O("#nav").addEventListener("click",n=>{let e=n.target.closest("button[data-view]");e&&L9(e.dataset.view)});O("#dashboardCampaignFilter").addEventListener("change",j2);O("#salesCampaignFilter").addEventListener("change",Zo);O("#salesStatusFilter").addEventListener("change",Zo);O("#salesSearch").addEventListener("input",Zo);O('#resultForm select[name="campaignId"]').addEventListener("change",()=>{ah(),K2()});O('#saleForm select[name="campaignId"]').addEventListener("change",ah);O("#campaignForm").addEventListener("submit",async n=>{n.preventDefault();let e=new FormData(n.currentTarget),t=Number(e.get("numberMin")),r=Number(e.get("numberMax")),s=Number(e.get("numberWidth"));if(!Number.isInteger(t)||!Number.isInteger(r)||t<0||r<t)return X("Revisa el rango num\xE9rico.");let i={id:Wo("campaign"),name:String(e.get("name")||"").trim(),numberMin:t,numberMax:r,numberWidth:s,useSeries:String(e.get("useSeries")||"false")==="true",eligibility:String(e.get("eligibility")||"paid"),allowRepeated:e.get("allowRepeated")==="on",notes:String(e.get("notes")||"").trim(),status:"active",deleted:!1};await Lr("campaigns",i,"Campa\xF1a creada.","campaign.created"),n.currentTarget.reset(),n.currentTarget.numberMin.value=0,n.currentTarget.numberMax.value=99,n.currentTarget.numberWidth.value=2,n.currentTarget.useSeries.value="false",n.currentTarget.allowRepeated.checked=!0});O("#campaignList").addEventListener("click",async n=>{let e=n.target.closest("[data-campaign-toggle]"),t=n.target.closest("[data-campaign-delete]");if(e){let r=Ot(e.dataset.campaignToggle);if(!r)return;let s={...r,status:r.status==="active"?"closed":"active"};await Lr("campaigns",s,"Estado de campa\xF1a actualizado.","campaign.statusChanged")}if(t){let r=Ot(t.dataset.campaignDelete);if(!r)return;if(R.data.sales.some(i=>!i.deleted&&i.campaignId===r.id))return X("No se puede eliminar una campa\xF1a con ventas.");confirm(`\xBFEliminar la campa\xF1a \u201C${r.name}\u201D?`)&&await Lr("campaigns",{...r,deleted:!0},"Campa\xF1a eliminada.","campaign.deleted")}});O("#saleForm").addEventListener("submit",async n=>{n.preventDefault();let e=new FormData(n.currentTarget),t=Ot(String(e.get("campaignId")||""));if(!t||t.status!=="active")return X("Selecciona una campa\xF1a activa.");let r,s;try{r=G2(e.get("number"),t),s=H2(e.get("series"),t)}catch(u){return X(u.message)}if(!t.allowRepeated&&R.data.sales.some(l=>!l.deleted&&l.campaignId===t.id&&l.number===r&&String(l.series||"")===s&&l.paymentStatus!=="cancelled"))return X(`${Vr(r,s,t)} ya fue registrado en esta campa\xF1a.`);let i=Number(e.get("quantity")),a=Number(e.get("amount"));if(!Number.isInteger(i)||i<1)return X("La cantidad debe ser un entero mayor que cero.");if(!Number.isFinite(a)||a<0)return X("El monto no es v\xE1lido.");let o={id:Wo("sale"),campaignId:t.id,number:r,series:s,quantity:i,customerName:String(e.get("customerName")||"").trim(),phone:String(e.get("phone")||"").trim(),amount:a,paymentStatus:String(e.get("paymentStatus")||"pending"),notes:String(e.get("notes")||"").trim(),sellerId:R.user.uid,sellerName:R.actor.name,deleted:!1};await Lr("sales",o,`${Vr(r,s,t)} registrado.`,"sale.created"),n.currentTarget.reset(),n.currentTarget.quantity.value=1,n.currentTarget.amount.value=0,ah()});O("#salesTable").addEventListener("click",n=>{let e=n.target.closest("[data-edit-sale]");if(!e)return;let t=Xo().find(u=>u.id===e.dataset.editSale);if(!t)return;let r=O("#editSaleForm");r.elements.namedItem("id").value=t.id,r.elements.namedItem("customerName").value=t.customerName,r.elements.namedItem("phone").value=t.phone||"",r.elements.namedItem("number").value=t.number;let s=O('[data-series-field="edit"]'),i=r.elements.namedItem("series"),a=Ot(t.campaignId),o=Un(a);s?.classList.toggle("hidden",!o),i.required=o,i.value=t.series||"",r.elements.namedItem("quantity").value=t.quantity,r.elements.namedItem("amount").value=t.amount,r.elements.namedItem("paymentStatus").value=t.paymentStatus,r.elements.namedItem("notes").value=t.notes||"",O("#editSaleDialog").showModal()});O("#editSaleForm").addEventListener("submit",async n=>{n.preventDefault();let e=new FormData(n.currentTarget),t=Xo().find(o=>o.id===e.get("id"));if(!t)return X("No se encontr\xF3 la venta.");let r=Ot(t.campaignId),s,i;try{s=G2(e.get("number"),r),i=H2(e.get("series"),r)}catch(o){return X(o.message)}if(!r.allowRepeated&&R.data.sales.some(u=>!u.deleted&&u.id!==t.id&&u.campaignId===r.id&&u.number===s&&String(u.series||"")===i&&u.paymentStatus!=="cancelled"))return X(`${Vr(s,i,r)} ya fue registrado en esta campa\xF1a.`);let a={...t,customerName:String(e.get("customerName")||"").trim(),phone:String(e.get("phone")||"").trim(),number:s,series:i,quantity:Math.max(1,Number(e.get("quantity"))||1),amount:Math.max(0,Number(e.get("amount"))||0),paymentStatus:String(e.get("paymentStatus")||"pending"),notes:String(e.get("notes")||"").trim()};await Lr("sales",a,"Venta actualizada.","sale.updated"),O("#editSaleDialog").close()});O("#closeEditDialogBtn").addEventListener("click",()=>O("#editSaleDialog").close());O("#cancelEditDialogBtn").addEventListener("click",()=>O("#editSaleDialog").close());O("#resultForm").addEventListener("submit",async n=>{n.preventDefault();let e=new FormData(n.currentTarget),t=Ot(String(e.get("campaignId")||""));if(!t)return X("Selecciona una campa\xF1a.");let r,s;try{r=G2(e.get("winningNumber"),t),s=H2(e.get("winningSeries"),t)}catch(a){return X(a.message)}let i=R.data.results.find(a=>!a.deleted&&a.campaignId===t.id);if(i){let a=R.data.deliveries.filter(o=>!o.deleted&&o.resultId===i.id);await Promise.all(a.map(o=>Lr("deliveries",{...o,deleted:!0},"","delivery.cleared"))),i={...i,winningNumber:r,winningSeries:s,notes:String(e.get("notes")||"").trim()}}else i={id:Wo("result"),campaignId:t.id,winningNumber:r,winningSeries:s,notes:String(e.get("notes")||"").trim(),deleted:!1};await Lr("results",i,`Consulta de ${Vr(r,s,t)} guardada.`,"result.saved")});O("#winnerSummary").addEventListener("click",async n=>{let e=n.target.closest("[data-delivery-key]");if(!e)return;let t=e.dataset.resultId,r=e.dataset.deliveryKey,s=D2(t,r);s?s={...s,delivered:!s.delivered,deliveredAt:s.delivered?null:Ji(),deliveredBy:s.delivered?null:R.actor.name}:s={id:Wo("delivery"),resultId:t,groupKey:r,delivered:!0,deliveredAt:Ji(),deliveredBy:R.actor.name,deleted:!1},await Lr("deliveries",s,s.delivered?"Entrega marcada como realizada.":"Entrega marcada como pendiente.","delivery.updated")});O("#refreshDevicesBtn").addEventListener("click",ta);O("#requestList").addEventListener("click",async n=>{let e=n.target.closest("[data-generate-key]"),t=n.target.closest("[data-reject]");if(e){let r=await Xl(Fe(Pe,"deviceRequests",e.dataset.generateKey));if(!r.exists())return X("Solicitud no encontrada.");let s=r.data(),i=O("#keyForm");i.elements.namedItem("targetUid").value=e.dataset.generateKey,i.elements.namedItem("mode").value="activation",i.elements.namedItem("userName").value=s.userName||"Usuario",i.elements.namedItem("deviceName").value=s.deviceName||"Dispositivo",i.elements.namedItem("offlineHours").value="24",i.elements.namedItem("expiresMinutes").value="30",O("#keyDialogTitle").textContent="Activar dispositivo",O("#keyDialog").showModal()}if(t&&confirm("\xBFRechazar esta solicitud?"))try{await xI(t.dataset.reject),X("Solicitud rechazada."),ta()}catch(r){X(r.message)}});O("#deviceList").addEventListener("click",async n=>{let e=n.target.closest("[data-recovery-key]");if(e){let s=await Xl(Fe(Pe,"devices",e.dataset.recoveryKey));if(!s.exists())return X("Dispositivo no encontrado.");let i=s.data(),a=O("#keyForm");a.elements.namedItem("targetUid").value=e.dataset.recoveryKey,a.elements.namedItem("mode").value="recovery",a.elements.namedItem("userName").value=i.userName||"Usuario",a.elements.namedItem("deviceName").value=i.deviceName||"Dispositivo",a.elements.namedItem("offlineHours").value=String(i.offlineHours||24),a.elements.namedItem("expiresMinutes").value="30",O("#keyDialogTitle").textContent="Recuperar acceso",O("#keyDialog").showModal();return}let t=n.target.closest("[data-toggle-device]");if(!t)return;let r=t.dataset.active==="1";if(confirm(r?"\xBFRevocar este dispositivo?":"\xBFReactivar este dispositivo?"))try{await kI(t.dataset.toggleDevice,r),X(r?"Dispositivo revocado.":"Dispositivo reactivado."),ta()}catch(s){X(s.message)}});O("#keyForm").addEventListener("submit",async n=>{n.preventDefault();let e=new FormData(n.currentTarget);try{let t=await NI(String(e.get("targetUid")),String(e.get("userName")),String(e.get("deviceName")),Number(e.get("offlineHours")),Number(e.get("expiresMinutes")),String(e.get("mode")||"activation"));O("#keyDialog").close(),DI(t),ta()}catch(t){X(t.message)}});O("#closeKeyDialogBtn").addEventListener("click",()=>O("#keyDialog").close());O("#cancelKeyBtn").addEventListener("click",()=>O("#keyDialog").close());O("#closeKeyResultBtn").addEventListener("click",()=>O("#keyResultDialog").close());O("#copyGeneratedKeyBtn").addEventListener("click",async()=>{R.generatedKey&&(await navigator.clipboard.writeText(R.generatedKey.plainKey),X("Clave copiada."))});O("#exportJsonBtn").addEventListener("click",SI);O("#exportCsvBtn").addEventListener("click",bI);O("#salesPrintBtn").addEventListener("click",()=>W2("sales"));O("#winnerPrintBtn").addEventListener("click",()=>W2("result"));O("#printAllBtn").addEventListener("click",()=>W2("dashboard"));O("#migrateLegacyBtn").addEventListener("click",OI);O("#importJsonInput").addEventListener("change",async n=>{let e=n.target.files?.[0];if(e)try{let t=JSON.parse(await e.text());if(!Array.isArray(t.campaigns)||!Array.isArray(t.sales))throw new Error("Formato no reconocido");if(!confirm("La importaci\xF3n agregar\xE1 o actualizar\xE1 registros en Firebase. \xBFContinuar?"))return;await k9(t)}catch(t){X(`No se pudo importar: ${t.message}`)}finally{n.target.value=""}});O("#resetDeviceBtn").addEventListener("click",async()=>{confirm("\xBFEliminar el PIN y la validaci\xF3n local de este dispositivo? Los datos de Firebase no se borrar\xE1n.")&&(Yo(),Fr(),navigator.onLine?await Bs({forceServer:!0}):Wt("Acceso local restablecido.","Conecta el dispositivo para renovar su autorizaci\xF3n."))});["#installBtn","#installAccessBtn","#installBackupBtn"].forEach(n=>O(n)?.addEventListener("click",RI));window.addEventListener("beforeinstallprompt",n=>{n.preventDefault(),R.deferredInstallPrompt=n,ch()});window.addEventListener("appinstalled",()=>{R.deferredInstallPrompt=null,ch(),X("Aplicaci\xF3n instalada.")});window.addEventListener("online",async()=>{ea(),R.user&&R.unlocked?await F9():R.user&&await Bs({forceServer:!0}),R.unlocked&&oh()});window.addEventListener("offline",()=>{ea(),R.unlocked&&Us()<=0?(R.unlocked=!1,Fr(),Wt("El permiso offline venci\xF3.","Conecta el dispositivo para renovar el acceso.")):R.unlocked&&oh()});O1(st,async n=>{if(Fr(),R.accessUnsub?.(),R.accessUnsub=null,R.user=n,R.admin=!!(n&&n.uid===v9&&!n.isAnonymous),R.actor=null,R.device=null,R.request=null,R.unlocked=!1,R.lease=n?k2(sh()):null,!n){Mr("accessView"),ea(),S2==="device"&&new URLSearchParams(location.search).get("solicitar")==="1"&&!_9&&navigator.onLine&&(_9=!0,setTimeout(()=>O("#startRequestBtn")?.click(),80));return}if(S2==="admin"&&!R.admin){await In(st);let e=O("#loginError");e&&(e.textContent="Esta cuenta no tiene permiso administrativo.");return}if(!R.admin&&!n.isAnonymous){Wt("Este dispositivo no est\xE1 autorizado.","Solicita acceso desde la portada de N\xFAmina.");return}await Bs()});"serviceWorker"in navigator&&window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(n=>console.error("Service Worker:",n)));ea();ch();
-/*! Bundled license information:
+    <article class="panel"><p><strong>Total de participaciones coincidentes:</strong> ${totalParticipations}</p>${result.notes ? `<p class="muted">${escapeHtml(result.notes)}</p>` : ''}</article>
+    <div class="winner-list">${cards || '<div class="panel empty">No hay registros elegibles con ese número.</div>'}</div>`;
+}
 
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/logger/dist/esm/index.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function download(filename, contents, type) {
+  const blob = new Blob([contents], { type });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
 
-@firebase/util/dist/index.esm.js:
-@firebase/util/dist/index.esm.js:
-@firebase/firestore/dist/index.esm.js:
-@firebase/firestore/dist/index.esm.js:
-  (**
-   * @license
-   * Copyright 2022 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function cleanExportItem(item) {
+  const copy = { ...item };
+  delete copy._pending;
+  delete copy.serverCreatedAt;
+  delete copy.serverUpdatedAt;
+  return copy;
+}
 
-@firebase/util/dist/index.esm.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function exportCampaign(campaign) {
+  return cleanExportItem({
+    ...campaign,
+    factorEnabled: campaignFactorEnabled(campaign),
+    factor: campaignFactor(campaign)
+  });
+}
 
-@firebase/util/dist/index.esm.js:
-@firebase/component/dist/esm/index.esm.js:
-@firebase/app/dist/esm/index.esm.js:
-@firebase/app/dist/esm/index.esm.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function exportDelivery(delivery) {
+  return cleanExportItem({
+    ...delivery,
+    manualResult: manualResultValue(delivery),
+    manualResultUpdatedAt: delivery.manualResultUpdatedAt || null,
+    manualResultUpdatedBy: delivery.manualResultUpdatedBy || null
+  });
+}
 
-@firebase/util/dist/index.esm.js:
-firebase/app/dist/esm/index.esm.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/index.esm.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function exportJson() {
+  const data = {
+    version: 3,
+    exportedAt: now(),
+    campaigns: state.data.campaigns.map(exportCampaign),
+    sales: state.data.sales.map(cleanExportItem),
+    results: state.data.results.map(cleanExportItem),
+    deliveries: state.data.deliveries.map(exportDelivery)
+  };
+  const stamp = new Date().toISOString().slice(0, 10);
+  download(`numina-respaldo-${stamp}.json`, JSON.stringify(data, null, 2), 'application/json');
+}
 
-@firebase/util/dist/index.esm.js:
-  (**
-   * @license
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2025 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function csvCell(value) {
+  let text = String(value ?? '');
+  if (typeof value === 'string' && /^[\u0000-\u0020]*[=+\-@]/.test(text)) {
+    text = `'${text}`;
+  }
+  return `"${text.replace(/"/g, '""')}"`;
+}
 
-@firebase/app/dist/esm/index.esm.js:
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2023 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function exportCsv() {
+  const headers = ['Fecha', 'Campaña', 'Factor activo', 'Factor', 'Número', 'Serie', 'Cliente', 'Teléfono', 'Participaciones', 'Monto', 'Estado', 'Registrado por', 'Sincronización', 'Notas'];
+  const rows = visibleSales().map(sale => {
+    const campaign = getCampaign(sale.campaignId);
+    return [
+      sale.createdAt,
+      campaign?.name || '',
+      campaignFactorEnabled(campaign) ? 'Sí' : 'No',
+      campaignFactor(campaign) ?? '',
+      sale.number,
+      sale.series || '',
+      sale.customerName,
+      sale.phone,
+      sale.quantity,
+      sale.amount,
+      paymentLabel(sale.paymentStatus),
+      sale.sellerName || sale.createdByName || '',
+      sale._pending ? 'Pendiente' : 'Confirmada',
+      sale.notes
+    ].map(csvCell).join(',');
+  });
+  const stamp = new Date().toISOString().slice(0, 10);
+  download(`numina-ventas-${stamp}.csv`, '\ufeff' + [headers.map(csvCell).join(','), ...rows].join('\n'), 'text/csv;charset=utf-8');
+}
 
-@firebase/app/dist/esm/index.esm.js:
-  (**
-   * @license
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function exportCoincidencesCsv() {
+  const campaign = getCampaign($('#resultForm select[name="campaignId"]').value);
+  const result = currentResult();
+  if (!campaign || !result) return toast('Primero realiza una búsqueda de coincidencias.');
+  const headers = ['Campaña', 'Cliente', 'Teléfono', 'Número', 'Serie', 'Participaciones', 'Monto registrado', 'Factor activo', 'Factor', 'Resultado manual', 'Estado de entrega', 'Registrado por', 'Fecha'];
+  const rows = winnerGroups(result).map(group => {
+    const delivery = deliveryFor(result.id, group.key);
+    const dates = Array.from(new Set(group.sales.map(sale => sale.createdAt || '').filter(Boolean))).join(' | ');
+    return [
+      campaign.name,
+      group.customerName,
+      group.phone || '',
+      result.winningNumber,
+      campaignUsesSeries(campaign) ? result.winningSeries || '' : '',
+      group.quantity,
+      group.amount,
+      campaignFactorEnabled(campaign) ? 'Sí' : 'No',
+      campaignFactor(campaign) ?? '',
+      manualResultValue(delivery) ?? '',
+      delivery?.delivered ? 'Entregado' : 'Pendiente',
+      group.sellers.join(', '),
+      dates
+    ].map(csvCell).join(',');
+  });
+  const stamp = new Date().toISOString().slice(0, 10);
+  download(`numina-coincidencias-${stamp}.csv`, '\ufeff' + [headers.map(csvCell).join(','), ...rows].join('\n'), 'text/csv;charset=utf-8');
+}
 
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/firestore/dist/index.esm.js:
-  (**
-   * @license
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function printView(viewName) {
+  const view = $(`#view-${viewName}`);
+  $$('.view').forEach(element => element.classList.remove('print-target'));
+  view.classList.add('print-target');
+  window.print();
+  setTimeout(() => view.classList.remove('print-target'), 500);
+}
 
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function refreshInstallButtons() {
+  const show = Boolean(state.deferredInstallPrompt);
+  ['#installBtn', '#installAccessBtn', '#installBackupBtn'].forEach(selector => $(selector)?.classList.toggle('hidden', !show));
+}
 
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2022 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2023 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+async function requestInstall() {
+  if (!state.deferredInstallPrompt) {
+    toast('En Chrome o Edge, abre el menú y elige “Instalar aplicación” o “Agregar a pantalla principal”.');
+    return;
+  }
+  state.deferredInstallPrompt.prompt();
+  await state.deferredInstallPrompt.userChoice;
+  state.deferredInstallPrompt = null;
+  refreshInstallButtons();
+}
 
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+async function enterApp() {
+  if (!state.unlocked || !state.actor) return;
+  showOnly('appView');
+  startDataSync();
+  startLeaseTimer();
+  renderAll();
+  if (isAdmin()) refreshDevices();
+}
 
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2025 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+async function refreshDevices() {
+  if (!isAdmin()) return;
+  if (!navigator.onLine) {
+    $('#requestList').innerHTML = '<div class="empty">Conéctate para administrar solicitudes.</div>';
+    $('#deviceList').innerHTML = '<div class="empty">La revocación requiere conexión.</div>';
+    return;
+  }
+  try {
+    const [requestsSnap, devicesSnap] = await Promise.all([
+      getDocs(query(collection(db, 'deviceRequests'), orderBy('createdAt', 'desc'))),
+      getDocs(query(collection(db, 'devices'), orderBy('authorizedAt', 'desc')))
+    ]);
+    const requests = requestsSnap.docs.map(item => ({ id: item.id, ...item.data() })).filter(item => ['pending', 'key_issued'].includes(item.status));
+    const devices = devicesSnap.docs.map(item => ({ id: item.id, ...item.data() }));
+    renderRequests(requests);
+    renderDevices(devices);
+  } catch (error) {
+    console.error(error);
+    $('#requestList').innerHTML = `<div class="empty">No se pudieron cargar solicitudes: ${escapeHtml(error.message)}</div>`;
+    $('#deviceList').innerHTML = '<div class="empty">Revisa que las reglas nuevas de Firestore estén publicadas.</div>';
+  }
+}
 
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC.
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function renderRequests(requests) {
+  $('#requestList').innerHTML = requests.length ? requests.map(request => {
+    const issued = request.status === 'key_issued';
+    return `<article class="record-card">
+    <header><div><strong>${escapeHtml(request.userName || 'Usuario')}</strong><span>${escapeHtml(request.deviceName || 'Dispositivo')}</span></div><span class="status-pill requested">${issued ? 'Clave generada' : 'Pendiente'}</span></header>
+    <small>Código ${escapeHtml(request.id.slice(0, 8).toUpperCase())} · ${formatDate(request.createdAt)}</small>
+    <div class="card-actions"><button class="primary" data-generate-key="${escapeHtml(request.id)}" type="button">${issued ? 'Generar otra clave' : 'Generar clave'}</button><button class="danger" data-reject="${escapeHtml(request.id)}" type="button">Rechazar</button></div>
+  </article>`;
+  }).join('') : '<div class="empty">No hay solicitudes pendientes.</div>';
+}
 
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+function renderDevices(devices) {
+  $('#deviceList').innerHTML = devices.length ? devices.map(device => `<article class="record-card">
+    <header><div><strong>${escapeHtml(device.userName || 'Usuario')}</strong><span>${escapeHtml(device.deviceName || 'Dispositivo')}</span></div><span class="status-pill ${device.active ? 'active' : 'revoked'}">${device.active ? 'Activo' : 'Revocado'}</span></header>
+    <small>Offline ${Number(device.offlineHours || 24)} h · ID ${escapeHtml(device.id.slice(0, 8).toUpperCase())} · Último acceso ${formatDate(device.lastSeenAt)}</small>
+    <div class="card-actions">${device.active ? `<button class="secondary" data-recovery-key="${escapeHtml(device.id)}" type="button">Nueva clave</button>` : ''}<button class="${device.active ? 'danger' : 'secondary'}" data-toggle-device="${escapeHtml(device.id)}" data-active="${device.active ? '1' : '0'}" type="button">${device.active ? 'Revocar' : 'Reactivar'}</button></div>
+  </article>`).join('') : '<div class="empty">No hay dispositivos autorizados.</div>';
+}
 
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC.
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+async function createTemporaryKey(targetUid, userName, deviceName, offlineHours, expiresMinutes, mode = 'activation') {
+  if (!navigator.onLine) throw new Error('Conéctate para generar la clave.');
+  const plainKey = generateActivationKey();
+  const normalized = normalizeActivationKey(plainKey);
+  const keyHash = await sha256(normalized);
+  const expiresAt = Timestamp.fromMillis(Date.now() + Number(expiresMinutes) * 60000);
+  const batch = writeBatch(db);
+  batch.set(doc(db, 'activationKeys', keyHash), {
+    targetUid,
+    userName: userName.trim(),
+    deviceName: deviceName.trim(),
+    mode,
+    offlineHours: Number(offlineHours),
+    expiresAt,
+    keySuffix: normalized.slice(-4),
+    used: false,
+    createdAt: serverTimestamp(),
+    createdBy: state.user.uid
+  });
+  if (mode === 'activation') {
+    batch.update(doc(db, 'deviceRequests', targetUid), {
+      status: 'key_issued',
+      keyIssuedAt: serverTimestamp(),
+      keyExpiresAt: expiresAt
+    });
+  }
+  await batch.commit();
+  await writeAudit(mode === 'recovery' ? 'device.recoveryKeyCreated' : 'device.activationKeyCreated', { targetUid, userName, deviceName, offlineHours: Number(offlineHours), expiresMinutes: Number(expiresMinutes) });
+  return { plainKey, expiresAt, userName, deviceName, expiresMinutes: Number(expiresMinutes), mode };
+}
 
-@firebase/webchannel-wrapper/dist/bloom-blob/esm/bloom_blob_es2018.js:
-@firebase/webchannel-wrapper/dist/webchannel-blob/esm/webchannel_blob_es2018.js:
-  (** @license
-  Copyright The Closure Library Authors.
-  SPDX-License-Identifier: Apache-2.0
-  *)
-  (** @license
-  
-   Copyright The Closure Library Authors.
-   SPDX-License-Identifier: Apache-2.0
-  *)
+function showGeneratedKey(result) {
+  state.generatedKey = result;
+  $('#generatedKeyOutput').textContent = result.plainKey;
+  $('#keyResultMessage').textContent = `${result.mode === 'recovery' ? 'Recuperación para' : 'Activación para'} ${result.userName} · ${result.deviceName}. Vence en ${result.expiresMinutes} minutos.`;
+  $('#shareGeneratedKeyBtn').href = activationKeyWhatsAppUrl(result.plainKey, result.userName, result.deviceName, result.expiresMinutes);
+  $('#keyResultDialog').showModal();
+}
 
-re2js/build/index.esm.js:
-  (*!
-   * re2js
-   * RE2JS is the JavaScript port of RE2, a regular expression engine that provides linear time matching
-   *
-   * @version v0.4.3
-   * @author Alexey Vasiliev
-   * @homepage https://github.com/le0pard/re2js#readme
-   * @repository github:le0pard/re2js
-   * @license MIT
-   *)
+async function rejectRequest(requestId) {
+  await updateDoc(doc(db, 'deviceRequests', requestId), {
+    status: 'rejected',
+    rejectedAt: serverTimestamp(),
+    rejectedBy: state.user.uid
+  });
+  await writeAudit('device.requestRejected', { targetUid: requestId });
+}
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+async function toggleDevice(deviceId, active) {
+  await updateDoc(doc(db, 'devices', deviceId), {
+    active: !active,
+    statusChangedAt: serverTimestamp(),
+    statusChangedBy: state.user.uid
+  });
+  await writeAudit(active ? 'device.revoked' : 'device.reactivated', { targetUid: deviceId });
+}
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+async function migrateLegacyData() {
+  const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+  if (!raw) return toast('No se encontraron datos anteriores.');
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch { return toast('Los datos anteriores no se pudieron leer.'); }
+  if (!confirm('¿Copiar a Firebase las campañas y registros de la versión anterior?')) return;
+  try {
+    await saveManyFromData(parsed, 'Migración completada.');
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    $('#legacyMigrationPanel').classList.add('hidden');
+  } catch (error) {
+    toast(`No se pudo migrar: ${error.message}`);
+  }
+}
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2025 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+async function changeAccount() {
+  if (!state.admin && state.user?.isAnonymous) {
+    const proceed = confirm('Cerrar esta sesión desvinculará esta instalación. Para volver a entrar necesitarás una nueva autorización. ¿Continuar?');
+    if (!proceed) return;
+  }
+  await signOut(auth);
+}
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2018 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+async function renewAccessSilently() {
+  if (!state.user || !navigator.onLine) return;
+  try {
+    if (state.admin) {
+      await validateAdminOnline();
+    } else {
+      const snapshot = await getDocFromServer(doc(db, 'devices', state.user.uid));
+      if (!snapshot.exists() || !snapshot.data().active) {
+        clearLocalAccess();
+        stopDataSync();
+        return showBlocked('Este dispositivo fue revocado.', 'El administrador desactivó esta instalación.');
+      }
+      state.device = { id: snapshot.id, ...snapshot.data() };
+      state.actor = { id: state.user.uid, name: state.device.userName || 'Operador', role: 'operator' };
+      storeLease();
+      updateDoc(doc(db, 'devices', state.user.uid), { lastSeenAt: serverTimestamp(), appVersion: APP_VERSION }).catch(console.warn);
+    }
+    updateLeaseUi();
+    updateSyncUi();
+  } catch (error) {
+    console.warn('Renovación silenciosa', error);
+  }
+}
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2022 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2023 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#adminLoginForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  $('#loginError').textContent = '';
+  const data = new FormData(event.currentTarget);
+  try {
+    if (auth.currentUser) await signOut(auth);
+    await signInWithEmailAndPassword(auth, String(data.get('email')).trim(), String(data.get('password')));
+  } catch (error) {
+    $('#loginError').textContent = authErrorMessage(error);
+  }
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2018 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2023 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#togglePasswordBtn').addEventListener('click', () => {
+  const input = $('#adminLoginForm input[name="password"]');
+  input.type = input.type === 'password' ? 'text' : 'password';
+  $('#togglePasswordBtn').textContent = input.type === 'password' ? 'Ver' : 'Ocultar';
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2022 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#resetPasswordBtn').addEventListener('click', async () => {
+  const email = $('#adminLoginForm input[name="email"]').value.trim();
+  if (!email) return toast('Escribe primero el correo.');
+  try {
+    await sendPasswordResetEmail(auth, email);
+    toast('Firebase envió el correo de recuperación.');
+  } catch (error) {
+    toast(authErrorMessage(error));
+  }
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2023 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#startRequestBtn')?.addEventListener('click', async () => {
+  if (!navigator.onLine) return toast('Conéctate para crear la solicitud inicial.');
+  try {
+    if (auth.currentUser) await signOut(auth);
+    await signInAnonymously(auth);
+  } catch (error) {
+    toast(authErrorMessage(error));
+  }
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2023 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2022 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#enterKeyBtn')?.addEventListener('click', async () => {
+  if (!navigator.onLine) return toast('Conéctate para validar una clave temporal.');
+  try {
+    if (!auth.currentUser) await signInAnonymously(auth);
+    if (!state.request) {
+      try {
+        const snap = await getDocFromServer(doc(db, 'deviceRequests', auth.currentUser.uid));
+        if (snap.exists()) state.request = { id: snap.id, ...snap.data() };
+      } catch { /* se mostrará el formulario de solicitud */ }
+    }
+    if (state.request) showActivationForm();
+    else showRequestForm();
+  } catch (error) { toast(authErrorMessage(error)); }
+});
+$('#requestForm')?.addEventListener('submit', event => submitDeviceRequest(event).catch(error => toast(error.message)));
+$('#cancelRequestBtn')?.addEventListener('click', () => signOut(auth));
+$('#activationForm')?.addEventListener('submit', activateWithTemporaryKey);
+$('#backFromActivationBtn')?.addEventListener('click', () => state.request ? showPendingRequest(state.request) : showRequestForm());
+$('#pinForm')?.addEventListener('submit', handlePinSubmit);
+$('#pinSignOutBtn')?.addEventListener('click', changeAccount);
+$('#lockBtn').addEventListener('click', () => {
+  state.unlocked = false;
+  stopDataSync();
+  showPinUnlock();
+});
+$('#signOutBtn').addEventListener('click', changeAccount);
+$('#validateNowBtn').addEventListener('click', async () => {
+  if (!navigator.onLine) return toast('Conéctate para validar con Firebase.');
+  await renewAccessSilently();
+  toast('Validación completada.');
+  renderDashboard();
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2023 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2018 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#menuBtn').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
+$('#nav').addEventListener('click', event => {
+  const button = event.target.closest('button[data-view]');
+  if (button) showView(button.dataset.view);
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2024 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#dashboardCampaignFilter').addEventListener('change', renderDashboard);
+$('#salesCampaignFilter').addEventListener('change', renderSales);
+$('#salesStatusFilter').addEventListener('change', renderSales);
+$('#salesSearch').addEventListener('input', renderSales);
+$('#resultForm select[name="campaignId"]').addEventListener('change', () => { updateSeriesFields(); renderWinnerSummary(); });
+$('#saleForm select[name="campaignId"]').addEventListener('change', updateSeriesFields);
+$('#campaignForm input[name="factorEnabled"]').addEventListener('change', event => updateFactorField({ clearWhenDisabled: !event.currentTarget.checked }));
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2025 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2024 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#campaignForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const formElement = event.currentTarget;
+  const form = new FormData(formElement);
+  const numberMin = Number(form.get('numberMin'));
+  const numberMax = Number(form.get('numberMax'));
+  const numberWidth = Number(form.get('numberWidth'));
+  const factorEnabled = form.get('factorEnabled') === 'on';
+  const factorText = String(form.get('factor') ?? '').trim();
+  let factor = null;
+  if (!Number.isInteger(numberMin) || !Number.isInteger(numberMax) || numberMin < 0 || numberMax < numberMin) return toast('Revisa el rango numérico.');
+  if (factorEnabled) {
+    if (!factorText) return toast('Escribe el factor de la campaña.');
+    factor = Number(factorText);
+    if (!Number.isFinite(factor) || factor < 0) return toast('El factor debe ser un número mayor o igual que 0.');
+  }
+  const campaign = {
+    id: makeId('campaign'),
+    name: String(form.get('name') || '').trim(),
+    numberMin,
+    numberMax,
+    numberWidth,
+    useSeries: String(form.get('useSeries') || 'false') === 'true',
+    eligibility: String(form.get('eligibility') || 'paid'),
+    allowRepeated: form.get('allowRepeated') === 'on',
+    factorEnabled,
+    factor,
+    notes: String(form.get('notes') || '').trim(),
+    status: 'active',
+    deleted: false
+  };
+  await saveEntity('campaigns', campaign, 'Campaña creada.', 'campaign.created');
+  formElement.reset();
+  formElement.numberMin.value = 0;
+  formElement.numberMax.value = 99;
+  formElement.numberWidth.value = 2;
+  formElement.useSeries.value = 'false';
+  formElement.allowRepeated.checked = true;
+  formElement.factorEnabled.checked = false;
+  formElement.factor.value = '';
+  updateFactorField({ clearWhenDisabled: true });
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2024 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#campaignList').addEventListener('click', async event => {
+  const toggle = event.target.closest('[data-campaign-toggle]');
+  const remove = event.target.closest('[data-campaign-delete]');
+  if (toggle) {
+    const campaign = getCampaign(toggle.dataset.campaignToggle);
+    if (!campaign) return;
+    const updated = { ...campaign, status: campaign.status === 'active' ? 'closed' : 'active' };
+    await saveEntity('campaigns', updated, 'Estado de campaña actualizado.', 'campaign.statusChanged');
+  }
+  if (remove) {
+    const campaign = getCampaign(remove.dataset.campaignDelete);
+    if (!campaign) return;
+    const hasSales = state.data.sales.some(sale => !sale.deleted && sale.campaignId === campaign.id);
+    if (hasSales) return toast('No se puede eliminar una campaña con ventas.');
+    if (confirm(`¿Eliminar la campaña “${campaign.name}”?`)) {
+      await saveEntity('campaigns', { ...campaign, deleted: true }, 'Campaña eliminada.', 'campaign.deleted');
+    }
+  }
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (* Copyright 2024 Google LLC* @license *)
-  (**
-   * @license
-   * Copyright 2024 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#saleForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const campaign = getCampaign(String(form.get('campaignId') || ''));
+  if (!campaign || campaign.status !== 'active') return toast('Selecciona una campaña activa.');
+  let number;
+  let series;
+  try {
+    number = numberForCampaign(form.get('number'), campaign);
+    series = seriesForCampaign(form.get('series'), campaign);
+  } catch (error) { return toast(error.message); }
+  if (!campaign.allowRepeated) {
+    const alreadyUsed = state.data.sales.some(sale => !sale.deleted && sale.campaignId === campaign.id && sale.number === number && String(sale.series || '') === series && sale.paymentStatus !== 'cancelled');
+    if (alreadyUsed) return toast(`${numberSeriesLabel(number, series, campaign)} ya fue registrado en esta campaña.`);
+  }
+  const quantity = Number(form.get('quantity'));
+  const amount = Number(form.get('amount'));
+  if (!Number.isInteger(quantity) || quantity < 1) return toast('La cantidad debe ser un entero mayor que cero.');
+  if (!Number.isFinite(amount) || amount < 0) return toast('El monto no es válido.');
+  const sale = {
+    id: makeId('sale'),
+    campaignId: campaign.id,
+    number,
+    series,
+    quantity,
+    customerName: String(form.get('customerName') || '').trim(),
+    phone: String(form.get('phone') || '').trim(),
+    amount,
+    paymentStatus: String(form.get('paymentStatus') || 'pending'),
+    notes: String(form.get('notes') || '').trim(),
+    sellerId: state.user.uid,
+    sellerName: state.actor.name,
+    deleted: false
+  };
+  await saveEntity('sales', sale, `${numberSeriesLabel(number, series, campaign)} registrado.`, 'sale.created');
+  event.currentTarget.reset();
+  event.currentTarget.quantity.value = 1;
+  event.currentTarget.amount.value = 0;
+  updateSeriesFields();
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2022 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2024 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law | agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES | CONDITIONS OF ANY KIND, either express | implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (* Copyright 2024 Google LLC* @license *)
-  (**
-   * @license
-   * Copyright 2023 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#salesTable').addEventListener('click', event => {
+  const button = event.target.closest('[data-edit-sale]');
+  if (!button) return;
+  const sale = visibleSales().find(item => item.id === button.dataset.editSale);
+  if (!sale) return;
+  const form = $('#editSaleForm');
+  form.elements.namedItem('id').value = sale.id;
+  form.elements.namedItem('customerName').value = sale.customerName;
+  form.elements.namedItem('phone').value = sale.phone || '';
+  form.elements.namedItem('number').value = sale.number;
+  const seriesField = $('[data-series-field="edit"]');
+  const seriesInput = form.elements.namedItem('series');
+  const campaign = getCampaign(sale.campaignId);
+  const usesSeries = campaignUsesSeries(campaign);
+  seriesField?.classList.toggle('hidden', !usesSeries);
+  seriesInput.required = usesSeries;
+  seriesInput.value = sale.series || '';
+  form.elements.namedItem('quantity').value = sale.quantity;
+  form.elements.namedItem('amount').value = sale.amount;
+  form.elements.namedItem('paymentStatus').value = sale.paymentStatus;
+  form.elements.namedItem('notes').value = sale.notes || '';
+  $('#editSaleDialog').showModal();
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2018 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#editSaleForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const sale = visibleSales().find(item => item.id === form.get('id'));
+  if (!sale) return toast('No se encontró la venta.');
+  const campaign = getCampaign(sale.campaignId);
+  let number;
+  let series;
+  try {
+    number = numberForCampaign(form.get('number'), campaign);
+    series = seriesForCampaign(form.get('series'), campaign);
+  } catch (error) { return toast(error.message); }
+  if (!campaign.allowRepeated) {
+    const duplicate = state.data.sales.some(item => !item.deleted && item.id !== sale.id && item.campaignId === campaign.id && item.number === number && String(item.series || '') === series && item.paymentStatus !== 'cancelled');
+    if (duplicate) return toast(`${numberSeriesLabel(number, series, campaign)} ya fue registrado en esta campaña.`);
+  }
+  const updated = {
+    ...sale,
+    customerName: String(form.get('customerName') || '').trim(),
+    phone: String(form.get('phone') || '').trim(),
+    number,
+    series,
+    quantity: Math.max(1, Number(form.get('quantity')) || 1),
+    amount: Math.max(0, Number(form.get('amount')) || 0),
+    paymentStatus: String(form.get('paymentStatus') || 'pending'),
+    notes: String(form.get('notes') || '').trim()
+  };
+  await saveEntity('sales', updated, 'Venta actualizada.', 'sale.updated');
+  $('#editSaleDialog').close();
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2025 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#closeEditDialogBtn').addEventListener('click', () => $('#editSaleDialog').close());
+$('#cancelEditDialogBtn').addEventListener('click', () => $('#editSaleDialog').close());
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2019 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#resultForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const campaign = getCampaign(String(form.get('campaignId') || ''));
+  if (!campaign) return toast('Selecciona una campaña.');
+  let winningNumber;
+  let winningSeries;
+  try {
+    winningNumber = numberForCampaign(form.get('winningNumber'), campaign);
+    winningSeries = seriesForCampaign(form.get('winningSeries'), campaign);
+  } catch (error) { return toast(error.message); }
+  let result = state.data.results.find(item => !item.deleted && item.campaignId === campaign.id);
+  if (result) {
+    const queryChanged = result.winningNumber !== winningNumber || String(result.winningSeries || '') !== String(winningSeries || '');
+    if (queryChanged) {
+      const relatedDeliveries = state.data.deliveries.filter(delivery => !delivery.deleted && delivery.resultId === result.id);
+      await Promise.all(relatedDeliveries.map(delivery => saveEntity('deliveries', { ...delivery, deleted: true }, '', 'delivery.cleared')));
+    }
+    result = { ...result, winningNumber, winningSeries, notes: String(form.get('notes') || '').trim() };
+  } else {
+    result = { id: makeId('result'), campaignId: campaign.id, winningNumber, winningSeries, notes: String(form.get('notes') || '').trim(), deleted: false };
+  }
+  await saveEntity('results', result, `Consulta de ${numberSeriesLabel(winningNumber, winningSeries, campaign)} guardada.`, 'result.saved');
+});
 
-@firebase/firestore/dist/common-456515ba.esm.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2024 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2025 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#winnerSummary').addEventListener('click', async event => {
+  const saveManualButton = event.target.closest('[data-save-manual-result]');
+  if (saveManualButton) {
+    const resultId = saveManualButton.dataset.resultId;
+    const groupKey = saveManualButton.dataset.saveManualResult;
+    const activeResult = currentResult();
+    if (!activeResult || activeResult.id !== resultId || !winnerGroups(activeResult).some(group => group.key === groupKey)) {
+      return toast('La coincidencia ya no está disponible. Actualiza la consulta.');
+    }
+    const input = saveManualButton.closest('.winner-card')?.querySelector('[data-manual-result-input]');
+    const rawValue = String(input?.value ?? '').trim();
+    if (!rawValue) return toast('Escribe el resultado manual.');
+    const manualResult = Number(rawValue);
+    if (!Number.isFinite(manualResult) || manualResult < 0) return toast('El resultado manual debe ser un número mayor o igual que 0.');
+    let delivery = deliveryFor(resultId, groupKey);
+    if (!delivery) {
+      delivery = {
+        id: makeId('delivery'),
+        resultId,
+        groupKey,
+        delivered: false,
+        manualResult,
+        manualResultUpdatedAt: now(),
+        manualResultUpdatedBy: state.actor.name,
+        deleted: false
+      };
+    } else {
+      delivery = {
+        ...delivery,
+        manualResult,
+        manualResultUpdatedAt: now(),
+        manualResultUpdatedBy: state.actor.name
+      };
+    }
+    await saveEntity('deliveries', delivery, 'Resultado manual guardado.', 'delivery.manualResultUpdated');
+    return;
+  }
 
-@firebase/firestore/dist/index.esm.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2022 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+  const button = event.target.closest('[data-delivery-key]');
+  if (!button) return;
+  const resultId = button.dataset.resultId;
+  const groupKey = button.dataset.deliveryKey;
+  let delivery = deliveryFor(resultId, groupKey);
+  if (!delivery) {
+    delivery = { id: makeId('delivery'), resultId, groupKey, delivered: true, deliveredAt: now(), deliveredBy: state.actor.name, deleted: false };
+  } else {
+    delivery = {
+      ...delivery,
+      delivered: !delivery.delivered,
+      deliveredAt: delivery.delivered ? null : now(),
+      deliveredBy: delivery.delivered ? null : state.actor.name
+    };
+  }
+  await saveEntity('deliveries', delivery, delivery.delivered ? 'Entrega marcada como realizada.' : 'Entrega marcada como pendiente.', 'delivery.updated');
+});
 
-@firebase/firestore/dist/index.esm.js:
-  (**
-   * @license
-   * Copyright 2025 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#refreshDevicesBtn').addEventListener('click', refreshDevices);
+$('#requestList').addEventListener('click', async event => {
+  const generate = event.target.closest('[data-generate-key]');
+  const reject = event.target.closest('[data-reject]');
+  if (generate) {
+    const requestSnap = await getDoc(doc(db, 'deviceRequests', generate.dataset.generateKey));
+    if (!requestSnap.exists()) return toast('Solicitud no encontrada.');
+    const request = requestSnap.data();
+    const form = $('#keyForm');
+    form.elements.namedItem('targetUid').value = generate.dataset.generateKey;
+    form.elements.namedItem('mode').value = 'activation';
+    form.elements.namedItem('userName').value = request.userName || 'Usuario';
+    form.elements.namedItem('deviceName').value = request.deviceName || 'Dispositivo';
+    form.elements.namedItem('offlineHours').value = '24';
+    form.elements.namedItem('expiresMinutes').value = '30';
+    $('#keyDialogTitle').textContent = 'Activar dispositivo';
+    $('#keyDialog').showModal();
+  }
+  if (reject && confirm('¿Rechazar esta solicitud?')) {
+    try {
+      await rejectRequest(reject.dataset.reject);
+      toast('Solicitud rechazada.');
+      refreshDevices();
+    } catch (error) { toast(error.message); }
+  }
+});
 
-@firebase/firestore/dist/index.esm.js:
-  (**
-   * @license
-   * Copyright 2022 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
+$('#deviceList').addEventListener('click', async event => {
+  const recovery = event.target.closest('[data-recovery-key]');
+  if (recovery) {
+    const deviceSnap = await getDoc(doc(db, 'devices', recovery.dataset.recoveryKey));
+    if (!deviceSnap.exists()) return toast('Dispositivo no encontrado.');
+    const device = deviceSnap.data();
+    const form = $('#keyForm');
+    form.elements.namedItem('targetUid').value = recovery.dataset.recoveryKey;
+    form.elements.namedItem('mode').value = 'recovery';
+    form.elements.namedItem('userName').value = device.userName || 'Usuario';
+    form.elements.namedItem('deviceName').value = device.deviceName || 'Dispositivo';
+    form.elements.namedItem('offlineHours').value = String(device.offlineHours || 24);
+    form.elements.namedItem('expiresMinutes').value = '30';
+    $('#keyDialogTitle').textContent = 'Recuperar acceso';
+    $('#keyDialog').showModal();
+    return;
+  }
+  const button = event.target.closest('[data-toggle-device]');
+  if (!button) return;
+  const active = button.dataset.active === '1';
+  if (!confirm(active ? '¿Revocar este dispositivo?' : '¿Reactivar este dispositivo?')) return;
+  try {
+    await toggleDevice(button.dataset.toggleDevice, active);
+    toast(active ? 'Dispositivo revocado.' : 'Dispositivo reactivado.');
+    refreshDevices();
+  } catch (error) { toast(error.message); }
+});
 
-@firebase/firestore/dist/index.esm.js:
-@firebase/firestore/dist/index.esm.js:
-  (**
-   * @license
-   * Copyright 2023 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-*/
+$('#keyForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
+  try {
+    const result = await createTemporaryKey(
+      String(data.get('targetUid')),
+      String(data.get('userName')),
+      String(data.get('deviceName')),
+      Number(data.get('offlineHours')),
+      Number(data.get('expiresMinutes')),
+      String(data.get('mode') || 'activation')
+    );
+    $('#keyDialog').close();
+    showGeneratedKey(result);
+    refreshDevices();
+  } catch (error) { toast(error.message); }
+});
+$('#closeKeyDialogBtn').addEventListener('click', () => $('#keyDialog').close());
+$('#cancelKeyBtn').addEventListener('click', () => $('#keyDialog').close());
+$('#closeKeyResultBtn').addEventListener('click', () => $('#keyResultDialog').close());
+$('#copyGeneratedKeyBtn').addEventListener('click', async () => {
+  if (!state.generatedKey) return;
+  await navigator.clipboard.writeText(state.generatedKey.plainKey);
+  toast('Clave copiada.');
+});
+
+$('#exportJsonBtn').addEventListener('click', exportJson);
+$('#exportCsvBtn').addEventListener('click', exportCsv);
+$('#winnerCsvBtn').addEventListener('click', exportCoincidencesCsv);
+$('#salesPrintBtn').addEventListener('click', () => printView('sales'));
+$('#winnerPrintBtn').addEventListener('click', () => printView('result'));
+$('#printAllBtn').addEventListener('click', () => printView('dashboard'));
+$('#migrateLegacyBtn').addEventListener('click', migrateLegacyData);
+
+$('#importJsonInput').addEventListener('change', async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    const parsed = JSON.parse(await file.text());
+    if (!Array.isArray(parsed.campaigns) || !Array.isArray(parsed.sales)) throw new Error('Formato no reconocido');
+    if (!confirm('La importación agregará o actualizará registros en Firebase. ¿Continuar?')) return;
+    await saveManyFromData(parsed);
+  } catch (error) {
+    toast(`No se pudo importar: ${error.message}`);
+  } finally {
+    event.target.value = '';
+  }
+});
+
+$('#resetDeviceBtn').addEventListener('click', async () => {
+  if (!confirm('¿Eliminar el PIN y la validación local de este dispositivo? Los datos de Firebase no se borrarán.')) return;
+  clearLocalAccess();
+  stopDataSync();
+  if (navigator.onLine) await evaluateAccess({ forceServer: true });
+  else showBlocked('Acceso local restablecido.', 'Conecta el dispositivo para renovar su autorización.');
+});
+
+['#installBtn', '#installAccessBtn', '#installBackupBtn'].forEach(selector => $(selector)?.addEventListener('click', requestInstall));
+
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  state.deferredInstallPrompt = event;
+  refreshInstallButtons();
+});
+window.addEventListener('appinstalled', () => {
+  state.deferredInstallPrompt = null;
+  refreshInstallButtons();
+  toast('Aplicación instalada.');
+});
+window.addEventListener('online', async () => {
+  updateConnectionUi();
+  if (state.user && state.unlocked) await renewAccessSilently();
+  else if (state.user) await evaluateAccess({ forceServer: true });
+  if (state.unlocked) renderAll();
+});
+window.addEventListener('offline', () => {
+  updateConnectionUi();
+  if (state.unlocked && leaseRemaining() <= 0) {
+    state.unlocked = false;
+    stopDataSync();
+    showBlocked('El permiso offline venció.', 'Conecta el dispositivo para renovar el acceso.');
+  } else if (state.unlocked) renderAll();
+});
+
+onAuthStateChanged(auth, async user => {
+  stopDataSync();
+  state.accessUnsub?.();
+  state.accessUnsub = null;
+  state.user = user;
+  state.admin = Boolean(user && user.uid === ADMIN_UID && !user.isAnonymous);
+  state.actor = null;
+  state.device = null;
+  state.request = null;
+  state.unlocked = false;
+  state.lease = user ? readJson(leaseKey()) : null;
+  if (!user) {
+    showOnly('accessView');
+    updateConnectionUi();
+    if (ENTRY_MODE === 'device' && new URLSearchParams(location.search).get('solicitar') === '1' && !autoRequestStarted && navigator.onLine) {
+      autoRequestStarted = true;
+      setTimeout(() => $('#startRequestBtn')?.click(), 80);
+    }
+    return;
+  }
+  if (ENTRY_MODE === 'admin' && !state.admin) {
+    await signOut(auth);
+    const error = $('#loginError');
+    if (error) error.textContent = 'Esta cuenta no tiene permiso administrativo.';
+    return;
+  }
+  if (!state.admin && !user.isAnonymous) {
+    showBlocked('Este dispositivo no está autorizado.', 'Solicita acceso desde la portada de Númina.');
+    return;
+  }
+  await evaluateAccess();
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(error => console.error('Service Worker:', error)));
+}
+
+updateConnectionUi();
+refreshInstallButtons();
+

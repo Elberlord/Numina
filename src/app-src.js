@@ -45,7 +45,7 @@ const ADMIN_UID = '6zJhAeRF9JRAilw6yvQQvLiN8bc2';
 const ENTRY_MODE = document.body.dataset.entry || 'device';
 const ACCESS_WHATSAPP = '50664305227';
 let autoRequestStarted = false;
-const APP_VERSION = 'firebase-completa-v1.2.0-series';
+const APP_VERSION = 'firebase-completa-v1.3.1-series';
 const LEGACY_STORAGE_KEY = 'numina_github_pages_data_v1';
 const ADMIN_DEVICE_ID_KEY = 'numina_admin_device_id_v1';
 const ADMIN_DEVICE_NAME_KEY = 'numina_admin_device_name_v1';
@@ -750,6 +750,23 @@ async function saveEntity(collectionName, entity, message = '', auditAction = ''
   }
 }
 
+function normalizeImportedEntity(collectionName, item) {
+  const normalized = { ...item };
+  if (collectionName === 'campaigns') {
+    normalized.factorEnabled = item?.factorEnabled === true;
+    const value = Number(item?.factor);
+    normalized.factor = normalized.factorEnabled && Number.isFinite(value) && value >= 0 ? value : null;
+  }
+  if (collectionName === 'deliveries') {
+    const value = Number(item?.manualResult);
+    const validManualResult = item?.manualResult !== null && item?.manualResult !== undefined && item?.manualResult !== '' && Number.isFinite(value) && value >= 0;
+    normalized.manualResult = validManualResult ? value : null;
+    normalized.manualResultUpdatedAt = item?.manualResultUpdatedAt || null;
+    normalized.manualResultUpdatedBy = item?.manualResultUpdatedBy || null;
+  }
+  return normalized;
+}
+
 async function saveManyFromData(data, message = 'Datos importados.') {
   const groups = [
     ['campaigns', Array.isArray(data.campaigns) ? data.campaigns : []],
@@ -764,7 +781,7 @@ async function saveManyFromData(data, message = 'Datos importados.') {
     const batch = writeBatch(db);
     for (const operation of operations.slice(index, index + 400)) {
       const id = operation.item.id || makeId(operation.name.slice(0, -1));
-      const existing = { ...operation.item, id };
+      const existing = normalizeImportedEntity(operation.name, { ...operation.item, id });
       delete existing._pending;
       const payload = { ...existing, ...actorFields(existing) };
       batch.set(doc(db, operation.name, id), payload, { merge: true });
@@ -805,6 +822,35 @@ function campaignUsesSeries(campaign) {
   return campaign?.useSeries === true;
 }
 
+function campaignFactorEnabled(campaign) {
+  return campaign?.factorEnabled === true;
+}
+
+function campaignFactor(campaign) {
+  if (!campaignFactorEnabled(campaign)) return null;
+  const value = Number(campaign?.factor);
+  return Number.isFinite(value) && value >= 0 ? value : null;
+}
+
+function formatPlainNumber(value) {
+  return new Intl.NumberFormat('es-CR', { maximumFractionDigits: 20 }).format(Number(value));
+}
+
+function campaignFactorLabel(campaign) {
+  const value = campaignFactor(campaign);
+  return value === null ? 'Sin factor' : `Factor ${formatPlainNumber(value)}`;
+}
+
+function hasManualResult(delivery) {
+  if (!delivery || delivery.manualResult === null || delivery.manualResult === undefined || delivery.manualResult === '') return false;
+  const value = Number(delivery.manualResult);
+  return Number.isFinite(value) && value >= 0;
+}
+
+function manualResultValue(delivery) {
+  return hasManualResult(delivery) ? Number(delivery.manualResult) : null;
+}
+
 function seriesForCampaign(value, campaign) {
   if (!campaignUsesSeries(campaign)) return '';
   const series = String(value || '').trim().toUpperCase();
@@ -815,6 +861,17 @@ function seriesForCampaign(value, campaign) {
 
 function numberSeriesLabel(number, series, campaign) {
   return campaignUsesSeries(campaign) ? `${number} · Serie ${series || '—'}` : number;
+}
+
+function updateFactorField({ clearWhenDisabled = false } = {}) {
+  const form = $('#campaignForm');
+  const checkbox = form?.elements.namedItem('factorEnabled');
+  const input = form?.elements.namedItem('factor');
+  if (!checkbox || !input) return;
+  const enabled = checkbox.checked;
+  input.disabled = !enabled;
+  input.required = enabled;
+  if (!enabled && clearWhenDisabled) input.value = '';
 }
 
 function updateSeriesFields() {
@@ -875,6 +932,7 @@ function renderAll() {
   populateCampaignSelect($('#saleForm select[name="campaignId"]'), { activeOnly: true });
   populateCampaignSelect($('#resultForm select[name="campaignId"]'));
   updateSeriesFields();
+  updateFactorField();
 
   renderDashboard();
   renderSales();
@@ -932,6 +990,7 @@ function renderCampaigns() {
         <span class="meta-chip">${campaign.allowRepeated ? 'Registros repetidos' : 'Registros exclusivos'}</span>
         <span class="meta-chip">${campaignUsesSeries(campaign) ? 'Número + serie' : 'Solo número'}</span>
         <span class="meta-chip">${campaign.eligibility === 'paid' ? 'Solo pagados' : 'Pagados y pendientes'}</span>
+        <span class="meta-chip factor-chip">${escapeHtml(campaignFactorLabel(campaign))}</span>
         ${campaign._pending ? '<span class="meta-chip">Pendiente de sincronizar</span>' : ''}
       </div>
       ${campaign.notes ? `<p class="muted">${escapeHtml(campaign.notes)}</p>` : ''}
@@ -965,7 +1024,7 @@ function renderSales() {
     const campaign = getCampaign(sale.campaignId);
     return `<div class="table-row">
     <span><span class="number-chip">${escapeHtml(numberSeriesLabel(sale.number, sale.series, campaign))}</span></span>
-    <span><strong>${escapeHtml(sale.customerName)}</strong><small>${escapeHtml(sale.sellerName || sale.createdByName || 'Usuario')} · ${formatDate(sale.createdAt)} ${sale._pending ? '· Pendiente' : ''}</small></span>
+    <span><strong>${escapeHtml(sale.customerName)}</strong><small>${escapeHtml(campaign?.name || 'Campaña')} · ${escapeHtml(campaignFactorLabel(campaign))}</small><small>${escapeHtml(sale.sellerName || sale.createdByName || 'Usuario')} · ${formatDate(sale.createdAt)} ${sale._pending ? '· Pendiente' : ''}</small></span>
     <span>${escapeHtml(sale.phone || '—')}</span>
     <span>${Number(sale.quantity || 0)}</span>
     <span>${formatAmount(sale.amount)}</span>
@@ -1026,22 +1085,46 @@ function renderWinnerSummary() {
   const pendingDeliveries = groups.filter(group => !deliveryFor(result.id, group.key)?.delivered).length;
   const cards = groups.map(group => {
     const delivery = deliveryFor(result.id, group.key);
+    const savedManualResult = manualResultValue(delivery);
+    const factorValue = campaignFactor(campaign);
+    const seriesDetail = campaignUsesSeries(campaign) ? `<div><span>Serie</span><strong>${escapeHtml(result.winningSeries || '—')}</strong></div>` : '';
+    const factorDetail = campaignFactorEnabled(campaign) ? `<div><span>Factor</span><strong>${factorValue === null ? '—' : escapeHtml(formatPlainNumber(factorValue))}</strong></div>` : '';
+    const manualMetadata = hasManualResult(delivery) && (delivery.manualResultUpdatedBy || delivery.manualResultUpdatedAt)
+      ? `<small>Actualizado${delivery.manualResultUpdatedBy ? ` por ${escapeHtml(delivery.manualResultUpdatedBy)}` : ''}${delivery.manualResultUpdatedAt ? ` · ${formatDate(delivery.manualResultUpdatedAt)}` : ''}</small>`
+      : '';
     return `<article class="winner-card">
-      <header><div><h3>${escapeHtml(group.customerName)}</h3><span class="status-pill ${delivery?.delivered ? 'delivered' : 'pending'}">${delivery?.delivered ? 'Entregado' : 'Pendiente'}</span></div><span class="number-chip">${escapeHtml(numberSeriesLabel(result.winningNumber, result.winningSeries, campaign))}</span></header>
+      <header><div><h3>${escapeHtml(group.customerName)}</h3><span class="status-pill ${delivery?.delivered ? 'delivered' : 'pending'}">${delivery?.delivered ? 'Entregado' : 'Pendiente'}</span></div></header>
       <div class="winner-details">
         <div><span>Teléfono</span><strong>${escapeHtml(group.phone || '—')}</strong></div>
+        <div><span>Número</span><strong>${escapeHtml(result.winningNumber)}</strong></div>
+        ${seriesDetail}
         <div><span>Participaciones</span><strong>${group.quantity}</strong></div>
-        <div><span>Registrado por</span><strong>${escapeHtml(group.sellers.join(', '))}</strong></div>
         <div><span>Monto registrado</span><strong>${formatAmount(group.amount)}</strong></div>
+        ${factorDetail}
+        <div><span>Registrado por</span><strong>${escapeHtml(group.sellers.join(', '))}</strong></div>
       </div>
-      <div class="card-actions"><button class="${delivery?.delivered ? 'ghost' : 'primary'}" data-delivery-key="${escapeHtml(group.key)}" data-result-id="${result.id}">${delivery?.delivered ? 'Marcar pendiente' : 'Marcar entregado'}</button></div>
+      <div class="manual-result-block">
+        <label class="manual-result-editor">Resultado manual
+          <input data-manual-result-input inputmode="decimal" min="0" step="any" type="number" value="${savedManualResult === null ? '' : escapeHtml(String(savedManualResult))}" placeholder="0"/>
+          ${manualMetadata}
+        </label>
+        <div class="manual-result-print"><span>Resultado manual</span><strong>${savedManualResult === null ? '—' : escapeHtml(formatPlainNumber(savedManualResult))}</strong></div>
+      </div>
+      <div class="card-actions">
+        <button class="secondary" data-save-manual-result="${escapeHtml(group.key)}" data-result-id="${result.id}" type="button">Guardar resultado</button>
+        <button class="${delivery?.delivered ? 'ghost' : 'primary'}" data-delivery-key="${escapeHtml(group.key)}" data-result-id="${result.id}" type="button">${delivery?.delivered ? 'Marcar pendiente' : 'Marcar entregado'}</button>
+      </div>
     </article>`;
   }).join('');
+  const factorOverview = campaignFactorEnabled(campaign)
+    ? `<article class="winner-stat"><span>Factor</span><strong>${campaignFactor(campaign) === null ? '—' : escapeHtml(formatPlainNumber(campaignFactor(campaign)))}</strong></article>`
+    : '';
   container.innerHTML = `
     <div class="winner-overview">
       <article class="winner-stat"><span>${campaignUsesSeries(campaign) ? 'Número y serie consultados' : 'Número consultado'}</span><strong>${escapeHtml(numberSeriesLabel(result.winningNumber, result.winningSeries, campaign))}</strong></article>
       <article class="winner-stat"><span>Personas coincidentes</span><strong>${groups.length}</strong></article>
       <article class="winner-stat"><span>Entregas pendientes</span><strong>${pendingDeliveries}</strong></article>
+      ${factorOverview}
     </div>
     <article class="panel"><p><strong>Total de participaciones coincidentes:</strong> ${totalParticipations}</p>${result.notes ? `<p class="muted">${escapeHtml(result.notes)}</p>` : ''}</article>
     <div class="winner-list">${cards || '<div class="panel empty">No hay registros elegibles con ese número.</div>'}</div>`;
@@ -1067,31 +1150,53 @@ function cleanExportItem(item) {
   return copy;
 }
 
+function exportCampaign(campaign) {
+  return cleanExportItem({
+    ...campaign,
+    factorEnabled: campaignFactorEnabled(campaign),
+    factor: campaignFactor(campaign)
+  });
+}
+
+function exportDelivery(delivery) {
+  return cleanExportItem({
+    ...delivery,
+    manualResult: manualResultValue(delivery),
+    manualResultUpdatedAt: delivery.manualResultUpdatedAt || null,
+    manualResultUpdatedBy: delivery.manualResultUpdatedBy || null
+  });
+}
+
 function exportJson() {
   const data = {
-    version: 2,
+    version: 3,
     exportedAt: now(),
-    campaigns: state.data.campaigns.map(cleanExportItem),
+    campaigns: state.data.campaigns.map(exportCampaign),
     sales: state.data.sales.map(cleanExportItem),
     results: state.data.results.map(cleanExportItem),
-    deliveries: state.data.deliveries.map(cleanExportItem)
+    deliveries: state.data.deliveries.map(exportDelivery)
   };
   const stamp = new Date().toISOString().slice(0, 10);
   download(`numina-respaldo-${stamp}.json`, JSON.stringify(data, null, 2), 'application/json');
 }
 
 function csvCell(value) {
-  const text = String(value ?? '');
+  let text = String(value ?? '');
+  if (typeof value === 'string' && /^[\u0000-\u0020]*[=+\-@]/.test(text)) {
+    text = `'${text}`;
+  }
   return `"${text.replace(/"/g, '""')}"`;
 }
 
 function exportCsv() {
-  const headers = ['Fecha', 'Campaña', 'Número', 'Serie', 'Cliente', 'Teléfono', 'Participaciones', 'Monto', 'Estado', 'Registrado por', 'Sincronización', 'Notas'];
+  const headers = ['Fecha', 'Campaña', 'Factor activo', 'Factor', 'Número', 'Serie', 'Cliente', 'Teléfono', 'Participaciones', 'Monto', 'Estado', 'Registrado por', 'Sincronización', 'Notas'];
   const rows = visibleSales().map(sale => {
     const campaign = getCampaign(sale.campaignId);
     return [
       sale.createdAt,
       campaign?.name || '',
+      campaignFactorEnabled(campaign) ? 'Sí' : 'No',
+      campaignFactor(campaign) ?? '',
       sale.number,
       sale.series || '',
       sale.customerName,
@@ -1106,6 +1211,34 @@ function exportCsv() {
   });
   const stamp = new Date().toISOString().slice(0, 10);
   download(`numina-ventas-${stamp}.csv`, '\ufeff' + [headers.map(csvCell).join(','), ...rows].join('\n'), 'text/csv;charset=utf-8');
+}
+
+function exportCoincidencesCsv() {
+  const campaign = getCampaign($('#resultForm select[name="campaignId"]').value);
+  const result = currentResult();
+  if (!campaign || !result) return toast('Primero realiza una búsqueda de coincidencias.');
+  const headers = ['Campaña', 'Cliente', 'Teléfono', 'Número', 'Serie', 'Participaciones', 'Monto registrado', 'Factor activo', 'Factor', 'Resultado manual', 'Estado de entrega', 'Registrado por', 'Fecha'];
+  const rows = winnerGroups(result).map(group => {
+    const delivery = deliveryFor(result.id, group.key);
+    const dates = Array.from(new Set(group.sales.map(sale => sale.createdAt || '').filter(Boolean))).join(' | ');
+    return [
+      campaign.name,
+      group.customerName,
+      group.phone || '',
+      result.winningNumber,
+      campaignUsesSeries(campaign) ? result.winningSeries || '' : '',
+      group.quantity,
+      group.amount,
+      campaignFactorEnabled(campaign) ? 'Sí' : 'No',
+      campaignFactor(campaign) ?? '',
+      manualResultValue(delivery) ?? '',
+      delivery?.delivered ? 'Entregado' : 'Pendiente',
+      group.sellers.join(', '),
+      dates
+    ].map(csvCell).join(',');
+  });
+  const stamp = new Date().toISOString().slice(0, 10);
+  download(`numina-coincidencias-${stamp}.csv`, '\ufeff' + [headers.map(csvCell).join(','), ...rows].join('\n'), 'text/csv;charset=utf-8');
 }
 
 function printView(viewName) {
@@ -1371,14 +1504,24 @@ $('#salesStatusFilter').addEventListener('change', renderSales);
 $('#salesSearch').addEventListener('input', renderSales);
 $('#resultForm select[name="campaignId"]').addEventListener('change', () => { updateSeriesFields(); renderWinnerSummary(); });
 $('#saleForm select[name="campaignId"]').addEventListener('change', updateSeriesFields);
+$('#campaignForm input[name="factorEnabled"]').addEventListener('change', event => updateFactorField({ clearWhenDisabled: !event.currentTarget.checked }));
 
 $('#campaignForm').addEventListener('submit', async event => {
   event.preventDefault();
-  const form = new FormData(event.currentTarget);
+  const formElement = event.currentTarget;
+  const form = new FormData(formElement);
   const numberMin = Number(form.get('numberMin'));
   const numberMax = Number(form.get('numberMax'));
   const numberWidth = Number(form.get('numberWidth'));
+  const factorEnabled = form.get('factorEnabled') === 'on';
+  const factorText = String(form.get('factor') ?? '').trim();
+  let factor = null;
   if (!Number.isInteger(numberMin) || !Number.isInteger(numberMax) || numberMin < 0 || numberMax < numberMin) return toast('Revisa el rango numérico.');
+  if (factorEnabled) {
+    if (!factorText) return toast('Escribe el factor de la campaña.');
+    factor = Number(factorText);
+    if (!Number.isFinite(factor) || factor < 0) return toast('El factor debe ser un número mayor o igual que 0.');
+  }
   const campaign = {
     id: makeId('campaign'),
     name: String(form.get('name') || '').trim(),
@@ -1388,17 +1531,22 @@ $('#campaignForm').addEventListener('submit', async event => {
     useSeries: String(form.get('useSeries') || 'false') === 'true',
     eligibility: String(form.get('eligibility') || 'paid'),
     allowRepeated: form.get('allowRepeated') === 'on',
+    factorEnabled,
+    factor,
     notes: String(form.get('notes') || '').trim(),
     status: 'active',
     deleted: false
   };
   await saveEntity('campaigns', campaign, 'Campaña creada.', 'campaign.created');
-  event.currentTarget.reset();
-  event.currentTarget.numberMin.value = 0;
-  event.currentTarget.numberMax.value = 99;
-  event.currentTarget.numberWidth.value = 2;
-  event.currentTarget.useSeries.value = 'false';
-  event.currentTarget.allowRepeated.checked = true;
+  formElement.reset();
+  formElement.numberMin.value = 0;
+  formElement.numberMax.value = 99;
+  formElement.numberWidth.value = 2;
+  formElement.useSeries.value = 'false';
+  formElement.allowRepeated.checked = true;
+  formElement.factorEnabled.checked = false;
+  formElement.factor.value = '';
+  updateFactorField({ clearWhenDisabled: true });
 });
 
 $('#campaignList').addEventListener('click', async event => {
@@ -1533,8 +1681,11 @@ $('#resultForm').addEventListener('submit', async event => {
   } catch (error) { return toast(error.message); }
   let result = state.data.results.find(item => !item.deleted && item.campaignId === campaign.id);
   if (result) {
-    const relatedDeliveries = state.data.deliveries.filter(delivery => !delivery.deleted && delivery.resultId === result.id);
-    await Promise.all(relatedDeliveries.map(delivery => saveEntity('deliveries', { ...delivery, deleted: true }, '', 'delivery.cleared')));
+    const queryChanged = result.winningNumber !== winningNumber || String(result.winningSeries || '') !== String(winningSeries || '');
+    if (queryChanged) {
+      const relatedDeliveries = state.data.deliveries.filter(delivery => !delivery.deleted && delivery.resultId === result.id);
+      await Promise.all(relatedDeliveries.map(delivery => saveEntity('deliveries', { ...delivery, deleted: true }, '', 'delivery.cleared')));
+    }
     result = { ...result, winningNumber, winningSeries, notes: String(form.get('notes') || '').trim() };
   } else {
     result = { id: makeId('result'), campaignId: campaign.id, winningNumber, winningSeries, notes: String(form.get('notes') || '').trim(), deleted: false };
@@ -1543,6 +1694,43 @@ $('#resultForm').addEventListener('submit', async event => {
 });
 
 $('#winnerSummary').addEventListener('click', async event => {
+  const saveManualButton = event.target.closest('[data-save-manual-result]');
+  if (saveManualButton) {
+    const resultId = saveManualButton.dataset.resultId;
+    const groupKey = saveManualButton.dataset.saveManualResult;
+    const activeResult = currentResult();
+    if (!activeResult || activeResult.id !== resultId || !winnerGroups(activeResult).some(group => group.key === groupKey)) {
+      return toast('La coincidencia ya no está disponible. Actualiza la consulta.');
+    }
+    const input = saveManualButton.closest('.winner-card')?.querySelector('[data-manual-result-input]');
+    const rawValue = String(input?.value ?? '').trim();
+    if (!rawValue) return toast('Escribe el resultado manual.');
+    const manualResult = Number(rawValue);
+    if (!Number.isFinite(manualResult) || manualResult < 0) return toast('El resultado manual debe ser un número mayor o igual que 0.');
+    let delivery = deliveryFor(resultId, groupKey);
+    if (!delivery) {
+      delivery = {
+        id: makeId('delivery'),
+        resultId,
+        groupKey,
+        delivered: false,
+        manualResult,
+        manualResultUpdatedAt: now(),
+        manualResultUpdatedBy: state.actor.name,
+        deleted: false
+      };
+    } else {
+      delivery = {
+        ...delivery,
+        manualResult,
+        manualResultUpdatedAt: now(),
+        manualResultUpdatedBy: state.actor.name
+      };
+    }
+    await saveEntity('deliveries', delivery, 'Resultado manual guardado.', 'delivery.manualResultUpdated');
+    return;
+  }
+
   const button = event.target.closest('[data-delivery-key]');
   if (!button) return;
   const resultId = button.dataset.resultId;
@@ -1644,6 +1832,7 @@ $('#copyGeneratedKeyBtn').addEventListener('click', async () => {
 
 $('#exportJsonBtn').addEventListener('click', exportJson);
 $('#exportCsvBtn').addEventListener('click', exportCsv);
+$('#winnerCsvBtn').addEventListener('click', exportCoincidencesCsv);
 $('#salesPrintBtn').addEventListener('click', () => printView('sales'));
 $('#winnerPrintBtn').addEventListener('click', () => printView('result'));
 $('#printAllBtn').addEventListener('click', () => printView('dashboard'));

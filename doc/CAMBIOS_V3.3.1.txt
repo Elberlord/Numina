@@ -1,0 +1,30 @@
+NÚMINA SERIE V3.3.1 — PARCHE DE SEGURIDAD CSV
+
+ARCHIVOS MODIFICADOS
+- src/app-src.js
+- app.bundle.js
+- VERSION.txt
+- sw.js
+
+CAMBIO REALIZADO
+- Se reforzó la función común de exportación CSV.
+- Los valores de texto que comiencen, incluso después de espacios o controles, con =, +, - o @ se exportan con un apóstrofo inicial.
+- Esto evita que Excel, Google Sheets u otras hojas de cálculo interpreten nombres, teléfonos, notas, campañas o series como fórmulas.
+- Los números reales se conservan como números y no se alteran.
+- La protección se aplica tanto al CSV de ventas como al CSV de coincidencias porque ambos usan la misma función csvCell().
+
+NO SE MODIFICÓ
+- Firebase Authentication.
+- Firestore ni sus reglas.
+- PIN local.
+- Dispositivos autorizados.
+- Campañas, ventas, series, coincidencias o entregas.
+- Respaldo JSON e importación.
+- Manifest ni diseño visual.
+
+PRUEBAS REALIZADAS
+- Revisión de sintaxis de src/app-src.js.
+- Revisión de sintaxis de app.bundle.js.
+- Verificación de protección para =, +, - y @.
+- Verificación de que valores numéricos ordinarios siguen exportándose sin apóstrofo.
+- Verificación de que portal.html, panel privado e index.html permanecen presentes.

@@ -1,0 +1,95 @@
+NÚMINA SERIE V3.3
+=================
+
+ARCHIVOS MODIFICADOS
+--------------------
+- VERSION.txt
+- portal.html
+- panel-privado-8f27c4.html
+- src/app-src.js
+- app.bundle.js
+- styles.css
+- sw.js
+
+ARCHIVO AÑADIDO
+---------------
+- CAMBIOS_V3.3.txt
+
+CAMPOS AÑADIDOS
+---------------
+Campañas:
+- factorEnabled: boolean
+- factor: number | null
+
+Entregas (deliveries):
+- manualResult: number | null
+- manualResultUpdatedAt
+- manualResultUpdatedBy
+
+COMPORTAMIENTO DEL FACTOR
+-------------------------
+- Se añadió la casilla opcional "Usar factor" al formulario Crear campaña.
+- El campo numérico "Factor" permanece deshabilitado mientras la casilla no esté marcada.
+- Al activar "Usar factor", el campo se habilita y pasa a ser obligatorio.
+- Admite 0, enteros y decimales mayores o iguales que 0.
+- Si está activo, se guarda factorEnabled=true y el valor numérico en factor.
+- Si está inactivo, se guarda factorEnabled=false y factor=null.
+- Después de crear una campaña, la casilla se desmarca, el campo se limpia y vuelve a quedar deshabilitado.
+- Las campañas antiguas que no contienen estos campos se interpretan como factorEnabled=false y factor=null.
+- El factor se muestra en campañas, ventas, Coincidencias, impresión/reporte, respaldo JSON y exportaciones CSV.
+- No se añadió ninguna multiplicación ni cálculo automático con el factor.
+
+COMPORTAMIENTO DEL RESULTADO MANUAL
+-----------------------------------
+- Cada persona o grupo mostrado en Coincidencias tiene un campo editable "Resultado manual" y un botón "Guardar resultado".
+- El valor es escrito exclusivamente por el usuario; Númina no lo calcula.
+- Admite 0, enteros y decimales mayores o iguales que 0.
+- Se guarda por resultId y groupKey en el registro delivery correspondiente.
+- Si el delivery no existe, se crea con delivered=false y el resultado manual indicado.
+- Si ya existe, se actualizan únicamente los datos del resultado manual sin borrar delivered, deliveredAt, deliveredBy, resultId ni groupKey.
+- Guardar el resultado manual no cambia el estado de entrega.
+- Cambiar entre Entregado y Pendiente conserva el resultado manual.
+- Al volver a abrir o sincronizar la aplicación, el valor se recupera desde deliveries.
+- Si cambia el número o la serie de una consulta existente, los registros de la consulta anterior no se reutilizan para personas diferentes.
+
+EXPORTACIONES Y REPORTES
+------------------------
+- El respaldo JSON conserva todos los campos existentes e incluye factorEnabled y factor en campañas.
+- El respaldo JSON incluye manualResult, manualResultUpdatedAt y manualResultUpdatedBy en deliveries.
+- La importación normaliza respaldos antiguos sin eliminar campos existentes.
+- El CSV de ventas incluye las columnas "Factor activo" y "Factor".
+- Se añadió CSV de Coincidencias con:
+  Campaña, Cliente, Teléfono, Número, Serie, Participaciones, Monto registrado,
+  Factor activo, Factor, Resultado manual, Estado de entrega, Registrado por y Fecha.
+- La impresión/reporte de Coincidencias muestra cliente, teléfono, número, serie,
+  participaciones, monto registrado, factor, resultado manual y estado de entrega.
+
+COMPILACIÓN
+-----------
+- Se modificó primero src/app-src.js.
+- El proyecto recibido no incluía package.json ni un comando de compilación.
+- Se reconstruyó app.bundle.js conservando el runtime Firebase ya distribuido en la versión estable e incorporando la fuente actualizada.
+- No se editó únicamente el bundle minificado.
+
+PRUEBAS REALIZADAS
+------------------
+1. El ZIP original se descomprimió correctamente.
+2. Se confirmó la existencia de index.html y portal.html.
+3. La aplicación cargó el bundle reconstruido sin pantalla en blanco, errores de página ni errores de consola en la prueba de navegador.
+4. home.js, sw.js, src/app-src.js y app.bundle.js pasaron comprobación de sintaxis JavaScript.
+5. Se creó una campaña sin factor y se verificó factorEnabled=false / factor=null.
+6. Se creó una campaña con factor decimal y se verificó su persistencia.
+7. Se comprobó que una campaña antigua sin los campos nuevos funciona como "Sin factor".
+8. Se comprobó que el Factor aparece en Coincidencias.
+9. Se guardó y editó Resultado manual asociado a resultId y groupKey.
+10. Se alternó Entregado/Pendiente y se verificó que Resultado manual no se borra.
+11. Se verificaron las columnas nuevas del CSV de ventas y del CSV de Coincidencias.
+12. Se verificaron los campos nuevos en respaldo JSON y la compatibilidad de importación antigua.
+13. Se auditó el código fuente y no existe multiplicación de monto por factor ni generación automática de resultados.
+14. Se confirmó que permanecen Firebase Authentication, Firestore, PIN local, dispositivos autorizados, acceso temporal, modo offline, sincronización, respaldo/importación, PWA, service worker y manifest.
+
+REGLAS DE FIRESTORE
+-------------------
+- No fue necesario modificar reglas de Firestore.
+- El ZIP recibido no contiene un archivo de reglas para alterar.
+- Los campos nuevos se guardan dentro de los documentos existentes de campaigns y deliveries mediante el mecanismo de persistencia ya utilizado por la aplicación.
