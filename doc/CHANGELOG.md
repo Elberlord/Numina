@@ -1,3 +1,18 @@
+# Númina Serie v3.5.0
+
+## Estabilidad y recuperación
+
+- Recuperación visible si el arranque queda detenido.
+- Reparación selectiva de caché y service worker sin tocar Firebase.
+- Aviso cuando la misma instalación está abierta en varias pestañas.
+- Bloqueo de guardados desde pestañas secundarias para evitar duplicados.
+- Advertencia al cerrar mientras existen escrituras pendientes.
+- Detección de sincronización atascada o con errores.
+- Comprobación de almacenamiento persistente y cuota disponible.
+- Revisión del service worker al regresar de segundo plano.
+- Navegación offline con tiempo máximo de espera de red.
+- Caché de actualización más resistente y limpieza limitada a Númina.
+
 # Númina v3.4.0
 
 - Importación JSON validada con vista previa, omisión de duplicados y registros inválidos.

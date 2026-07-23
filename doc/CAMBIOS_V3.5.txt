@@ -1,0 +1,65 @@
+NÚMINA SERIE V3.5.0 — ESTABILIDAD Y RECUPERACIÓN
+
+BASE DE TRABAJO
+- Creada exclusivamente a partir de numina-serie-v3.4.zip.
+- No se modificó ni publicó nada en GitHub.
+- No se modificaron Firebase Authentication, Firestore, reglas, App Check ni la lógica funcional de campañas, ventas, coincidencias o entregas.
+
+ARCHIVOS MODIFICADOS
+- portal.html
+- panel-privado-8f27c4.html
+- src/app-src.js (solo identificador interno de versión)
+- app.bundle.js (solo identificador interno de versión)
+- styles.css
+- sw.js
+- VERSION.txt
+- CHANGELOG.md
+
+ARCHIVOS NUEVOS
+- stability.js
+- src/stability-src.js
+- CAMBIOS_V3.5.txt
+
+MEJORAS
+1. Recuperación de arranque
+- Si la aplicación permanece en “Preparando Númina” por más de 18 segundos, muestra acciones para reintentar o reparar la caché.
+- La reparación elimina solamente cachés de Númina y vuelve a registrar el service worker.
+- No elimina información guardada en Firebase.
+
+2. Varias pestañas
+- Detecta cuando la misma entrada de Númina está abierta en varias pestañas del navegador.
+- Elige una pestaña principal y deja las demás en modo de consulta.
+- Evita guardados y envíos desde pestañas secundarias para reducir registros duplicados.
+
+3. Escrituras pendientes
+- Advierte al intentar cerrar la pestaña mientras el indicador informa escrituras pendientes o sincronización activa.
+
+4. Sincronización atascada
+- Si “Cargando datos” o “Sincronizando” permanece demasiado tiempo, muestra una advertencia con opción de reintento.
+- Si aparece un error de sincronización, presenta una acción visible en lugar de dejar únicamente el indicador pequeño.
+
+5. Estabilidad al volver de segundo plano
+- Al regresar después de varios minutos, comprueba actualizaciones del service worker y vuelve a revisar el estado visible de sincronización.
+
+6. Almacenamiento offline
+- Solicita almacenamiento persistente cuando el navegador lo permite.
+- Advierte si la cuota del navegador supera aproximadamente el 85 %.
+- Detecta cuando el almacenamiento local está bloqueado y muestra una explicación en la pantalla de arranque.
+
+7. Service worker reforzado
+- Nueva caché: numina-serie-v3-5-0-20260723.
+- La navegación espera la red un máximo de 8 segundos antes de utilizar la copia offline.
+- Los archivos esenciales se almacenan de forma obligatoria y los iconos de forma tolerante a fallos.
+- La limpieza elimina únicamente cachés cuyo nombre pertenece a Númina; no borra cachés de otras aplicaciones alojadas en el mismo dominio.
+- No almacena respuestas fallidas ni recursos externos.
+
+PRUEBAS REALIZADAS
+- Descompresión de la versión base.
+- Existencia de index.html, portal.html y panel privado.
+- Validación sintáctica de stability.js, src/stability-src.js, app.bundle.js, src/app-src.js y sw.js.
+- Verificación de coincidencia entre stability.js y src/stability-src.js.
+- Verificación de referencias HTML y archivos de la caché PWA.
+- Prueba estática del flujo de recuperación de arranque.
+- Prueba estática del control de pestañas y bloqueo de formularios secundarios.
+- Verificación de que no se añadieron cálculos con Factor.
+- Verificación de que no se modificaron reglas de Firestore ni App Check.
