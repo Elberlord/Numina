@@ -1,0 +1,11 @@
+DOCUMENTACIÓN OPERATIVA DE NÚMINA v3.6.1
+
+Incluye:
+1. Plan de respaldo y recuperación.
+2. Procedimiento de actualización PWA.
+3. Manual técnico para vendedores.
+
+Fecha: 23 de julio de 2026
+
+Los archivos PDF son para consulta e impresión.
+Los archivos DOCX son copias editables para personalizar nombres, responsables o políticas internas.
