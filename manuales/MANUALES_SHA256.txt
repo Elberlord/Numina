@@ -1,0 +1,2 @@
+e0792df330f16729d62fe8a2df73d2a5a0ddc38829a567b74e33ead54bf9e731  /mnt/data/Numina-PUBLICO-GITHUB-PAGES/manuales/Manual_Numina_Administrador_v4.4.5.pdf
+c472a6c74eeef4965b742790e8e03c40e39231d4d0554c95734442a443b51b8a  /mnt/data/Numina-PUBLICO-GITHUB-PAGES/manuales/Manual_Numina_Vendedor_v4.4.5.pdf
